@@ -1,0 +1,1079 @@
+@import "tailwindcss";
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* Cemiloğlu logo paleti: #3D69CE (primary), #3D69CE -200, kırmızı -200 soft */
+@theme {
+    --color-primary: #3D69CE;
+    --color-primary-200: #DCE8FC;
+    --color-primary-blue: #3D69CE;
+    --color-primary-red: #C41E5A;
+    --color-primary-red-200: #FAD7E4;
+    --color-accent-cyan: #3775A8;
+    --color-mernis: #2D8B6F;
+    --color-dark-slate: #274A9B;
+    --color-soft-bg: #F0F4FA;
+    --color-white-blue: #F0F4FA;
+    --color-gray-blue: #6B7A99;
+    --color-black-blue: #0F1A2E;
+    --font-sans: "Source Sans Pro", sans-serif;
+}
+
+:root {
+    /* Cemiloğlu logo paleti – marka renkleri */
+    --bs-primary: #3D69CE;
+    --bs-primary-blue: #3D69CE;
+    --bs-primary-red: #C41E5A;
+    --bs-accent-cyan: #3775A8;
+    --bs-mernis: #2D8B6F;
+    --bs-dark-slate: #274A9B;
+    --bs-soft-bg: #F0F4FA;
+    --bs-white-blue: #F0F4FA;
+    --bs-gray-blue: #6B7A99;
+    --bs-black-blue: #0F1A2E;
+    --bs-font-sans: "Source Sans Pro", sans-serif;
+
+    /* Sayfa renkleri – hepsi sidebar (primary) mavi ile aynı */
+    --bs-dashboard: #3D69CE;
+    --bs-orders: #3D69CE;
+    --bs-customers: #3D69CE;
+    --bs-shipments: #3D69CE;
+    --bs-warehouses: #3D69CE;
+    --bs-vehicles: #3D69CE;
+    --bs-work-orders: #3D69CE;
+    --bs-employees: #3D69CE;
+    --bs-shifts: #3D69CE;
+    --bs-payments: #3D69CE;
+    --bs-documents: #3D69CE;
+
+    /* Hover (koyu) tonları – hepsi primary hover */
+    --bs-dashboard-hover: #335bb5;
+    --bs-orders-hover: #335bb5;
+    --bs-customers-hover: #335bb5;
+    --bs-shipments-hover: #335bb5;
+    --bs-warehouses-hover: #335bb5;
+    --bs-vehicles-hover: #335bb5;
+    --bs-work-orders-hover: #335bb5;
+    --bs-employees-hover: #335bb5;
+    --bs-shifts-hover: #335bb5;
+    --bs-payments-hover: #335bb5;
+    --bs-documents-hover: #335bb5;
+
+    /* Soft -200 arka plan – #3D69CE -200 (tek palet) */
+    --bs-dashboard-200: #DCE8FC;
+    --bs-orders-200: #DCE8FC;
+    --bs-customers-200: #DCE8FC;
+    --bs-shipments-200: #DCE8FC;
+    --bs-warehouses-200: #DCE8FC;
+    --bs-vehicles-200: #DCE8FC;
+    --bs-work-orders-200: #DCE8FC;
+    --bs-employees-200: #DCE8FC;
+    --bs-shifts-200: #DCE8FC;
+    --bs-payments-200: #DCE8FC;
+    --bs-documents-200: #DCE8FC;
+
+    /* Bootstrap -200 soft – #3D69CE -200; Cemiloğlu kırmızı -200 soft */
+    --bs-primary-200: #DCE8FC;
+    /* Cemiloğlu kırmızı -200: açık ton arka plan #FAD7E4; metin için koyu soft #C45A7A */
+    --bs-primary-red-200: #FAD7E4;
+    --bs-primary-red-200-text: #C45A7A;
+    --bs-success-200: #E0EDE8;
+    --bs-danger-200: #FCE8F0;
+    --bs-warning-200: #F5F2E8;
+    --bs-info-200: #E5EEFA;
+    --bs-secondary-200: #EEF1F6;
+    --bs-dark-200: #E2E8F2;
+
+    /* Bootstrap semantic override – Cemiloğlu paleti */
+    --bs-info: #3775A8;
+    --bs-danger: #C41E5A;
+    --bs-success: #2D8B6F;
+    --bs-secondary: #6B7A99;
+    --bs-dark: #0F1A2E;
+    --bs-light: #F0F4FA;
+    --bs-white: #ffffff;
+
+    /* Sidebar koyu tema (referans: tüm link sayfaları bu görünümde) */
+    --sidebar-bg: #2B344B;
+    --sidebar-border: rgba(255, 255, 255, 0.08);
+    --sidebar-text: #94A3B8;
+    --sidebar-text-hover: #E2E8F0;
+    --sidebar-heading: rgba(255, 255, 255, 0.45);
+}
+
+body {
+    font-family: var(--bs-font-sans);
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.625;
+    color: var(--bs-black-blue);
+    background-color: var(--bs-soft-bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: auto;
+}
+
+/* .btn – #3D69CE -200 (ana renk #3D69CE, yumuşak/outline -200) */
+.btn-primary {
+    background-color: var(--bs-primary) !important; /* #3D69CE */
+    border-color: var(--bs-primary) !important;
+    color: var(--bs-white) !important;
+}
+.btn-primary:hover {
+    background-color: #335bb5 !important;
+    border-color: #335bb5 !important;
+    color: var(--bs-white) !important;
+}
+.btn-outline-primary {
+    color: var(--bs-primary) !important; /* #3D69CE */
+    border-color: var(--bs-primary) !important;
+    background-color: transparent !important;
+}
+.btn-outline-primary:hover {
+    background-color: var(--bs-primary-200) !important; /* #3D69CE -200 */
+    border-color: var(--bs-primary) !important;
+    color: var(--bs-primary) !important;
+}
+.btn-success {
+    background-color: var(--bs-success) !important;
+    border-color: var(--bs-success) !important;
+    color: var(--bs-white) !important;
+}
+.btn-success:hover {
+    background-color: #268163 !important;
+    border-color: #268163 !important;
+    color: var(--bs-white) !important;
+}
+.btn-danger {
+    background-color: var(--bs-danger) !important;
+    border-color: var(--bs-danger) !important;
+    color: var(--bs-white) !important;
+}
+.btn-danger:hover {
+    background-color: #a01948 !important;
+    border-color: #a01948 !important;
+    color: var(--bs-white) !important;
+}
+.btn-warning {
+    background-color: var(--bs-gray-blue) !important;
+    border-color: var(--bs-gray-blue) !important;
+    color: var(--bs-white) !important;
+}
+.btn-warning:hover {
+    background-color: #5a6989 !important;
+    border-color: #5a6989 !important;
+    color: var(--bs-white) !important;
+}
+.btn-info {
+    background-color: var(--bs-info) !important;
+    border-color: var(--bs-info) !important;
+    color: var(--bs-white) !important;
+}
+.btn-info:hover {
+    background-color: #2c6090 !important;
+    border-color: #2c6090 !important;
+    color: var(--bs-white) !important;
+}
+.btn-secondary {
+    background-color: var(--bs-secondary) !important;
+    border-color: var(--bs-secondary) !important;
+    color: var(--bs-white) !important;
+}
+.btn-secondary:hover {
+    background-color: #5a6989 !important;
+    border-color: #5a6989 !important;
+    color: var(--bs-white) !important;
+}
+.btn-light {
+    background-color: var(--bs-light) !important;
+    border-color: var(--bs-gray-blue) !important;
+    color: var(--bs-black-blue) !important;
+}
+.btn-light:hover {
+    background-color: var(--bs-dark-200) !important;
+    border-color: var(--bs-gray-blue) !important;
+    color: var(--bs-black-blue) !important;
+}
+
+/* Form inputs - tutarlı tipografi */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea,
+.form-control {
+    font-size: 0.875rem !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+}
+
+/* Küçük metin (yardımcı, etiket vb.) */
+.text-small {
+    font-size: 0.8rem;
+}
+
+/* Custom color utilities */
+.text-primary {
+    color: var(--bs-primary) !important;
+}
+
+.bg-primary {
+    background-color: var(--bs-primary) !important;
+}
+
+.border-primary {
+    border-color: var(--bs-primary) !important;
+}
+
+.text-accent-cyan {
+    color: var(--bs-accent-cyan) !important;
+}
+
+.bg-accent-cyan {
+    background-color: var(--bs-accent-cyan) !important;
+}
+
+.text-mernis {
+    color: var(--bs-mernis) !important;
+}
+
+.bg-mernis {
+    background-color: var(--bs-mernis) !important;
+}
+
+.text-primary-red {
+    color: var(--bs-primary-red) !important;
+}
+
+.bg-primary-red {
+    background-color: var(--bs-primary-red) !important;
+}
+
+.border-primary-red {
+    border-color: var(--bs-primary-red) !important;
+}
+
+.text-primary-red-200 {
+    color: var(--bs-primary-red-200-text) !important;
+}
+
+.bg-primary-red-200 {
+    background-color: var(--bs-primary-red-200) !important;
+}
+
+.border-primary-red-200 {
+    border-color: var(--bs-primary-red-200) !important;
+}
+
+.text-white-blue {
+    color: var(--bs-white-blue) !important;
+}
+
+.bg-white-blue {
+    background-color: var(--bs-white-blue) !important;
+}
+
+.text-gray-blue {
+    color: var(--bs-gray-blue) !important;
+}
+
+.bg-gray-blue {
+    background-color: var(--bs-gray-blue) !important;
+}
+
+.text-black-blue {
+    color: var(--bs-black-blue) !important;
+}
+
+.bg-black-blue {
+    background-color: var(--bs-black-blue) !important;
+}
+
+/* Page-specific soft color utilities */
+.bg-dashboard { background-color: var(--bs-dashboard) !important; }
+.bg-orders { background-color: var(--bs-orders) !important; }
+.bg-customers { background-color: var(--bs-customers) !important; }
+.bg-shipments { background-color: var(--bs-shipments) !important; }
+.bg-warehouses { background-color: var(--bs-warehouses) !important; }
+.bg-vehicles { background-color: var(--bs-vehicles) !important; }
+.bg-work-orders { background-color: var(--bs-work-orders) !important; }
+.bg-employees { background-color: var(--bs-employees) !important; }
+.bg-shifts { background-color: var(--bs-shifts) !important; }
+.bg-payments { background-color: var(--bs-payments) !important; }
+.bg-documents { background-color: var(--bs-documents) !important; }
+
+.bg-dashboard-200 { background-color: var(--bs-dashboard-200) !important; }
+.bg-orders-200 { background-color: var(--bs-orders-200) !important; }
+.bg-customers-200 { background-color: var(--bs-customers-200) !important; }
+.bg-shipments-200 { background-color: var(--bs-shipments-200) !important; }
+.bg-warehouses-200 { background-color: var(--bs-warehouses-200) !important; }
+.bg-vehicles-200 { background-color: var(--bs-vehicles-200) !important; }
+.bg-work-orders-200 { background-color: var(--bs-work-orders-200) !important; }
+.bg-employees-200 { background-color: var(--bs-employees-200) !important; }
+.bg-shifts-200 { background-color: var(--bs-shifts-200) !important; }
+.bg-payments-200 { background-color: var(--bs-payments-200) !important; }
+.bg-documents-200 { background-color: var(--bs-documents-200) !important; }
+
+.text-dashboard { color: var(--bs-dashboard) !important; }
+.text-orders { color: var(--bs-orders) !important; }
+.text-customers { color: var(--bs-customers) !important; }
+.text-shipments { color: var(--bs-shipments) !important; }
+.text-warehouses { color: var(--bs-warehouses) !important; }
+.text-vehicles { color: var(--bs-vehicles) !important; }
+.text-work-orders { color: var(--bs-work-orders) !important; }
+.text-employees { color: var(--bs-employees) !important; }
+.text-shifts { color: var(--bs-shifts) !important; }
+.text-payments { color: var(--bs-payments) !important; }
+.text-documents { color: var(--bs-documents) !important; }
+
+.border-dashboard { border-color: var(--bs-dashboard) !important; }
+.border-orders { border-color: var(--bs-orders) !important; }
+.border-customers { border-color: var(--bs-customers) !important; }
+.border-shipments { border-color: var(--bs-shipments) !important; }
+.border-warehouses { border-color: var(--bs-warehouses) !important; }
+.border-vehicles { border-color: var(--bs-vehicles) !important; }
+.border-work-orders { border-color: var(--bs-work-orders) !important; }
+.border-employees { border-color: var(--bs-employees) !important; }
+.border-shifts { border-color: var(--bs-shifts) !important; }
+.border-payments { border-color: var(--bs-payments) !important; }
+.border-documents { border-color: var(--bs-documents) !important; }
+
+.border-dashboard-200 { border-color: var(--bs-dashboard-200) !important; }
+.border-orders-200 { border-color: var(--bs-orders-200) !important; }
+.border-customers-200 { border-color: var(--bs-customers-200) !important; }
+.border-shipments-200 { border-color: var(--bs-shipments-200) !important; }
+.border-warehouses-200 { border-color: var(--bs-warehouses-200) !important; }
+.border-vehicles-200 { border-color: var(--bs-vehicles-200) !important; }
+.border-work-orders-200 { border-color: var(--bs-work-orders-200) !important; }
+.border-employees-200 { border-color: var(--bs-employees-200) !important; }
+.border-shifts-200 { border-color: var(--bs-shifts-200) !important; }
+.border-payments-200 { border-color: var(--bs-payments-200) !important; }
+.border-documents-200 { border-color: var(--bs-documents-200) !important; }
+
+/* Page-specific button styles – beyaz metin, hover’da koyulaşma */
+.btn-dashboard {
+    background-color: var(--bs-dashboard) !important;
+    border-color: var(--bs-dashboard) !important;
+    color: var(--bs-white) !important;
+}
+.btn-dashboard:hover {
+    background-color: var(--bs-dashboard-hover) !important;
+    border-color: var(--bs-dashboard-hover) !important;
+    color: var(--bs-white) !important;
+}
+
+.btn-orders {
+    background-color: var(--bs-orders) !important;
+    border-color: var(--bs-orders) !important;
+    color: var(--bs-white) !important;
+}
+.btn-orders:hover {
+    background-color: var(--bs-orders-hover) !important;
+    border-color: var(--bs-orders-hover) !important;
+    color: var(--bs-white) !important;
+}
+
+.btn-customers {
+    background-color: var(--bs-customers) !important;
+    border-color: var(--bs-customers) !important;
+    color: var(--bs-white) !important;
+}
+.btn-customers:hover {
+    background-color: var(--bs-customers-hover) !important;
+    border-color: var(--bs-customers-hover) !important;
+    color: var(--bs-white) !important;
+}
+
+.btn-shipments {
+    background-color: var(--bs-shipments) !important;
+    border-color: var(--bs-shipments) !important;
+    color: var(--bs-white) !important;
+}
+.btn-shipments:hover {
+    background-color: var(--bs-shipments-hover) !important;
+    border-color: var(--bs-shipments-hover) !important;
+    color: var(--bs-white) !important;
+}
+
+.btn-warehouses {
+    background-color: var(--bs-warehouses) !important;
+    border-color: var(--bs-warehouses) !important;
+    color: var(--bs-white) !important;
+}
+.btn-warehouses:hover {
+    background-color: var(--bs-warehouses-hover) !important;
+    border-color: var(--bs-warehouses-hover) !important;
+    color: var(--bs-white) !important;
+}
+
+.btn-vehicles {
+    background-color: var(--bs-vehicles) !important;
+    border-color: var(--bs-vehicles) !important;
+    color: var(--bs-white) !important;
+}
+.btn-vehicles:hover {
+    background-color: var(--bs-vehicles-hover) !important;
+    border-color: var(--bs-vehicles-hover) !important;
+    color: var(--bs-white) !important;
+}
+
+.btn-work-orders {
+    background-color: var(--bs-work-orders) !important;
+    border-color: var(--bs-work-orders) !important;
+    color: var(--bs-white) !important;
+}
+.btn-work-orders:hover {
+    background-color: var(--bs-work-orders-hover) !important;
+    border-color: var(--bs-work-orders-hover) !important;
+    color: var(--bs-white) !important;
+}
+
+.btn-employees {
+    background-color: var(--bs-employees) !important;
+    border-color: var(--bs-employees) !important;
+    color: var(--bs-white) !important;
+}
+.btn-employees:hover {
+    background-color: var(--bs-employees-hover) !important;
+    border-color: var(--bs-employees-hover) !important;
+    color: var(--bs-white) !important;
+}
+
+.btn-shifts {
+    background-color: var(--bs-shifts) !important;
+    border-color: var(--bs-shifts) !important;
+    color: var(--bs-white) !important;
+}
+.btn-shifts:hover {
+    background-color: var(--bs-shifts-hover) !important;
+    border-color: var(--bs-shifts-hover) !important;
+    color: var(--bs-white) !important;
+}
+
+.btn-payments {
+    background-color: var(--bs-payments) !important;
+    border-color: var(--bs-payments) !important;
+    color: var(--bs-white) !important;
+}
+.btn-payments:hover {
+    background-color: var(--bs-payments-hover) !important;
+    border-color: var(--bs-payments-hover) !important;
+    color: var(--bs-white) !important;
+}
+
+.btn-documents {
+    background-color: var(--bs-documents) !important;
+    border-color: var(--bs-documents) !important;
+    color: var(--bs-white) !important;
+}
+.btn-documents:hover {
+    background-color: var(--bs-documents-hover) !important;
+    border-color: var(--bs-documents-hover) !important;
+    color: var(--bs-white) !important;
+}
+
+/* Focus ring colors for form elements */
+.focus\:border-dashboard:focus { border-color: var(--bs-dashboard) !important; }
+.focus\:border-orders:focus { border-color: var(--bs-orders) !important; }
+.focus\:border-customers:focus { border-color: var(--bs-customers) !important; }
+.focus\:border-shipments:focus { border-color: var(--bs-shipments) !important; }
+.focus\:border-warehouses:focus { border-color: var(--bs-warehouses) !important; }
+.focus\:border-vehicles:focus { border-color: var(--bs-vehicles) !important; }
+.focus\:border-work-orders:focus { border-color: var(--bs-work-orders) !important; }
+.focus\:border-employees:focus { border-color: var(--bs-employees) !important; }
+.focus\:border-shifts:focus { border-color: var(--bs-shifts) !important; }
+.focus\:border-payments:focus { border-color: var(--bs-payments) !important; }
+.focus\:border-documents:focus { border-color: var(--bs-documents) !important; }
+
+.focus\:ring-dashboard:focus { 
+    --tw-ring-color: var(--bs-dashboard) !important;
+    box-shadow: 0 0 0 3px rgba(61, 105, 206, 0.2) !important;
+}
+.focus\:ring-orders:focus { 
+    --tw-ring-color: var(--bs-orders) !important;
+    box-shadow: 0 0 0 3px rgba(79, 129, 231, 0.2) !important;
+}
+.focus\:ring-customers:focus { 
+    --tw-ring-color: var(--bs-customers) !important;
+    box-shadow: 0 0 0 3px rgba(92, 107, 184, 0.2) !important;
+}
+.focus\:ring-shipments:focus { 
+    --tw-ring-color: var(--bs-shipments) !important;
+    box-shadow: 0 0 0 3px rgba(55, 117, 168, 0.2) !important;
+}
+.focus\:ring-warehouses:focus { 
+    --tw-ring-color: var(--bs-warehouses) !important;
+    box-shadow: 0 0 0 3px rgba(45, 139, 111, 0.2) !important;
+}
+.focus\:ring-vehicles:focus { 
+    --tw-ring-color: var(--bs-vehicles) !important;
+    box-shadow: 0 0 0 3px rgba(61, 105, 206, 0.2) !important;
+}
+.focus\:ring-work-orders:focus { 
+    --tw-ring-color: var(--bs-work-orders) !important;
+    box-shadow: 0 0 0 3px rgba(107, 122, 153, 0.2) !important;
+}
+.focus\:ring-employees:focus { 
+    --tw-ring-color: var(--bs-employees) !important;
+    box-shadow: 0 0 0 3px rgba(92, 107, 184, 0.2) !important;
+}
+.focus\:ring-shifts:focus { 
+    --tw-ring-color: var(--bs-shifts) !important;
+    box-shadow: 0 0 0 3px rgba(79, 129, 231, 0.2) !important;
+}
+.focus\:ring-payments:focus { 
+    --tw-ring-color: var(--bs-payments) !important;
+    box-shadow: 0 0 0 3px rgba(196, 30, 90, 0.2) !important;
+}
+.focus\:ring-documents:focus { 
+    --tw-ring-color: var(--bs-documents) !important;
+    box-shadow: 0 0 0 3px rgba(107, 122, 153, 0.2) !important;
+}
+
+/* Bootstrap -200 Soft Color Utilities */
+.bg-primary-200 {
+    background-color: var(--bs-primary-200) !important;
+}
+
+.bg-success-200 {
+    background-color: var(--bs-success-200) !important;
+}
+
+.bg-danger-200 {
+    background-color: var(--bs-danger-200) !important;
+}
+
+.bg-warning-200 {
+    background-color: var(--bs-warning-200) !important;
+}
+
+.bg-info-200 {
+    background-color: var(--bs-info-200) !important;
+}
+
+.bg-secondary-200 {
+    background-color: var(--bs-secondary-200) !important;
+}
+
+.bg-dark-200 {
+    background-color: var(--bs-dark-200) !important;
+}
+
+.text-primary-200 {
+    color: var(--bs-primary-200) !important;
+}
+
+.text-success-200 {
+    color: var(--bs-success-200) !important;
+}
+
+.text-danger-200 {
+    color: var(--bs-danger-200) !important;
+}
+
+.text-warning-200 {
+    color: var(--bs-warning-200) !important;
+}
+
+.text-info-200 {
+    color: var(--bs-info-200) !important;
+}
+
+.border-primary-200 {
+    border-color: var(--bs-primary-200) !important;
+}
+
+.border-success-200 {
+    border-color: var(--bs-success-200) !important;
+}
+
+.border-danger-200 {
+    border-color: var(--bs-danger-200) !important;
+}
+
+.border-warning-200 {
+    border-color: var(--bs-warning-200) !important;
+}
+
+.border-info-200 {
+    border-color: var(--bs-info-200) !important;
+}
+
+/* Filter.Area – #3D69CE -200 (tek palet) */
+.filter-area .form-control,
+.filter-area .form-select {
+    background-color: #fff !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-color: var(--bs-primary-200) !important;
+}
+
+.filter-area {
+    background-color: var(--bs-primary-200) !important;
+    border: 1px solid var(--bs-primary-200) !important;
+}
+
+.filter-area .form-control:focus,
+.filter-area .form-select:focus {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 3px rgba(61, 105, 206, 0.2) !important;
+}
+
+/* Filter area içindeki filtre butonları – .btn #3D69CE -200 */
+.filter-area .btn {
+    background-color: var(--bs-primary-200) !important;
+    border-color: var(--bs-primary) !important;
+    color: var(--bs-primary) !important;
+}
+
+.filter-area .btn:hover {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+    color: var(--bs-white) !important;
+}
+
+/* Sayfa bazlı filter-area sınıfları – hepsi aynı #3D69CE -200 */
+.filter-area.filter-area-orders,
+.filter-area.filter-area-customers,
+.filter-area.filter-area-shipments,
+.filter-area.filter-area-warehouses,
+.filter-area.filter-area-vehicles,
+.filter-area.filter-area-work-orders,
+.filter-area.filter-area-employees,
+.filter-area.filter-area-shifts,
+.filter-area.filter-area-payments,
+.filter-area.filter-area-documents,
+.filter-area.filter-area-primary {
+    background-color: var(--bs-primary-200) !important;
+    border: 1px solid var(--bs-primary-200) !important;
+}
+
+.filter-area.filter-area-orders .form-control,
+.filter-area.filter-area-orders .form-select,
+.filter-area.filter-area-customers .form-control,
+.filter-area.filter-area-customers .form-select,
+.filter-area.filter-area-shipments .form-control,
+.filter-area.filter-area-shipments .form-select,
+.filter-area.filter-area-warehouses .form-control,
+.filter-area.filter-area-warehouses .form-select,
+.filter-area.filter-area-vehicles .form-control,
+.filter-area.filter-area-vehicles .form-select,
+.filter-area.filter-area-work-orders .form-control,
+.filter-area.filter-area-work-orders .form-select,
+.filter-area.filter-area-employees .form-control,
+.filter-area.filter-area-employees .form-select,
+.filter-area.filter-area-shifts .form-control,
+.filter-area.filter-area-shifts .form-select,
+.filter-area.filter-area-payments .form-control,
+.filter-area.filter-area-payments .form-select,
+.filter-area.filter-area-documents .form-control,
+.filter-area.filter-area-documents .form-select,
+.filter-area.filter-area-primary .form-control,
+.filter-area.filter-area-primary .form-select {
+    border-color: var(--bs-primary-200) !important;
+}
+
+.filter-area.filter-area-orders .form-control:focus,
+.filter-area.filter-area-orders .form-select:focus,
+.filter-area.filter-area-customers .form-control:focus,
+.filter-area.filter-area-customers .form-select:focus,
+.filter-area.filter-area-shipments .form-control:focus,
+.filter-area.filter-area-shipments .form-select:focus,
+.filter-area.filter-area-warehouses .form-control:focus,
+.filter-area.filter-area-warehouses .form-select:focus,
+.filter-area.filter-area-vehicles .form-control:focus,
+.filter-area.filter-area-vehicles .form-select:focus,
+.filter-area.filter-area-work-orders .form-control:focus,
+.filter-area.filter-area-work-orders .form-select:focus,
+.filter-area.filter-area-employees .form-control:focus,
+.filter-area.filter-area-employees .form-select:focus,
+.filter-area.filter-area-shifts .form-control:focus,
+.filter-area.filter-area-shifts .form-select:focus,
+.filter-area.filter-area-payments .form-control:focus,
+.filter-area.filter-area-payments .form-select:focus,
+.filter-area.filter-area-documents .form-control:focus,
+.filter-area.filter-area-documents .form-select:focus,
+.filter-area.filter-area-primary .form-control:focus,
+.filter-area.filter-area-primary .form-select:focus {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 3px rgba(61, 105, 206, 0.2) !important;
+}
+
+.filter-area .btn.btn-filter-orders,
+.filter-area .btn.btn-filter-customers,
+.filter-area .btn.btn-filter-shipments,
+.filter-area .btn.btn-filter-warehouses,
+.filter-area .btn.btn-filter-vehicles,
+.filter-area .btn.btn-filter-work-orders,
+.filter-area .btn.btn-filter-employees,
+.filter-area .btn.btn-filter-shifts,
+.filter-area .btn.btn-filter-payments,
+.filter-area .btn.btn-filter-documents,
+.filter-area .btn.btn-filter-primary {
+    background-color: var(--bs-primary-200) !important;
+    border-color: var(--bs-primary) !important;
+    color: var(--bs-primary) !important;
+}
+
+.filter-area .btn.btn-filter-orders:hover,
+.filter-area .btn.btn-filter-customers:hover,
+.filter-area .btn.btn-filter-shipments:hover,
+.filter-area .btn.btn-filter-warehouses:hover,
+.filter-area .btn.btn-filter-vehicles:hover,
+.filter-area .btn.btn-filter-work-orders:hover,
+.filter-area .btn.btn-filter-employees:hover,
+.filter-area .btn.btn-filter-shifts:hover,
+.filter-area .btn.btn-filter-payments:hover,
+.filter-area .btn.btn-filter-documents:hover,
+.filter-area .btn.btn-filter-primary:hover {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+    color: var(--bs-white) !important;
+}
+
+/* Gradient utilities */
+.bg-gradient-primary {
+    background: linear-gradient(to right, var(--bs-primary), var(--bs-accent-cyan));
+}
+
+.bg-gradient-primary-br {
+    background: linear-gradient(to bottom right, var(--bs-primary), var(--bs-accent-cyan));
+}
+
+/* Custom rounded corners */
+.rounded-3xl {
+    border-radius: 1.5rem;
+}
+
+.rounded-2xl {
+    border-radius: 1rem;
+}
+
+/* Custom spacing */
+.gap-3 {
+    gap: 0.75rem;
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.gap-6 {
+    gap: 1.5rem;
+}
+
+.gap-8 {
+    gap: 2rem;
+}
+
+.py-2\.5 {
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+}
+
+/* Glass effect – beyaz mavi tonunda */
+.glass-card {
+    background: rgba(240, 244, 250, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(107, 122, 153, 0.15);
+}
+
+/* Scanning ring animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.scanning-ring {
+    border: 2px solid transparent;
+    border-top-color: var(--bs-accent-cyan);
+    border-bottom-color: var(--bs-primary);
+    animation: spin 3s linear infinite;
+}
+
+.spinner-mini {
+    border: 2px solid var(--bs-primary-200);
+    border-top-color: var(--bs-primary);
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    animation: spin 1s linear infinite;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--bs-gray-blue);
+    border-radius: 10px;
+}
+
+/* Verified seal – ana mavi tonunda */
+.verified-seal {
+    background: radial-gradient(circle at center, rgba(61, 105, 206, 0.12) 0%, transparent 70%);
+}
+
+/* Pulse animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Sidebar koyu tema – referans görünüm (tüm link sayfaları böyle) */
+aside.sidebar-dark {
+    background-color: var(--sidebar-bg) !important;
+    border-color: var(--sidebar-border) !important;
+}
+aside.sidebar-dark .sidebar-logo-wrap {
+    border-color: var(--sidebar-border) !important;
+}
+aside.sidebar-dark .small.text-muted {
+    color: var(--sidebar-heading) !important;
+    font-size: 10px !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+}
+aside.sidebar-dark nav a {
+    color: var(--sidebar-text) !important;
+}
+aside.sidebar-dark nav a:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: var(--sidebar-text-hover) !important;
+}
+aside.sidebar-dark nav a.bg-primary {
+    background-color: var(--bs-primary) !important;
+    color: var(--bs-white) !important;
+}
+aside.sidebar-dark nav a.bg-primary:hover {
+    background-color: #335bb5 !important;
+    color: var(--bs-white) !important;
+}
+aside.sidebar-dark .border-top {
+    border-color: var(--sidebar-border) !important;
+}
+aside.sidebar-dark .text-dark,
+aside.sidebar-dark .small.fw-bold.text-dark {
+    color: var(--sidebar-text-hover) !important;
+}
+aside.sidebar-dark .text-secondary,
+aside.sidebar-dark .small.text-secondary {
+    color: var(--sidebar-text) !important;
+}
+aside.sidebar-dark .bg-white.text-secondary {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: var(--sidebar-border) !important;
+    color: var(--sidebar-text) !important;
+}
+aside.sidebar-dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+aside.sidebar-dark .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Sidebar açık tema – beyaz arka plan, koyu metin, aktif #3D69CE */
+aside.sidebar-light {
+    background-color: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+aside.sidebar-light .sidebar-logo-wrap {
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+aside.sidebar-light .sidebar-group-heading,
+aside.sidebar-light .small.text-muted.fw-bold.mb-1.px-3 {
+    color: var(--bs-primary-red-200-text) !important;
+    font-size: 10px !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+}
+
+aside.sidebar-light nav a {
+    color: #334155 !important;
+}
+
+aside.sidebar-light nav a:hover {
+    background-color: var(--bs-primary-200) !important;
+    color: var(--bs-primary) !important;
+}
+
+aside.sidebar-light nav a.bg-primary,
+aside.sidebar-light nav a.bg-primary .material-symbols-outlined,
+aside.sidebar-light nav a.bg-primary .fw-semibold {
+    background-color: var(--bs-primary) !important;
+    color: #ffffff !important;
+}
+
+aside.sidebar-light nav a.bg-primary:hover {
+    background-color: #335bb5 !important;
+    color: #ffffff !important;
+}
+
+aside.sidebar-light .border-top {
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+aside.sidebar-light .text-dark,
+aside.sidebar-light .small.fw-bold.text-dark {
+    color: #0f172a !important;
+}
+
+aside.sidebar-light .text-secondary,
+aside.sidebar-light .small.text-secondary {
+    color: #64748b !important;
+}
+
+aside.sidebar-light .bg-white.text-secondary {
+    background-color: #f8fafc !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    color: #64748b !important;
+}
+
+aside.sidebar-light .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+aside.sidebar-light .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Sidebar logo - yükleme sırasında zıplama önleme (CLS) */
+.sidebar-logo-wrap {
+    height: 83px;
+    display: flex;
+    align-items: center;
+}
+.sidebar-logo-inner {
+    min-height: 67px;
+}
+.sidebar-logo-img {
+    max-width: 100%;
+}
+
+/* Sidebar responsive */
+.sidebar-content {
+    margin-left: 280px;
+}
+
+/* Sidebar overlay for mobile */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 26, 46, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Transition utilities */
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+.hover\:shadow-sm:hover {
+    box-shadow: 0 1px 2px 0 rgba(15, 26, 46, 0.06);
+}
+
+.hover\:shadow-md:hover {
+    box-shadow: 0 4px 6px -1px rgba(15, 26, 46, 0.08), 0 2px 4px -1px rgba(15, 26, 46, 0.04);
+}
+
+.hover\:shadow-xl:hover {
+    box-shadow: 0 20px 25px -5px rgba(15, 26, 46, 0.1), 0 10px 10px -5px rgba(15, 26, 46, 0.04);
+}
+
+.hover\:bg-white:hover {
+    background-color: var(--bs-white-blue) !important;
+}
+
+.hover\:bg-primary:hover {
+    background-color: var(--bs-primary) !important;
+}
+
+.hover\:bg-info:hover {
+    background-color: var(--bs-accent-cyan) !important;
+}
+
+.hover\:bg-success:hover {
+    background-color: var(--bs-mernis) !important;
+}
+
+.hover\:bg-warning:hover {
+    background-color: var(--bs-gray-blue) !important;
+}
+
+.hover\:bg-danger:hover {
+    background-color: var(--bs-primary-red) !important;
+}
+
+.hover\:bg-secondary:hover {
+    background-color: var(--bs-gray-blue) !important;
+}
+
+.hover\:text-white:hover {
+    color: var(--bs-white) !important;
+}
+
+.hover\:opacity-80:hover {
+    opacity: 0.8;
+}
+
+.hover\:opacity-90:hover {
+    opacity: 0.9;
+}
+
+/* Sidebar logout button – kırmızı mavi tonunda */
+.btn-logout-sidebar:hover {
+    background-color: var(--bs-primary-red) !important;
+    color: var(--bs-white) !important;
+    border-color: var(--bs-primary-red) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(196, 30, 90, 0.3);
+}
+
+.btn-logout-sidebar:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(196, 30, 90, 0.2);
+}
+
+@media (max-width: 991.98px) {
+    .sidebar-content {
+        margin-left: 0;
+    }
+
+    aside {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 2px 0 10px rgba(15, 26, 46, 0.12);
+    }
+
+    aside.show {
+        transform: translateX(0);
+    }
+}
+
+/* Navbar breadcrumb – mavi palet */
+.navbar-breadcrumb .breadcrumb-item::before {
+    color: var(--bs-primary);
+}
+.navbar-breadcrumb .breadcrumb-item.active {
+    color: var(--bs-primary);
+}
