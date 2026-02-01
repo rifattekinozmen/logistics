@@ -8,7 +8,7 @@
                     $logoUrl = $activeCompany && $activeCompany->logo_path ? $activeCompany->logo_url : null;
                 @endphp
                 @if($logoUrl && $activeCompany)
-                    <img src="{{ $logoUrl }}?v={{ time() }}" alt="{{ $activeCompany->name }}" class="w-100 sidebar-logo-img" width="248" height="67" loading="eager" decoding="async" style="height: auto; max-height: 67px; object-fit: contain; display: block;">
+                    <img src="{{ $logoUrl }}" alt="{{ $activeCompany->name }}" class="w-100 sidebar-logo-img" width="248" height="67" loading="eager" decoding="async" style="height: auto; max-height: 67px; object-fit: contain; display: block;">
                 @else
                     <img src="{{ asset('images/cemiloglu.svg') }}" alt="Cemiloğlu Şirketler Grubu" class="w-100 sidebar-logo-img" width="248" height="67" loading="eager" decoding="async" style="height: auto; max-height: 67px; object-fit: contain; display: block;">
                 @endif

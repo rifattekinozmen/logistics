@@ -10,6 +10,17 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: (id) => {
+                    if (id.includes('node_modules/bootstrap')) {
+                        return 'bootstrap';
+                    }
+                },
+            },
+        },
+    },
     server: {
         host: '127.0.0.1',
         hmr: {

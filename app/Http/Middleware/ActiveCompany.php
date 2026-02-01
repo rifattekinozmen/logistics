@@ -23,12 +23,16 @@ class ActiveCompany
             return $next($request);
         }
 
+        $user = Auth::user();
+
+        // Navbar firma dropdown'ı her sayfada tek sorguda kullansın (firma seçim sayfası dahil)
+        View::share('userCompaniesForLayout', $this->userCompaniesForLayout($user));
+
         // Firma seçim sayfasında aktif firma zorunlu değil
         if ($request->routeIs('admin.companies.select')) {
             return $next($request);
         }
 
-        $user = Auth::user();
         $activeCompany = null;
 
         // Eğer session'da aktif firma yoksa, default firmayı set et
@@ -71,11 +75,32 @@ class ActiveCompany
             }
         }
 
-        // Layout/sidebar aynı firmayı tekrar sorgulamadan kullansın
+        // Layout/sidebar ve navbar aynı veriyi tekrar sorgulamadan kullansın (sayfa yükleme hızı)
         if ($activeCompany) {
             View::share('activeCompanyForLayout', $activeCompany);
         }
 
         return $next($request);
+    }
+
+    /**
+     * Kullanıcının firmalar listesini tek sorguda alıp layout'ta kullanılacak şekilde döndürür.
+     *
+     * @return \Illuminate\Support\Collection<int, \App\Models\Company>
+     */
+    private function userCompaniesForLayout($user): \Illuminate\Support\Collection
+    {
+        try {
+            $query = $user->companies();
+            if (\Schema::hasColumn('user_companies', 'is_active')) {
+                $query->wherePivot('is_active', true);
+            } elseif (\Schema::hasColumn('companies', 'status')) {
+                $query->where('companies.status', 1);
+            }
+
+            return $query->get();
+        } catch (\Throwable) {
+            return $user->companies()->get();
+        }
     }
 }

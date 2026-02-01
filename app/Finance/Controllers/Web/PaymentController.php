@@ -32,7 +32,7 @@ class PaymentController extends Controller
      */
     public function create(): View
     {
-        $companies = \App\Models\Company::where('status', 1)->orderBy('name')->get();
+        $companies = \App\Models\Company::active()->orderBy('name')->get();
 
         return view('admin.payments.create', compact('companies'));
     }
@@ -73,7 +73,7 @@ class PaymentController extends Controller
     public function edit(int $id): View
     {
         $payment = \App\Models\Payment::findOrFail($id);
-        $companies = \App\Models\Company::where('status', 1)->orderBy('name')->get();
+        $companies = \App\Models\Company::active()->orderBy('name')->get();
 
         return view('admin.payments.edit', compact('payment', 'companies'));
     }

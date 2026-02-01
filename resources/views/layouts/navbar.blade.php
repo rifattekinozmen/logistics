@@ -26,29 +26,11 @@
         <div class="d-flex align-items-center gap-3">
             @yield('navbar-actions')
             
-            <!-- Company Switch -->
+            <!-- Company Switch (activeCompanyForLayout ve userCompaniesForLayout middleware'de paylaşılıyor; tekrarlanan sorgu yok) -->
             @auth
             @php
-                $activeCompany = null;
-                $userCompanies = collect();
-                
-                try {
-                    $activeCompany = Auth::user()->activeCompany();
-                    // Aktif firmaları getir (is_active varsa onu kullan, yoksa status)
-                    try {
-                        $userCompanies = Auth::user()->companies()->where('is_active', true)->get();
-                    } catch (\Illuminate\Database\QueryException $e) {
-                        // is_active kolonu yoksa status kullan
-                        try {
-                            $userCompanies = Auth::user()->companies()->where('status', 1)->get();
-                        } catch (\Exception $e2) {
-                            // Hiçbir filtreleme yapmadan getir
-                            $userCompanies = Auth::user()->companies()->get();
-                        }
-                    }
-                } catch (\Exception $e) {
-                    // Hata durumunda boş bırak
-                }
+                $activeCompany = $activeCompanyForLayout ?? null;
+                $userCompanies = $userCompaniesForLayout ?? collect();
             @endphp
             <div class="dropdown">
                 <button class="btn btn-link text-secondary p-2 rounded-3xl hover:bg-white transition-all d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
