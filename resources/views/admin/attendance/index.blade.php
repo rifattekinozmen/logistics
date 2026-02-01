@@ -389,7 +389,8 @@ window.__ATTENDANCE_CONFIG__ = {!! $configJson ?? '{}' !!};
 .attendance-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.875rem; }
 .attendance-table thead { background: var(--bs-primary); color: #fff; position: sticky; top: 0; z-index: 20; }
 .attendance-table thead th.weekend { background: #fef9c3; color: #1f2937; }
-.personnel-header { padding: 0.75rem 1rem; min-width: 200px; position: sticky; left: 0; z-index: 1000; background: var(--bs-primary); color: #fff; }
+/* z-index: 100 — sidebar (1000) altında kalsın, mobilde üstte görünmesin */
+.personnel-header { padding: 0.75rem 1rem; min-width: 200px; position: sticky; left: 0; z-index: 100; background: var(--bs-primary); color: #fff; }
 .personnel-header .badge { background: rgba(255,255,255,0.3); color: #fff; }
 .day-header { padding: 0.5rem 0.35rem; text-align: center; min-width: 52px; }
 .day-content { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
@@ -432,7 +433,7 @@ window.__ATTENDANCE_CONFIG__ = {!! $configJson ?? '{}' !!};
 .summary-badge.summary-badge-rapor { background: var(--bs-danger-200); color: #842029; border: 1px solid rgba(132,32,41,0.2); }
 .summary-badge.summary-badge-none { background: var(--bs-secondary-200); color: #495057; border: 1px solid rgba(73,80,87,0.2); }
 .totals-row td { background: var(--bs-primary); color: #fff; position: relative; z-index: 15; }
-.totals-row td.total-label { position: sticky; left: 0; z-index: 1000; min-width: 200px; }
+.totals-row td.total-label { position: sticky; left: 0; z-index: 100; min-width: 200px; }
 .totals-row td.weekend { background: #fef9c3; color: #1f2937; }
 
 .context-menu { position: absolute; background: #fff; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); padding: 0.5rem 0; z-index: 1000; min-width: 160px; border: 1px solid #e5e7eb; }
