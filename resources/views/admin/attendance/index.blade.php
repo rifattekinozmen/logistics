@@ -8,13 +8,13 @@
     $nextStatusMap = $nextStatus ?? \App\Enums\AttendanceStatus::cycleOrderMap();
 @endphp
 <div class="attendance-page-wrapper" x-data="puantajTable()" x-init="init()" x-cloak>
-    {{-- Başlık: Vardiyalar ile aynı yapı --}}
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
+    {{-- Başlık: Sevkiyatlar ile aynı mobil uyumlu yapı --}}
+    <div class="attendance-page-header d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div class="attendance-page-header-title">
             <h2 class="h3 fw-bold text-dark mb-1">Puantaj</h2>
             <p class="text-secondary mb-0">Personel yoklama durumları</p>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="attendance-page-header-actions d-flex gap-2 flex-wrap">
             <button type="button" class="btn btn-shifts d-flex align-items-center gap-2" :class="{ 'active': showQuickFill }" @click="toggleQuickFill()" title="Toplu Doldur">
                 <span class="material-symbols-outlined" style="font-size: 1.25rem;">format_paint</span>
                 Toplu Doldur
@@ -47,22 +47,21 @@
         </div>
     </div>
 
-    {{-- Filtre alanı: Vardiyalar ile aynı yapı --}}
-    <div class="filter-area filter-area-attendance rounded-3xl shadow-sm border p-4 mb-4">
+    {{-- Filtre alanı: Sevkiyatlar ile aynı mobil uyumlu yapı (row + col-md-*) --}}
+    <div class="filter-area filter-area-attendance rounded-3xl shadow-sm border p-3 p-md-4 mb-4">
         <div class="row g-3 align-items-end">
-            <div class="col-md-3">
+            <div class="col-12 col-md-3">
                 <label class="form-label small fw-semibold text-dark">Ay</label>
                 <div class="d-flex align-items-center gap-2">
                     <input type="month" x-model="month" @change="fetchTableAjax()" class="form-control" id="attendance-month">
                     <div x-show="loading" class="spinner-border spinner-border-sm text-primary" role="status" style="display: none;"></div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-12 col-md-6">
                 <label class="form-label small fw-semibold text-dark">Personel Ara</label>
                 <input type="text" x-model="search" placeholder="Personel ara..." class="form-control">
             </div>
-            <div class="col-md-3">
-                <span class="form-label small fw-semibold text-dark d-block opacity-0">Filtre</span>
+            <div class="col-12 col-md-3 d-flex align-items-end">
                 <button type="button" class="btn btn-filter btn-filter-attendance w-100 shadow-sm hover:shadow-md transition-all" disabled>Ay / arama yukarıdan</button>
             </div>
         </div>
@@ -163,9 +162,9 @@
         </div>
     </div>
 
-    {{-- Tablo kartı: Vardiyalar ile aynı yapı, tam genişlik --}}
+    {{-- Tablo kartı: Sevkiyatlar gibi mobilde table-responsive (yatay kaydırma) --}}
     <div class="attendance-table-card bg-white rounded-3xl shadow-sm border overflow-hidden mb-0" style="border-color: var(--bs-primary-200);">
-    <div class="table-container" x-show="!loading" :class="{ 'compact-mode': compactMode }">
+    <div class="table-responsive table-container" x-show="!loading" :class="{ 'compact-mode': compactMode }">
         <table class="attendance-table" :class="{ 'table-compact': compactMode }">
             <thead>
                 <tr>
@@ -263,15 +262,18 @@ window.__ATTENDANCE_CONFIG__ = {!! $configJson ?? '{}' !!};
 <style>
 [x-cloak] { display: none !important; }
 
-/* Sayfa konteyneri - diğer admin sayfaları ile aynı tam genişlik */
+/* Sayfa konteyneri - Sevkiyatlar gibi tam genişlik, mobil uyumlu */
 .attendance-page-wrapper {
     width: 100%;
+    max-width: 100%;
+    min-width: 0; /* flex içinde daralabilmesi için */
     box-sizing: border-box;
 }
 
-/* Tablo kartı: sabit boyut 1525×200 (min. yükseklik) */
+/* Tablo kartı: masaüstü 1525×200, mobilde tam genişlik */
 .attendance-table-card {
     width: 1525px;
+    max-width: 100%;
     min-height: 200px;
     box-sizing: border-box;
 }
@@ -353,9 +355,10 @@ window.__ATTENDANCE_CONFIG__ = {!! $configJson ?? '{}' !!};
 
 /* Panel card (Bulk Fill) */
 .panel-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
-/* Toplu Atama kartı: tablo kartı ile aynı ölçüler 1525×200 (min. yükseklik) */
+/* Toplu Atama kartı: masaüstü 1525×200, mobilde tam genişlik (Sevkiyatlar gibi) */
 .panel-card-bulk {
     width: 1525px;
+    max-width: 100%;
     min-height: 200px;
     box-sizing: border-box;
 }
@@ -381,8 +384,8 @@ window.__ATTENDANCE_CONFIG__ = {!! $configJson ?? '{}' !!};
 .checkbox-label { font-size: 0.875rem; color: #374151; cursor: pointer; margin: 0; line-height: 1.4; }
 .filter-hint { font-size: 0.8125rem; color: #6b7280; line-height: 1.45; margin: 0; padding-top: 0.75rem; border-top: 1px solid #f3f4f6; }
 
-/* Table */
-.table-container { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: auto; max-height: min(calc(100vh - 280px), 720px); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+/* Table - Sevkiyatlar gibi mobilde yatay kaydırma */
+.table-container { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: auto; max-height: min(calc(100vh - 280px), 720px); box-shadow: 0 1px 3px rgba(0,0,0,0.05); -webkit-overflow-scrolling: touch; }
 .attendance-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.875rem; }
 .attendance-table thead { background: var(--bs-primary); color: #fff; position: sticky; top: 0; z-index: 20; }
 .attendance-table thead th.weekend { background: #fef9c3; color: #1f2937; }
@@ -453,15 +456,106 @@ window.__ATTENDANCE_CONFIG__ = {!! $configJson ?? '{}' !!};
 .view-option { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.75rem 0.5rem; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-size: 0.75rem; }
 .view-option.active { background: #eff6ff; border-color: var(--primary); color: var(--primary); }
 
+/* Mobil uyum: Sevkiyatlar sayfası ile aynı alan davranışları */
+@media (max-width: 992px) {
+    .attendance-table-card,
+    .panel-card-bulk {
+        width: 100% !important;
+        max-width: 100%;
+    }
+}
+
 @media (max-width: 768px) {
-    .bulk-fill-grid { grid-template-columns: 1fr 1fr; }
-    .bulk-fill-grid .apply-group { grid-column: 1 / -1; }
-    .filter-options { flex-direction: column; align-items: flex-start; }
-    .filter-options-title { margin-bottom: 0; }
-    .stats-cards-row { grid-template-columns: repeat(2, 1fr); }
-    .attendance-header { flex-direction: column; }
-    .attendance-header-actions { width: 100%; }
-    .header-action-btn .btn-text { display: none; }
+    .attendance-page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .attendance-page-header-title {
+        flex: none;
+    }
+    .attendance-page-header-actions {
+        width: 100%;
+    }
+    .attendance-page-header-actions .btn {
+        flex: 1;
+        min-width: fit-content;
+        justify-content: center;
+    }
+    .attendance-page-header-actions .btn .material-symbols-outlined:first-child {
+        margin-right: 0.25rem;
+    }
+    .bulk-fill-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .bulk-fill-grid .apply-group {
+        grid-column: 1 / -1;
+    }
+    .filter-options {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .filter-options-title {
+        margin-bottom: 0;
+    }
+    .stats-cards-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .stats-panel-body {
+        padding: 0.5rem 0.75rem;
+    }
+    .card-header,
+    .card-content {
+        padding: 0.75rem 1rem;
+    }
+    .table-container {
+        max-height: min(calc(100vh - 240px), 480px);
+    }
+    .personnel-header {
+        min-width: 140px;
+    }
+    .personnel-cell {
+        padding: 0.4rem 0.6rem;
+    }
+    .day-header {
+        min-width: 44px;
+        padding: 0.4rem 0.25rem;
+    }
+    .day-cell {
+        padding: 0.25rem;
+    }
+    .status-btn {
+        width: 36px;
+        height: 36px;
+    }
+    .status-btn.btn-compact {
+        width: 30px;
+        height: 30px;
+    }
+    .status-btn .status-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+    }
+    .status-btn.btn-compact .status-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+    }
+    .totals-row td.total-label {
+        min-width: 140px;
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-cards-row {
+        grid-template-columns: 1fr;
+    }
+    .bulk-fill-grid {
+        grid-template-columns: 1fr;
+    }
+    .bulk-fill-grid .apply-group {
+        grid-column: 1;
+    }
 }
 </style>
 @endpush

@@ -975,6 +975,11 @@ aside.sidebar-light .custom-scrollbar::-webkit-scrollbar-track {
 /* Sidebar responsive */
 .sidebar-content {
     margin-left: 280px;
+    min-width: 0; /* flex içinde dar ekranda taşmayı önler */
+}
+
+.sidebar-content main {
+    min-width: 0; /* içerik sabit genişlikte olsa bile sayfa daralabilsin */
 }
 
 /* Sidebar overlay for mobile */
