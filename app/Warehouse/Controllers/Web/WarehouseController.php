@@ -2,19 +2,32 @@
 
 namespace App\Warehouse\Controllers\Web;
 
+use App\Core\Services\ExportService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class WarehouseController extends Controller
 {
+    public function __construct(
+        protected ExportService $exportService
+    ) {
+    }
+
     /**
      * Display a listing of warehouses.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|StreamedResponse|Response
     {
         $filters = $request->only(['status', 'branch_id', 'search']);
+
+        if ($request->has('export')) {
+            return $this->export($filters, $request->get('export'));
+        }
+
         $warehouses = \App\Models\Warehouse::query()
             ->with(['branch'])
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
@@ -26,6 +39,37 @@ class WarehouseController extends Controller
         $branches = \App\Models\Branch::where('status', 1)->orderBy('name')->get();
 
         return view('admin.warehouses.index', compact('warehouses', 'branches'));
+    }
+
+    /**
+     * Depo listesini CSV veya XML olarak dışa aktar.
+     */
+    protected function export(array $filters, string $format): StreamedResponse|Response
+    {
+        $warehouses = \App\Models\Warehouse::query()
+            ->with(['branch'])
+            ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
+            ->when($filters['branch_id'] ?? null, fn ($q, $branchId) => $q->where('branch_id', $branchId))
+            ->when($filters['search'] ?? null, fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
+            ->orderBy('name')
+            ->get();
+
+        $headers = ['Depo Adı', 'Kod', 'Şube', 'Adres', 'Durum', 'Oluşturulma'];
+
+        $rows = $warehouses->map(fn ($w) => [
+            $w->name,
+            $w->code ?? '-',
+            $w->branch?->name ?? '-',
+            $w->address ?? '-',
+            $w->status ? 'Aktif' : 'Pasif',
+            $w->created_at->format('d.m.Y H:i'),
+        ])->all();
+
+        $filename = 'depolar';
+
+        return $format === 'xml'
+            ? $this->exportService->xml($headers, $rows, $filename, 'warehouses', 'warehouse')
+            : $this->exportService->csv($headers, $rows, $filename);
     }
 
     /**

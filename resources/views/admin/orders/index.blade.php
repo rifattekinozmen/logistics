@@ -8,10 +8,36 @@
         <h2 class="h3 fw-bold text-dark mb-1">Siparişler</h2>
         <p class="text-secondary mb-0">Tüm siparişleri görüntüleyin ve yönetin</p>
     </div>
-    <a href="{{ route('admin.orders.create') }}" class="btn btn-orders d-flex align-items-center gap-2">
-        <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
-        Yeni Sipariş
-    </a>
+    <div class="d-flex align-items-center gap-2">
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="material-symbols-outlined" style="font-size: 1.25rem;">download</span>
+                Dışa Aktar
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.orders.index', array_merge(request()->query(), ['export' => 'csv'])) }}">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">table_chart</span>
+                        CSV
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.orders.index', array_merge(request()->query(), ['export' => 'xml'])) }}">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">code</span>
+                        XML
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <a href="{{ route('admin.orders.import') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">upload_file</span>
+            İçe Aktar
+        </a>
+        <a href="{{ route('admin.orders.create') }}" class="btn btn-orders d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
+            Yeni Sipariş
+        </a>
+    </div>
 </div>
 
 <div class="filter-area filter-area-orders rounded-3xl shadow-sm border p-4 mb-4">

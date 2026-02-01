@@ -8,10 +8,32 @@
         <h2 class="h3 fw-bold text-dark mb-1">Ödemeler</h2>
         <p class="text-secondary mb-0">Tüm ödemeleri görüntüleyin ve yönetin</p>
     </div>
-    <a href="{{ route('admin.payments.create') }}" class="btn btn-payments d-flex align-items-center gap-2">
-        <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
-        Yeni Ödeme
-    </a>
+    <div class="d-flex align-items-center gap-2">
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="material-symbols-outlined" style="font-size: 1.25rem;">download</span>
+                Dışa Aktar
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.payments.index', array_merge(request()->query(), ['export' => 'csv'])) }}">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">table_chart</span>
+                        CSV
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.payments.index', array_merge(request()->query(), ['export' => 'xml'])) }}">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">code</span>
+                        XML
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <a href="{{ route('admin.payments.create') }}" class="btn btn-payments d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
+            Yeni Ödeme
+        </a>
+    </div>
 </div>
 
 <div class="filter-area filter-area-payments rounded-3xl shadow-sm border p-4 mb-4">

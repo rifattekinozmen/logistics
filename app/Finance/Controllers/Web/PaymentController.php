@@ -2,29 +2,73 @@
 
 namespace App\Finance\Controllers\Web;
 
+use App\Core\Services\ExportService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PaymentController extends Controller
 {
+    public function __construct(
+        protected ExportService $exportService
+    ) {
+    }
+
     /**
      * Display a listing of payments.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|StreamedResponse|Response
     {
         $filters = $request->only(['type', 'status', 'due_date_from', 'due_date_to', 'company_id']);
-        $payments = \App\Models\Payment::query()
-            ->when($filters['type'] ?? null, fn ($q, $type) => $q->where('type', $type))
-            ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
-            ->when($filters['due_date_from'] ?? null, fn ($q, $date) => $q->whereDate('due_date', '>=', $date))
-            ->when($filters['due_date_to'] ?? null, fn ($q, $date) => $q->whereDate('due_date', '<=', $date))
-            ->when($filters['company_id'] ?? null, fn ($q, $companyId) => $q->where('company_id', $companyId))
-            ->orderBy('due_date', 'asc')
-            ->paginate(25);
+
+        if ($request->has('export')) {
+            return $this->export($filters, $request->get('export'));
+        }
+
+        $payments = $this->buildQuery($filters)->paginate(25);
 
         return view('admin.payments.index', compact('payments'));
+    }
+
+    /**
+     * Ödeme listesini CSV veya XML olarak dışa aktar.
+     */
+    protected function export(array $filters, string $format): StreamedResponse|Response
+    {
+        $payments = $this->buildQuery($filters)->with('related')->get();
+
+        $headers = ['İlişkili', 'Tür', 'Tutar', 'Vade Tarihi', 'Ödeme Tarihi', 'Durum', 'Oluşturulma'];
+
+        $statusLabels = [0 => 'Beklemede', 1 => 'Ödendi', 2 => 'Gecikmiş', 3 => 'İptal'];
+
+        $rows = $payments->map(fn ($p) => [
+            $p->related ? (method_exists($p->related, 'name') ? $p->related->name : class_basename($p->related_type)) : '-',
+            $p->payment_type,
+            (string) $p->amount,
+            $p->due_date?->format('d.m.Y') ?? '-',
+            $p->paid_date?->format('d.m.Y') ?? '-',
+            $statusLabels[$p->status] ?? (string) $p->status,
+            $p->created_at->format('d.m.Y H:i'),
+        ])->all();
+
+        $filename = 'odemeler';
+
+        return $format === 'xml'
+            ? $this->exportService->xml($headers, $rows, $filename, 'payments', 'payment')
+            : $this->exportService->csv($headers, $rows, $filename);
+    }
+
+    protected function buildQuery(array $filters): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = \App\Models\Payment::query();
+        $query->when($filters['type'] ?? null, fn ($q, $type) => $q->where('payment_type', $type));
+        $query->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status));
+        $query->when($filters['due_date_from'] ?? null, fn ($q, $date) => $q->whereDate('due_date', '>=', $date));
+        $query->when($filters['due_date_to'] ?? null, fn ($q, $date) => $q->whereDate('due_date', '<=', $date));
+        return $query->orderBy('due_date', 'asc');
     }
 
     /**

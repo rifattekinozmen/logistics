@@ -63,6 +63,22 @@
                 @enderror
             </div>
 
+            <div class="col-md-6">
+                <label for="pickup_date" class="form-label fw-semibold text-dark">Alış Tarihi <span class="text-danger">*</span></label>
+                <input type="datetime-local" name="pickup_date" id="pickup_date" value="{{ old('pickup_date', $shipment->pickup_date?->format('Y-m-d\TH:i')) }}" class="form-control @error('pickup_date') is-invalid @enderror" required>
+                @error('pickup_date')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-6">
+                <label for="delivery_date" class="form-label fw-semibold text-dark">Teslimat Tarihi</label>
+                <input type="datetime-local" name="delivery_date" id="delivery_date" value="{{ old('delivery_date', $shipment->delivery_date?->format('Y-m-d\TH:i')) }}" class="form-control @error('delivery_date') is-invalid @enderror">
+                @error('delivery_date')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
             <div class="col-md-12">
                 <label for="notes" class="form-label fw-semibold text-dark">Notlar</label>
                 <textarea name="notes" id="notes" class="form-control @error('notes') is-invalid @enderror" rows="3">{{ old('notes', $shipment->notes) }}</textarea>

@@ -2,32 +2,70 @@
 
 namespace App\Employee\Controllers\Web;
 
+use App\Core\Services\ExportService;
 use App\Employee\Requests\StoreEmployeeRequest;
 use App\Employee\Requests\UpdateEmployeeRequest;
 use App\Employee\Services\EmployeeService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EmployeeController extends Controller
 {
     public function __construct(
-        protected EmployeeService $employeeService
+        protected EmployeeService $employeeService,
+        protected ExportService $exportService
     ) {
     }
 
     /**
      * Display a listing of employees.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|StreamedResponse|Response
     {
         $filters = $request->only(['status', 'branch_id', 'position_id']);
+
+        if ($request->has('export')) {
+            return $this->export($filters, $request->get('export'));
+        }
+
         $employees = $this->employeeService->getPaginated($filters);
         $branches = \App\Models\Branch::where('status', 1)->orderBy('name')->get();
         $positions = \App\Models\Position::orderBy('name')->get();
 
         return view('admin.employees.index', compact('employees', 'branches', 'positions'));
+    }
+
+    /**
+     * Personel listesini CSV veya XML olarak dışa aktar.
+     */
+    protected function export(array $filters, string $format): StreamedResponse|Response
+    {
+        $employees = $this->employeeService->getForExport($filters);
+
+        $headers = ['Personel No', 'Ad Soyad', 'E-posta', 'Telefon', 'Şube', 'Pozisyon', 'Durum', 'Oluşturulma'];
+
+        $statusLabels = [0 => 'Pasif', 1 => 'Aktif', 2 => 'İzinli'];
+
+        $rows = $employees->map(fn ($e) => [
+            $e->employee_number ?? '-',
+            trim(($e->first_name ?? '').' '.($e->last_name ?? '')) ?: '-',
+            $e->user?->email ?? $e->email ?? '-',
+            $e->phone ?? '-',
+            $e->branch?->name ?? '-',
+            $e->position?->name ?? '-',
+            $statusLabels[$e->status] ?? (string) $e->status,
+            $e->created_at->format('d.m.Y H:i'),
+        ])->all();
+
+        $filename = 'personel';
+
+        return $format === 'xml'
+            ? $this->exportService->xml($headers, $rows, $filename, 'employees', 'employee')
+            : $this->exportService->csv($headers, $rows, $filename);
     }
 
     /**

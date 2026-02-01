@@ -94,7 +94,19 @@ class PayrollController extends Controller
     public function show(Payroll $payroll): View
     {
         $payroll->load(['employee', 'creator']);
+
         return view('admin.payrolls.show', compact('payroll'));
+    }
+
+    /**
+     * Bordro belgesi (yazdırma / PDF için uygun HTML).
+     * İleride DomPDF vb. ile PDF çıktı alınabilir.
+     */
+    public function pdf(Payroll $payroll): View
+    {
+        $payroll->load(['employee']);
+
+        return view('admin.payrolls.pdf', compact('payroll'));
     }
 
     /**

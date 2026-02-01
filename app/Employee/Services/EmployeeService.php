@@ -53,6 +53,28 @@ class EmployeeService
     }
 
     /**
+     * Filtrelenmiş personeli export için getir.
+     */
+    public function getForExport(array $filters = []): Collection
+    {
+        $query = Employee::query()->with(['branch', 'position', 'user']);
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (isset($filters['branch_id'])) {
+            $query->where('branch_id', $filters['branch_id']);
+        }
+
+        if (isset($filters['position_id'])) {
+            $query->where('position_id', $filters['position_id']);
+        }
+
+        return $query->latest()->get();
+    }
+
+    /**
      * Generate unique employee number.
      */
     protected function generateEmployeeNumber(): string

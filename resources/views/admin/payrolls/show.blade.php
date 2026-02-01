@@ -8,9 +8,15 @@
         <h2 class="h3 fw-bold text-dark mb-1">Bordro Detayı</h2>
         <p class="text-secondary mb-0">Bordro No: <span class="fw-semibold">{{ $payroll->payroll_number }}</span></p>
     </div>
-    <a href="{{ route('admin.payrolls.index') }}" class="btn btn-outline-secondary">
-        Listeye Dön
-    </a>
+    <div class="d-flex align-items-center gap-2">
+        <a href="{{ route('admin.payrolls.pdf', $payroll) }}" target="_blank" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size: 1.1rem;">picture_as_pdf</span>
+            PDF / Yazdır
+        </a>
+        <a href="{{ route('admin.payrolls.index') }}" class="btn btn-outline-secondary">
+            Listeye Dön
+        </a>
+    </div>
 </div>
 
 <div class="row g-4">

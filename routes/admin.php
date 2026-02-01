@@ -17,12 +17,23 @@ use App\Employee\Controllers\Web\LeaveController;
 use App\Employee\Controllers\Web\AdvanceController;
 use App\Employee\Controllers\Web\PayrollController;
 use App\Employee\Controllers\Web\PersonnelAttendanceController;
+use App\Core\Services\ExportService;
 use App\Finance\Services\FinanceDashboardService;
 use App\Order\Services\OperationsPerformanceService;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () {
+        $customersThisMonth = \App\Models\Customer::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+        $customersLastMonth = \App\Models\Customer::whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->count();
+        $customersChangePercent = $customersLastMonth > 0
+            ? round((($customersThisMonth - $customersLastMonth) / $customersLastMonth) * 100)
+            : ($customersThisMonth > 0 ? 100 : 0);
+
         $stats = [
             'orders_count' => \App\Models\Order::where('status', '!=', 'cancelled')->count(),
             'orders_pending' => \App\Models\Order::where('status', 'pending')->count(),
@@ -35,6 +46,7 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
                 ->count(),
             'employees_count' => \App\Models\Employee::where('status', 1)->count(),
             'customers_count' => \App\Models\Customer::where('status', 1)->count(),
+            'customers_change_percent' => $customersChangePercent,
             'warehouses_count' => \App\Models\Warehouse::count(),
         ];
 
@@ -100,15 +112,50 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         $operationsData = $operationsService->getPerformanceSummary();
 
         return view('admin.dashboard', compact(
-            'stats', 
-            'recentActivities', 
+            'stats',
+            'recentActivities',
             'aiReports',
             'financeData',
             'operationsData'
         ));
     })->name('dashboard');
 
-    // Orders
+    Route::get('/dashboard/export', function () {
+        $user = auth()->user();
+        $company = $user->activeCompany();
+        $financeService = app(FinanceDashboardService::class);
+        $financeData = $financeService->getDashboardData($company);
+        $operationsService = app(OperationsPerformanceService::class);
+        $operationsData = $operationsService->getPerformanceSummary();
+
+        $headers = ['Metrik', 'Değer'];
+        $rows = [
+            ['Toplam Sipariş', \App\Models\Order::where('status', '!=', 'cancelled')->count()],
+            ['Bekleyen Sipariş', \App\Models\Order::where('status', 'pending')->count()],
+            ['Teslim Edilen Sipariş', \App\Models\Order::where('status', 'delivered')->count()],
+            ['Toplam Sevkiyat', \App\Models\Shipment::count()],
+            ['Aktif Sevkiyat', \App\Models\Shipment::whereIn('status', ['pending', 'in_transit'])->count()],
+            ['Toplam Araç', \App\Models\Vehicle::where('status', 1)->count()],
+            ['Aktif Müşteri', \App\Models\Customer::where('status', 1)->count()],
+            ['Personel', \App\Models\Employee::where('status', 1)->count()],
+            ['Depo', \App\Models\Warehouse::count()],
+            ['Geciken Ödemeler (₺)', number_format($financeData['overdue']['total_amount'] ?? 0, 2, ',', '.')],
+            ['Bugün Vadesi Gelen (₺)', number_format($financeData['due_today']['total_amount'] ?? 0, 2, ',', '.')],
+            ['7 Gün İçinde (₺)', number_format($financeData['due_in_7_days']['total_amount'] ?? 0, 2, ',', '.')],
+            ['Bu Ay Ödenen (₺)', number_format($financeData['paid_this_month']['total_amount'] ?? 0, 2, ',', '.')],
+            ['Teslimat Performans Puanı', number_format($operationsData['delivery_performance_score'] ?? 0, 1)],
+            ['Geciken Sipariş Oranı (%)', number_format($operationsData['delayed_order_rate']['rate'] ?? 0, 1)],
+            ['Araç Doluluk Oranı (%)', number_format($operationsData['vehicle_utilization']['utilization_rate'] ?? 0, 1)],
+            ['Ortalama Teslimat Süresi (saat)', $operationsData['average_delivery_time'] ?? '-'],
+        ];
+
+        return app(ExportService::class)->csv($headers, $rows, 'dashboard_ozet');
+    })->name('dashboard.export');
+
+    // Orders – import routes first (so "import" is not captured by resource {order})
+    Route::middleware('permission:order.view')->get('orders/import', [OrderController::class, 'importForm'])->name('orders.import');
+    Route::middleware('permission:order.view')->get('orders/import-template', [OrderController::class, 'importTemplate'])->name('orders.import-template');
+    Route::middleware('permission:order.view')->post('orders/import', [OrderController::class, 'importStore'])->name('orders.import.store');
     Route::middleware('permission:order.view')->resource('orders', OrderController::class);
 
     // Customers
@@ -159,6 +206,7 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         Route::get('/', [PayrollController::class, 'index'])->name('index');
         Route::get('/create', [PayrollController::class, 'create'])->name('create');
         Route::post('/', [PayrollController::class, 'store'])->name('store');
+        Route::get('/{payroll}/pdf', [PayrollController::class, 'pdf'])->name('pdf');
         Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
     });
 

@@ -48,4 +48,26 @@ class VehicleService
 
         return $query->latest()->paginate($perPage);
     }
+
+    /**
+     * Filtrelenmiş araçları export için getir.
+     */
+    public function getForExport(array $filters = []): Collection
+    {
+        $query = Vehicle::query()->with(['branch']);
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (isset($filters['branch_id'])) {
+            $query->where('branch_id', $filters['branch_id']);
+        }
+
+        if (isset($filters['vehicle_type'])) {
+            $query->where('vehicle_type', $filters['vehicle_type']);
+        }
+
+        return $query->latest()->get();
+    }
 }

@@ -57,6 +57,32 @@ class OrderService
     }
 
     /**
+     * Filtrelenmiş siparişleri export için getir (sayfalama yok).
+     */
+    public function getForExport(array $filters = []): Collection
+    {
+        $query = Order::query()->with(['customer', 'creator']);
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (isset($filters['customer_id'])) {
+            $query->where('customer_id', $filters['customer_id']);
+        }
+
+        if (isset($filters['date_from'])) {
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if (isset($filters['date_to'])) {
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        return $query->latest()->get();
+    }
+
+    /**
      * Generate unique order number.
      */
     protected function generateOrderNumber(): string

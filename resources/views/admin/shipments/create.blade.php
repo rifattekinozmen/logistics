@@ -72,17 +72,17 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">Planlanan Alış Tarihi <span class="text-danger">*</span></label>
-                <input type="datetime-local" name="planned_pickup_date" value="{{ old('planned_pickup_date') }}" class="form-control border-primary-200 focus:border-primary focus:ring-primary @error('planned_pickup_date') is-invalid border-danger @enderror" required>
-                @error('planned_pickup_date')
+                <label class="form-label fw-semibold text-dark">Alış Tarihi <span class="text-danger">*</span></label>
+                <input type="datetime-local" name="pickup_date" value="{{ old('pickup_date') }}" class="form-control border-primary-200 focus:border-primary focus:ring-primary @error('pickup_date') is-invalid border-danger @enderror" required>
+                @error('pickup_date')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">Planlanan Teslimat Tarihi</label>
-                <input type="datetime-local" name="planned_delivery_date" value="{{ old('planned_delivery_date') }}" class="form-control border-primary-200 focus:border-primary focus:ring-primary @error('planned_delivery_date') is-invalid border-danger @enderror">
-                @error('planned_delivery_date')
+                <label class="form-label fw-semibold text-dark">Teslimat Tarihi</label>
+                <input type="datetime-local" name="delivery_date" value="{{ old('delivery_date') }}" class="form-control border-primary-200 focus:border-primary focus:ring-primary @error('delivery_date') is-invalid border-danger @enderror">
+                @error('delivery_date')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>

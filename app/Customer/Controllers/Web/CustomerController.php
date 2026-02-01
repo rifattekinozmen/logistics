@@ -2,19 +2,32 @@
 
 namespace App\Customer\Controllers\Web;
 
+use App\Core\Services\ExportService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CustomerController extends Controller
 {
+    public function __construct(
+        protected ExportService $exportService
+    ) {
+    }
+
     /**
      * Display a listing of customers.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|StreamedResponse|Response
     {
         $filters = $request->only(['status', 'search']);
+
+        if ($request->has('export')) {
+            return $this->export($filters, $request->get('export'));
+        }
+
         $customers = \App\Models\Customer::query()
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
@@ -22,6 +35,36 @@ class CustomerController extends Controller
             ->paginate(25);
 
         return view('admin.customers.index', compact('customers'));
+    }
+
+    /**
+     * Müşteri listesini CSV veya XML olarak dışa aktar.
+     */
+    protected function export(array $filters, string $format): StreamedResponse|Response
+    {
+        $customers = \App\Models\Customer::query()
+            ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
+            ->when($filters['search'] ?? null, fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
+            ->orderBy('name')
+            ->get();
+
+        $headers = ['Müşteri Adı', 'E-posta', 'Telefon', 'Vergi No', 'Adres', 'Durum', 'Oluşturulma'];
+
+        $rows = $customers->map(fn ($c) => [
+            $c->name,
+            $c->email ?? '-',
+            $c->phone ?? '-',
+            $c->tax_number ?? '-',
+            $c->address ?? '-',
+            $c->status ? 'Aktif' : 'Pasif',
+            $c->created_at->format('d.m.Y H:i'),
+        ])->all();
+
+        $filename = 'musteriler';
+
+        return $format === 'xml'
+            ? $this->exportService->xml($headers, $rows, $filename, 'customers', 'customer')
+            : $this->exportService->csv($headers, $rows, $filename);
     }
 
     /**
