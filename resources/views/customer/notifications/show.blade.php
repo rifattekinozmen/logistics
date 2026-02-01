@@ -20,8 +20,8 @@
                 </button>
             </form>
         @endif
-        <a href="{{ route('customer.notifications.index') }}" class="btn btn-outline-secondary">
-            <span class="material-symbols-outlined" style="font-size: 1.25rem;">arrow_back</span>
+        <a href="{{ route('customer.notifications.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+            <span class="material-symbols-outlined">arrow_back</span>
             Listeye Dön
         </a>
     </div>

@@ -111,6 +111,12 @@ body {
     text-rendering: auto;
 }
 
+/* Geri Dön butonu: ikon ile metin aynı hizada ve eşit boyutta */
+.btn.d-inline-flex .material-symbols-outlined,
+a.d-inline-flex .material-symbols-outlined {
+    font-size: 1em;
+}
+
 /* .btn – #3D69CE -200 (ana renk #3D69CE, yumuşak/outline -200) */
 .btn-primary {
     background-color: var(--bs-primary) !important; /* #3D69CE */
@@ -637,6 +643,7 @@ textarea,
 .filter-area.filter-area-work-orders,
 .filter-area.filter-area-employees,
 .filter-area.filter-area-shifts,
+.filter-area.filter-area-attendance,
 .filter-area.filter-area-payments,
 .filter-area.filter-area-documents,
 .filter-area.filter-area-primary {
@@ -660,6 +667,8 @@ textarea,
 .filter-area.filter-area-employees .form-select,
 .filter-area.filter-area-shifts .form-control,
 .filter-area.filter-area-shifts .form-select,
+.filter-area.filter-area-attendance .form-control,
+.filter-area.filter-area-attendance .form-select,
 .filter-area.filter-area-payments .form-control,
 .filter-area.filter-area-payments .form-select,
 .filter-area.filter-area-documents .form-control,
@@ -685,6 +694,8 @@ textarea,
 .filter-area.filter-area-employees .form-select:focus,
 .filter-area.filter-area-shifts .form-control:focus,
 .filter-area.filter-area-shifts .form-select:focus,
+.filter-area.filter-area-attendance .form-control:focus,
+.filter-area.filter-area-attendance .form-select:focus,
 .filter-area.filter-area-payments .form-control:focus,
 .filter-area.filter-area-payments .form-select:focus,
 .filter-area.filter-area-documents .form-control:focus,
@@ -703,6 +714,7 @@ textarea,
 .filter-area .btn.btn-filter-work-orders,
 .filter-area .btn.btn-filter-employees,
 .filter-area .btn.btn-filter-shifts,
+.filter-area .btn.btn-filter-attendance,
 .filter-area .btn.btn-filter-payments,
 .filter-area .btn.btn-filter-documents,
 .filter-area .btn.btn-filter-primary {
@@ -719,6 +731,7 @@ textarea,
 .filter-area .btn.btn-filter-work-orders:hover,
 .filter-area .btn.btn-filter-employees:hover,
 .filter-area .btn.btn-filter-shifts:hover,
+.filter-area .btn.btn-filter-attendance:hover,
 .filter-area .btn.btn-filter-payments:hover,
 .filter-area .btn.btn-filter-documents:hover,
 .filter-area .btn.btn-filter-primary:hover {
@@ -1076,4 +1089,119 @@ aside.sidebar-light .custom-scrollbar::-webkit-scrollbar-track {
 }
 .navbar-breadcrumb .breadcrumb-item.active {
     color: var(--bs-primary);
+}
+
+/* Personel sayfaları – Cemiloğlu açık mavi palet, kimlik portalı tarzı */
+.personel-portal-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.personel-form-card,
+.personel-preview-card {
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 20px rgba(61, 105, 206, 0.08);
+    border: 1px solid var(--bs-primary-200);
+}
+.personel-form-card {
+    background: var(--bs-white);
+    padding: 1.5rem 1.75rem;
+}
+.personel-preview-card {
+    background: linear-gradient(165deg, var(--bs-white) 0%, var(--bs-primary-200) 40%, var(--bs-soft-bg) 100%);
+    padding: 1.5rem 1.75rem;
+    position: sticky;
+    top: 1rem;
+}
+.personel-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--bs-primary);
+}
+.personel-live-badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    animation: personel-pulse 1.5s ease-in-out infinite;
+}
+@keyframes personel-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+/* Kimlik kartı – sadece açık mavi gradient (Cemiloğlu palet) */
+.personel-id-card {
+    background: linear-gradient(145deg, #5B7DD6 0%, var(--bs-primary) 40%, var(--bs-dark-slate) 100%);
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+    color: var(--bs-white);
+    box-shadow: 0 8px 24px rgba(61, 105, 206, 0.25);
+}
+.personel-id-card .personel-id-row {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.personel-id-card .personel-id-label {
+    opacity: 0.9;
+}
+.personel-id-card .personel-id-value {
+    font-weight: 600;
+    text-align: right;
+}
+.personel-footer-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--bs-primary);
+    font-weight: 500;
+}
+.btn-personel-primary {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-dark-slate) 100%) !important;
+    border: none !important;
+    color: var(--bs-white) !important;
+    font-weight: 600;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 14px rgba(61, 105, 206, 0.35);
+}
+.btn-personel-primary:hover {
+    background: linear-gradient(135deg, #335bb5 0%, #1e3a7a 100%) !important;
+    color: var(--bs-white) !important;
+    box-shadow: 0 6px 18px rgba(61, 105, 206, 0.4);
+}
+.personel-photo-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--bs-primary-200) 0%, #E8EFFD 100%);
+    border: 3px solid var(--bs-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+    box-shadow: 0 0 0 2px var(--bs-primary-200);
+}
+.personel-photo-placeholder .material-symbols-outlined {
+    font-size: 48px;
+    color: var(--bs-primary);
+}
+/* Personel sayfaları – doğrulama / bilgi kutusu açık mavi */
+.personel-portal-wrap .bg-white.rounded-3.border-primary-200 {
+    border-color: var(--bs-primary-200) !important;
+    background: linear-gradient(180deg, var(--bs-white) 0%, var(--bs-primary-200) 100%) !important;
+}
+.personel-portal-wrap .border-top.border-primary-200 {
+    border-color: var(--bs-primary-200) !important;
+}
+.personel-verified-box {
+    background: linear-gradient(180deg, var(--bs-white) 0%, var(--bs-primary-200) 100%) !important;
+    border-color: var(--bs-primary-200) !important;
 }

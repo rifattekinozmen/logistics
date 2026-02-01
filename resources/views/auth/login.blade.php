@@ -304,7 +304,7 @@
                 <!-- Back to Home -->
                 <div class="text-center">
                     <a href="{{ route('welcome') }}" class="d-inline-flex align-items-center gap-2 small fw-semibold text-decoration-none transition-all link-cemiloglu">
-                        <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_back</span>
+                        <span class="material-symbols-outlined">arrow_back</span>
                         Ana Sayfaya Dön
                     </a>
                 </div>

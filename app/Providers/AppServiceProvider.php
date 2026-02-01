@@ -74,6 +74,7 @@ class AppServiceProvider extends ServiceProvider
             'work-orders' => 'İş Emirleri & Bakım',
             'fuel-prices' => 'Motorin Fiyat',
             'employees' => 'Personel',
+            'personnel_attendance' => 'Puantaj',
             'shifts' => 'Vardiyalar',
             'leaves' => 'İzinler',
             'advances' => 'Avanslar',

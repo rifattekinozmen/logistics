@@ -18,17 +18,19 @@
         <h2 class="h3 fw-bold text-dark mb-1">Personel</h2>
         <p class="text-secondary mb-0">Tüm personeli görüntüleyin ve yönetin</p>
     </div>
-    <a href="{{ route('personel.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
-        <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
-        Yeni Personel
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('personel.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
+            Yeni Personel
+        </a>
+    </div>
 </div>
 
-<div class="bg-white rounded-3xl shadow-sm border p-4 mb-4" style="border-color: var(--bs-primary-200);">
+<div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
     <form method="GET" action="{{ route('personel.index') }}" class="row g-3">
         <div class="col-md-3">
             <label class="form-label small fw-semibold text-dark">Durum</label>
-            <select name="aktif" class="form-select border-primary-200 focus:border-primary focus:ring-primary">
+            <select name="aktif" class="form-select">
                 <option value="">Tümü</option>
                 <option value="1" {{ request('aktif') == '1' ? 'selected' : '' }}>Aktif</option>
                 <option value="0" {{ request('aktif') == '0' ? 'selected' : '' }}>Pasif</option>
@@ -36,14 +38,14 @@
         </div>
         <div class="col-md-3">
             <label class="form-label small fw-semibold text-dark">Departman</label>
-            <input type="text" name="departman" value="{{ request('departman') }}" class="form-control border-primary-200 focus:border-primary focus:ring-primary" placeholder="Departman ara...">
+            <input type="text" name="departman" value="{{ request('departman') }}" class="form-control" placeholder="Departman ara...">
         </div>
         <div class="col-md-3">
             <label class="form-label small fw-semibold text-dark">Pozisyon</label>
-            <input type="text" name="pozisyon" value="{{ request('pozisyon') }}" class="form-control border-primary-200 focus:border-primary focus:ring-primary" placeholder="Pozisyon ara...">
+            <input type="text" name="pozisyon" value="{{ request('pozisyon') }}" class="form-control" placeholder="Pozisyon ara...">
         </div>
         <div class="col-md-3 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
+            <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>
 </div>
@@ -89,7 +91,7 @@
                         <small class="text-secondary">{{ $personel->maas ? number_format($personel->maas, 2, ',', '.') . ' ₺' : '-' }}</small>
                     </td>
                     <td class="align-middle">
-                        <span class="badge bg-{{ $personel->aktif ? 'success-200 text-success' : 'secondary-200 text-secondary' }} px-3 py-2 rounded-pill fw-semibold">
+                        <span class="badge bg-{{ $personel->aktif ? 'primary-200 text-primary' : 'secondary-200 text-secondary' }} px-3 py-2 rounded-pill fw-semibold">
                             {{ $personel->aktif ? 'Aktif' : 'Pasif' }}
                         </span>
                     </td>

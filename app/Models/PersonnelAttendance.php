@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Casts\AttendanceStatusCast;
+use App\Enums\AttendanceStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +17,7 @@ class PersonnelAttendance extends Model
 
     protected $fillable = [
         'employee_id',
+        'personel_id',
         'attendance_date',
         'attendance_type',
         'check_in',
@@ -33,6 +36,7 @@ class PersonnelAttendance extends Model
     {
         return [
             'attendance_date' => 'date',
+            'attendance_type' => AttendanceStatusCast::class,
             'check_in' => 'datetime',
             'check_out' => 'datetime',
             'total_hours' => 'decimal:2',
@@ -42,11 +46,31 @@ class PersonnelAttendance extends Model
     }
 
     /**
+     * Puantaj grid'i için frontend anahtarını döndürür (full, half, izin, yillik, rapor, none).
+     */
+    public function getFrontendStatusKey(): string
+    {
+        $status = $this->attendance_type;
+
+        return $status instanceof AttendanceStatus
+            ? $status->frontendKey()
+            : 'none';
+    }
+
+    /**
      * Get the employee that owns the attendance record.
      */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    /**
+     * Get the personel that owns the attendance record.
+     */
+    public function personel(): BelongsTo
+    {
+        return $this->belongsTo(Personel::class);
     }
 
     /**

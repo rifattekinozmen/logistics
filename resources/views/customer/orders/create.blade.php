@@ -11,8 +11,8 @@
         </div>
         <p class="text-secondary mb-0">Yeni sipariş oluşturun</p>
     </div>
-    <a href="{{ route('customer.orders.index') }}" class="btn btn-outline-secondary">
-        <span class="material-symbols-outlined" style="font-size: 1.25rem;">arrow_back</span>
+    <a href="{{ route('customer.orders.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+        <span class="material-symbols-outlined">arrow_back</span>
         Geri Dön
     </a>
 </div>

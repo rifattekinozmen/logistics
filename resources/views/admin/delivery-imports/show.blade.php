@@ -10,8 +10,8 @@
             Dosya: <span class="fw-semibold">{{ $batch->file_name }}</span>
         </p>
     </div>
-    <a href="{{ route('admin.delivery-imports.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-        <span class="material-symbols-outlined" style="font-size: 1.1rem;">arrow_back</span>
+    <a href="{{ route('admin.delivery-imports.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+        <span class="material-symbols-outlined">arrow_back</span>
         Listeye Dön
     </a>
 </div>

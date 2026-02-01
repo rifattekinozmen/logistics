@@ -24,8 +24,17 @@ class UpdatePersonelRequest extends FormRequest
     {
         return [
             'ad_soyad' => ['required', 'string', 'max:255'],
+            'tckn' => ['nullable', 'string', 'size:11', 'regex:/^[0-9]+$/'],
+            'kimlik_seri_no' => ['nullable', 'string', 'max:50'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('personels')->ignore($this->personel)],
             'telefon' => ['nullable', 'string', 'max:20'],
+            'mobil_telefon' => ['nullable', 'string', 'max:20'],
+            'acil_iletisim' => ['nullable', 'string', 'max:20'],
+            'anne_adi' => ['nullable', 'string', 'max:255'],
+            'baba_adi' => ['nullable', 'string', 'max:255'],
+            'dogum_tarihi' => ['nullable', 'date'],
+            'dogum_yeri' => ['nullable', 'string', 'max:255'],
+            'medeni_durum' => ['nullable', 'string', 'max:50'],
             'departman' => ['required', 'string', 'max:255'],
             'pozisyon' => ['required', 'string', 'max:255'],
             'ise_baslama_tarihi' => ['required', 'date'],
@@ -50,6 +59,8 @@ class UpdatePersonelRequest extends FormRequest
             'pozisyon.required' => 'Pozisyon alanı zorunludur.',
             'ise_baslama_tarihi.required' => 'İşe başlama tarihi zorunludur.',
             'ise_baslama_tarihi.date' => 'Geçerli bir tarih giriniz.',
+            'tckn.size' => 'T.C. Kimlik No 11 haneli olmalıdır.',
+            'tckn.regex' => 'T.C. Kimlik No sadece rakam içermelidir.',
             'maas.numeric' => 'Maaş sayısal bir değer olmalıdır.',
             'maas.min' => 'Maaş 0 veya daha büyük olmalıdır.',
         ];

@@ -16,6 +16,7 @@ use App\Notification\Controllers\Web\NotificationController;
 use App\Employee\Controllers\Web\LeaveController;
 use App\Employee\Controllers\Web\AdvanceController;
 use App\Employee\Controllers\Web\PayrollController;
+use App\Employee\Controllers\Web\PersonnelAttendanceController;
 use App\Finance\Services\FinanceDashboardService;
 use App\Order\Services\OperationsPerformanceService;
 use Illuminate\Support\Facades\Route;
@@ -136,6 +137,13 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         Route::get('/create', [LeaveController::class, 'create'])->name('create');
         Route::post('/', [LeaveController::class, 'store'])->name('store');
         Route::post('/{leave}/approve', [LeaveController::class, 'approve'])->name('approve');
+    });
+
+    // Personnel Attendance (Puantaj / Yoklama)
+    Route::prefix('personnel-attendance')->name('personnel_attendance.')->group(function () {
+        Route::get('/', [PersonnelAttendanceController::class, 'index'])->name('index');
+        Route::post('/', [PersonnelAttendanceController::class, 'store'])->name('store');
+        Route::get('/api/table', [PersonnelAttendanceController::class, 'apiTable'])->name('api.table');
     });
 
     // Advances (Avans Yönetimi)

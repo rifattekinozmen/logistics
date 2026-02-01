@@ -26,8 +26,17 @@ class PersonelFactory extends Factory
     {
         return [
             'ad_soyad' => $this->faker->name(),
+            'tckn' => $this->faker->numerify('###########'),
+            'kimlik_seri_no' => 'A01-' . $this->faker->numerify('######'),
             'email' => $this->faker->unique()->safeEmail(),
-            'telefon' => $this->faker->phoneNumber(),
+            'telefon' => $this->faker->numerify('5##########'),
+            'mobil_telefon' => $this->faker->numerify('5##########'),
+            'acil_iletisim' => $this->faker->numerify('5##########'),
+            'anne_adi' => $this->faker->firstName('female'),
+            'baba_adi' => $this->faker->firstName('male'),
+            'dogum_tarihi' => $this->faker->dateTimeBetween('-50 years', '-18 years'),
+            'dogum_yeri' => $this->faker->city(),
+            'medeni_durum' => $this->faker->randomElement(['Bekar', 'Evli', 'Dul', 'Boşanmış']),
             'departman' => $this->faker->randomElement(['Lojistik', 'İnsan Kaynakları', 'Muhasebe', 'Satış', 'IT', 'Operasyon']),
             'pozisyon' => $this->faker->jobTitle(),
             'ise_baslama_tarihi' => $this->faker->dateTimeBetween('-5 years', 'now'),

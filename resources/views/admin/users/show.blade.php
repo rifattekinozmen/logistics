@@ -24,8 +24,8 @@
             <span class="material-symbols-outlined" style="font-size: 1.25rem;">edit</span>
             Düzenle
         </a>
-        <a href="{{ route('admin.users.index') }}" class="btn btn-light">
-            <span class="material-symbols-outlined" style="font-size: 1.25rem;">arrow_back</span>
+        <a href="{{ route('admin.users.index') }}" class="btn btn-light d-inline-flex align-items-center gap-2">
+            <span class="material-symbols-outlined">arrow_back</span>
             Geri Dön
         </a>
     </div>

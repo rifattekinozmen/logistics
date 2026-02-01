@@ -8,10 +8,12 @@
         <h2 class="h3 fw-bold text-dark mb-1">Personel</h2>
         <p class="text-secondary mb-0">Tüm personeli görüntüleyin ve yönetin</p>
     </div>
-    <a href="{{ route('admin.employees.create') }}" class="btn btn-employees d-flex align-items-center gap-2">
-        <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
-        Yeni Personel
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('admin.employees.create') }}" class="btn btn-employees d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
+            Yeni Personel
+        </a>
+    </div>
 </div>
 
 <div class="filter-area filter-area-employees rounded-3xl shadow-sm border p-4 mb-4">

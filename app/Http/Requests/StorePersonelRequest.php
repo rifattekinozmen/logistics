@@ -23,8 +23,17 @@ class StorePersonelRequest extends FormRequest
     {
         return [
             'ad_soyad' => ['required', 'string', 'max:255'],
+            'tckn' => ['nullable', 'string', 'size:11', 'regex:/^[0-9]+$/'],
+            'kimlik_seri_no' => ['nullable', 'string', 'max:50'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:personels,email'],
             'telefon' => ['nullable', 'string', 'max:20'],
+            'mobil_telefon' => ['nullable', 'string', 'max:20'],
+            'acil_iletisim' => ['nullable', 'string', 'max:20'],
+            'anne_adi' => ['nullable', 'string', 'max:255'],
+            'baba_adi' => ['nullable', 'string', 'max:255'],
+            'dogum_tarihi' => ['nullable', 'date'],
+            'dogum_yeri' => ['nullable', 'string', 'max:255'],
+            'medeni_durum' => ['nullable', 'string', 'max:50'],
             'departman' => ['required', 'string', 'max:255'],
             'pozisyon' => ['required', 'string', 'max:255'],
             'ise_baslama_tarihi' => ['required', 'date'],
@@ -42,6 +51,8 @@ class StorePersonelRequest extends FormRequest
     {
         return [
             'ad_soyad.required' => 'Ad Soyad alanı zorunludur.',
+            'tckn.size' => 'T.C. Kimlik No 11 haneli olmalıdır.',
+            'tckn.regex' => 'T.C. Kimlik No sadece rakam içermelidir.',
             'email.required' => 'E-posta alanı zorunludur.',
             'email.email' => 'Geçerli bir e-posta adresi giriniz.',
             'email.unique' => 'Bu e-posta adresi zaten kullanılıyor.',

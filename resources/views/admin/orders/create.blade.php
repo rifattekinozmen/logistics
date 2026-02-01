@@ -8,8 +8,8 @@
         <h2 class="h3 fw-bold text-dark mb-1">Yeni Sipariş Oluştur</h2>
         <p class="text-secondary mb-0">Yeni bir sipariş kaydı oluşturun</p>
     </div>
-    <a href="{{ route('admin.orders.index') }}" class="btn btn-light">
-        <span class="material-symbols-outlined" style="font-size: 1.25rem;">arrow_back</span>
+    <a href="{{ route('admin.orders.index') }}" class="btn btn-light d-inline-flex align-items-center gap-2">
+        <span class="material-symbols-outlined">arrow_back</span>
         Geri Dön
     </a>
 </div>

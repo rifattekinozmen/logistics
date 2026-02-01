@@ -104,7 +104,7 @@
                 </li>
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('employee.view'))
                 <li class="mb-1">
-                    <a href="{{ route('admin.employees.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.employees.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('personel.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('personel.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">groups</span>
                         <span class="fw-semibold" style="font-size: 14px;">Personel</span>
                     </a>
@@ -120,6 +120,12 @@
                     <a href="{{ route('admin.leaves.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.leaves.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">event_available</span>
                         <span class="fw-semibold" style="font-size: 14px;">İzinler</span>
+                    </a>
+                </li>
+                <li class="mb-1">
+                    <a href="{{ route('admin.personnel_attendance.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.personnel_attendance.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">calendar_month</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Puantaj</span>
                     </a>
                 </li>
                 <li class="mb-1">
