@@ -169,12 +169,17 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     // Shipments
     Route::middleware('permission:shipment.view')->resource('shipments', ShipmentController::class);
 
-    // Delivery Imports (Teslimat Numarası Excel Yükleme)
+    // Delivery Imports (Teslimat Raporları Excel Yükleme)
     Route::prefix('delivery-imports')->name('delivery-imports.')->group(function () {
         Route::get('/', [DeliveryImportController::class, 'index'])->name('index');
         Route::get('/create', [DeliveryImportController::class, 'create'])->name('create');
+        Route::get('/template', [DeliveryImportController::class, 'downloadTemplate'])->name('template');
         Route::post('/', [DeliveryImportController::class, 'store'])->name('store');
         Route::get('/{batch}', [DeliveryImportController::class, 'show'])->name('show');
+        Route::get('/{batch}/export', [DeliveryImportController::class, 'export'])->name('export');
+        Route::get('/{batch}/download-original', [DeliveryImportController::class, 'downloadOriginal'])->name('download-original');
+        Route::post('/{batch}/reprocess', [DeliveryImportController::class, 'reprocess'])->name('reprocess');
+        Route::delete('/{batch}', [DeliveryImportController::class, 'destroy'])->name('destroy');
     });
 
     // Vehicles

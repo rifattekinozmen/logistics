@@ -69,7 +69,7 @@ class AppServiceProvider extends ServiceProvider
             'customers' => 'Müşteriler',
             'shipments' => 'Sevkiyatlar',
             'warehouses' => 'Depo & Stok',
-            'delivery-imports' => 'Teslimat Import',
+            'delivery-imports' => 'Teslimat Raporları',
             'vehicles' => 'Araçlar',
             'work-orders' => 'İş Emirleri & Bakım',
             'fuel-prices' => 'Motorin Fiyat',

@@ -2,25 +2,44 @@
 
 namespace App\Delivery\Controllers\Web;
 
+use App\Core\Services\ExportService;
 use App\Delivery\Jobs\ProcessDeliveryImportJob;
+use App\Delivery\Services\DeliveryReportImportService;
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryImportBatch;
+use App\Models\DeliveryReportRow;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DeliveryImportController extends Controller
 {
     /**
-     * Liste: Yüklenmiş teslimat import batch'leri.
+     * Liste: Yüklenmiş teslimat import batch'leri (durum ve tarih filtresi).
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $batches = DeliveryImportBatch::query()
-            ->latest()
-            ->paginate(20);
+        $query = DeliveryImportBatch::query()->latest();
+
+        $status = $request->string('status')->trim()->toString();
+        if ($status !== '' && in_array($status, ['pending', 'processing', 'completed', 'failed'], true)) {
+            $query->where('status', $status);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date('date_to'));
+        }
+
+        $batches = $query->withCount('reportRows')->paginate(20)->withQueryString();
 
         return view('admin.delivery-imports.index', compact('batches'));
     }
@@ -30,7 +49,9 @@ class DeliveryImportController extends Controller
      */
     public function create(): View
     {
-        return view('admin.delivery-imports.create');
+        $reportTypes = config('delivery_report.report_types', []);
+
+        return view('admin.delivery-imports.create', compact('reportTypes'));
     }
 
     /**
@@ -43,6 +64,7 @@ class DeliveryImportController extends Controller
     {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,csv,txt|max:20480',
+            'report_type' => 'nullable|string|max:80',
         ]);
 
         $user = Auth::user();
@@ -57,9 +79,16 @@ class DeliveryImportController extends Controller
         $file = $request->file('file');
         $path = $file->store('delivery-imports', 'private');
 
+        $reportType = $request->string('report_type')->trim()->toString();
+        $types = config('delivery_report.report_types', []);
+        if ($reportType === '' || ! isset($types[$reportType])) {
+            $reportType = array_key_first($types) ?: null;
+        }
+
         $batch = DeliveryImportBatch::query()->create([
             'file_name' => $file->getClientOriginalName(),
             'file_path' => $path,
+            'report_type' => $reportType,
             'total_rows' => 0,
             'processed_rows' => 0,
             'successful_rows' => 0,
@@ -77,23 +106,241 @@ class DeliveryImportController extends Controller
     }
 
     /**
-     * Tek bir batch ve ilişkili teslimat numaralarını göster.
+     * Tek bir batch ve normalize edilmiş rapor satırlarını başlıklara göre göster.
+     * Batch hâlâ "pending" ise import burada senkron çalıştırılır (kuyruk worker yoksa içerik yine görünsün).
      */
-    public function show(DeliveryImportBatch $batch): View
+    public function show(Request $request, DeliveryImportBatch $batch, DeliveryReportImportService $reportImportService): View
     {
-        $deliveryNumbers = $batch->deliveryNumbers()
-            ->latest()
-            ->paginate(25);
+        if (Schema::hasTable('delivery_report_rows') && $batch->status === 'pending') {
+            try {
+                $result = $reportImportService->importAndSaveReportRows($batch);
+                $batch->update([
+                    'total_rows' => $result['total_rows'],
+                    'processed_rows' => $result['total_rows'],
+                    'successful_rows' => $result['saved'],
+                    'failed_rows' => count($result['errors']),
+                    'import_errors' => $result['errors'],
+                    'status' => 'completed',
+                ]);
+                $batch->refresh();
+            } catch (\Throwable $e) {
+                $batch->update(['status' => 'failed']);
+                report($e);
+            }
+        }
+
+        $expectedHeaders = $reportImportService->getExpectedHeadersForBatch($batch);
+        $search = $request->string('search')->trim()->toString();
+        $sortCol = $request->integer('sort', -1);
+        $direction = strtolower($request->string('direction', 'asc')->toString()) === 'desc' ? 'desc' : 'asc';
+        $perPage = (int) $request->input('per_page', 25);
+        $perPage = in_array($perPage, [25, 50, 100], true) ? $perPage : 25;
+        $errorRowIndexes = array_keys($batch->import_errors ?? []);
+
+        if (! Schema::hasTable('delivery_report_rows')) {
+            $reportRows = new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage, 1);
+            $migrationMissing = true;
+        } else {
+            $query = $batch->reportRows();
+
+            if ($search !== '') {
+                $all = $query->orderBy('row_index')->get();
+                $filtered = $all->filter(function (DeliveryReportRow $row) use ($search): bool {
+                    $data = $row->row_data ?? [];
+                    foreach ($data as $val) {
+                        if (mb_stripos((string) $val, $search) !== false) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                });
+
+                if ($sortCol >= 0 && $sortCol < count($expectedHeaders)) {
+                    $filtered = $filtered->sortBy(fn (DeliveryReportRow $r) => $r->row_data[$sortCol] ?? '', SORT_REGULAR, $direction === 'desc');
+                } else {
+                    $filtered = $filtered->sortBy('row_index', SORT_REGULAR, $direction === 'desc');
+                }
+
+                $page = max(1, $request->integer('page', 1));
+                $slice = $filtered->values()->slice(($page - 1) * $perPage, $perPage);
+                $reportRows = new \Illuminate\Pagination\LengthAwarePaginator(
+                    $slice,
+                    $filtered->count(),
+                    $perPage,
+                    $page,
+                    ['path' => $request->url(), 'query' => $request->query()]
+                );
+            } else {
+                $driver = \Illuminate\Support\Facades\DB::connection()->getDriverName();
+                $sortInPhp = $driver === 'sqlsrv' && $sortCol >= 0 && $sortCol < count($expectedHeaders);
+
+                if ($sortInPhp) {
+                    $all = $query->orderBy('row_index')->get();
+                    $sorted = $all->sortBy(
+                        fn (DeliveryReportRow $r) => $r->row_data[$sortCol] ?? '',
+                        SORT_REGULAR,
+                        $direction === 'desc'
+                    );
+                    $page = max(1, $request->integer('page', 1));
+                    $slice = $sorted->values()->slice(($page - 1) * $perPage, $perPage);
+                    $reportRows = new \Illuminate\Pagination\LengthAwarePaginator(
+                        $slice,
+                        $sorted->count(),
+                        $perPage,
+                        $page,
+                        ['path' => $request->url(), 'query' => $request->query()]
+                    );
+                } elseif ($sortCol >= 0 && $sortCol < count($expectedHeaders)) {
+                    $query->orderByRaw("JSON_UNQUOTE(JSON_EXTRACT(row_data, '$[".$sortCol."]')) ".$direction);
+                    $reportRows = $query->paginate($perPage)->withQueryString();
+                } else {
+                    $query->orderBy('row_index');
+                    $reportRows = $query->paginate($perPage)->withQueryString();
+                }
+            }
+            $migrationMissing = false;
+        }
 
         $fileExists = $batch->file_path
             ? Storage::disk('private')->exists($batch->file_path)
             : false;
 
+        $reportTypes = config('delivery_report.report_types', []);
+        $reportTypeLabel = ($batch->report_type && isset($reportTypes[$batch->report_type]['label']))
+            ? $reportTypes[$batch->report_type]['label']
+            : null;
+
         return view('admin.delivery-imports.show', [
             'batch' => $batch,
-            'deliveryNumbers' => $deliveryNumbers,
+            'reportRows' => $reportRows,
+            'expectedHeaders' => $expectedHeaders,
             'fileExists' => $fileExists,
+            'migrationMissing' => $migrationMissing,
+            'reportTypeLabel' => $reportTypeLabel,
+            'errorRowIndexes' => $errorRowIndexes,
+            'perPage' => $perPage,
         ]);
+    }
+
+    /**
+     * Rapor satırlarını Excel veya CSV olarak indir.
+     */
+    public function export(Request $request, DeliveryImportBatch $batch, DeliveryReportImportService $reportImportService): StreamedResponse|\Illuminate\Http\Response
+    {
+        $format = $request->string('format', 'xlsx')->toString();
+        if (! in_array($format, ['xlsx', 'csv'], true)) {
+            $format = 'xlsx';
+        }
+
+        $expectedHeaders = $reportImportService->getExpectedHeadersForBatch($batch);
+        $query = $batch->reportRows()->orderBy('row_index');
+        $rows = $query->get();
+
+        $dataRows = $rows->map(fn (DeliveryReportRow $row) => $row->row_data ?? [])->all();
+
+        $baseName = pathinfo($batch->file_name, PATHINFO_FILENAME).'_rapor_'.now()->format('Y-m-d_His');
+
+        if ($format === 'csv') {
+            $rowsArray = $rows->map(fn (DeliveryReportRow $row) => array_merge([$row->row_index], $row->row_data ?? []))->all();
+
+            return app(ExportService::class)->csv(
+                array_merge(['#'], $expectedHeaders),
+                $rowsArray,
+                $baseName.'.csv'
+            );
+        }
+
+        $spreadsheet = new Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray(array_merge([array_merge(['#'], $expectedHeaders)], $rows->map(fn (DeliveryReportRow $r) => array_merge([$r->row_index], $r->row_data ?? []))->all()), null, 'A1');
+
+        $writer = new XlsxWriter($spreadsheet);
+        $filename = $baseName.'.xlsx';
+
+        return response()->streamDownload(function () use ($writer): void {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="'.str_replace('"', '\\"', $filename).'"',
+        ]);
+    }
+
+    /**
+     * Batch'i tekrar işle (report rows silinir, status pending yapılır; show'da yeniden import çalışır).
+     */
+    public function reprocess(DeliveryImportBatch $batch): RedirectResponse
+    {
+        $batch->reportRows()->delete();
+        $batch->update([
+            'status' => 'pending',
+            'total_rows' => 0,
+            'processed_rows' => 0,
+            'successful_rows' => 0,
+            'failed_rows' => 0,
+            'import_errors' => null,
+        ]);
+
+        return redirect()
+            ->route('admin.delivery-imports.show', $batch)
+            ->with('success', 'Rapor tekrar işlenecek. Sayfa yenilendiğinde import çalışacaktır.');
+    }
+
+    /**
+     * Beklenen başlıklarla boş Excel şablonu indir. ?type= ile rapor tipi seçilebilir.
+     */
+    public function downloadTemplate(Request $request): StreamedResponse
+    {
+        $type = $request->string('type')->trim()->toString();
+        $types = config('delivery_report.report_types', []);
+        if ($type !== '' && isset($types[$type]['headers'])) {
+            $expectedHeaders = $types[$type]['headers'];
+        } else {
+            $expectedHeaders = config('delivery_report.expected_headers', []);
+        }
+        $spreadsheet = new Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray([$expectedHeaders], null, 'A1');
+
+        $writer = new XlsxWriter($spreadsheet);
+        $filename = 'teslimat_raporu_sablon_'.now()->format('Y-m-d').'.xlsx';
+
+        return response()->streamDownload(function () use ($writer): void {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="'.str_replace('"', '\\"', $filename).'"',
+        ]);
+    }
+
+    /**
+     * Yüklenen orijinal dosyayı indir.
+     */
+    public function downloadOriginal(DeliveryImportBatch $batch): StreamedResponse|\Illuminate\Http\RedirectResponse
+    {
+        if (! $batch->file_path || ! Storage::disk('private')->exists($batch->file_path)) {
+            return redirect()->route('admin.delivery-imports.show', $batch)
+                ->with('error', 'Dosya bulunamadı.');
+        }
+
+        return Storage::disk('private')->download(
+            $batch->file_path,
+            $batch->file_name
+        );
+    }
+
+    /**
+     * Batch'i sil (rapor satırları cascade silinir, orijinal dosya storage'dan kaldırılır).
+     */
+    public function destroy(DeliveryImportBatch $batch): RedirectResponse
+    {
+        if ($batch->file_path && Storage::disk('private')->exists($batch->file_path)) {
+            Storage::disk('private')->delete($batch->file_path);
+        }
+        $batch->delete();
+
+        return redirect()->route('admin.delivery-imports.index')
+            ->with('success', 'Teslimat raporu silindi.');
     }
 }
 

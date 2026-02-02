@@ -1,18 +1,47 @@
 @extends('layouts.app')
 
-@section('title', 'Teslimat İmportları - Logistics')
+@section('title', 'Teslimat Raporları - Logistics')
 
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="h3 fw-bold text-dark mb-1">Teslimat İmportları</h2>
+        <h2 class="h3 fw-bold text-dark mb-1">Teslimat Raporları</h2>
         <p class="text-secondary mb-0">Excel ile yüklenmiş teslimat numarası batch’lerini görüntüleyin</p>
     </div>
     <a href="{{ route('admin.delivery-imports.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
         <span class="material-symbols-outlined" style="font-size: 1.25rem;">upload_file</span>
-        Yeni İmport
+        Rapor Yükle
     </a>
 </div>
+
+<form method="GET" action="{{ route('admin.delivery-imports.index') }}" class="mb-4">
+    <div class="bg-white rounded-3xl shadow-sm border p-3">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-2">
+                <label for="status" class="form-label small text-secondary mb-0">Durum</label>
+                <select name="status" id="status" class="form-select form-select-sm">
+                    <option value="">Tümü</option>
+                    <option value="pending" @selected(request('status') === 'pending')>Beklemede</option>
+                    <option value="processing" @selected(request('status') === 'processing')>İşleniyor</option>
+                    <option value="completed" @selected(request('status') === 'completed')>Tamamlandı</option>
+                    <option value="failed" @selected(request('status') === 'failed')>Hata</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="date_from" class="form-label small text-secondary mb-0">Başlangıç</label>
+                <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-2">
+                <label for="date_to" class="form-label small text-secondary mb-0">Bitiş</label>
+                <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-outline-primary">Filtrele</button>
+                <a href="{{ route('admin.delivery-imports.index') }}" class="btn btn-sm btn-outline-secondary">Temizle</a>
+            </div>
+        </div>
+    </div>
+</form>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden" style="border-color: var(--bs-primary-200);">
     <div class="table-responsive">
@@ -74,9 +103,35 @@
                             </small>
                         </td>
                         <td class="align-middle text-end">
-                            <a href="{{ route('admin.delivery-imports.show', $batch) }}" class="btn btn-sm bg-primary-200 text-primary border-0">
-                                Detay
-                            </a>
+                            <div class="d-flex flex-wrap align-items-center justify-content-end gap-1">
+                                <a href="{{ route('admin.delivery-imports.show', $batch) }}" class="btn btn-sm bg-primary-200 text-primary border-0" title="Detay">
+                                    Detay
+                                </a>
+                                @if($batch->report_rows_count > 0)
+                                    <a href="{{ route('admin.delivery-imports.export', [$batch, 'format' => 'xlsx']) }}" class="btn btn-sm btn-outline-primary" title="Excel indir">xlsx</a>
+                                    <a href="{{ route('admin.delivery-imports.export', [$batch, 'format' => 'csv']) }}" class="btn btn-sm btn-outline-primary" title="CSV indir">csv</a>
+                                @endif
+                                @if($batch->file_path && \Illuminate\Support\Facades\Storage::disk('private')->exists($batch->file_path))
+                                    <a href="{{ route('admin.delivery-imports.download-original', $batch) }}" class="btn btn-sm btn-outline-secondary" title="Orijinal dosyayı indir">
+                                        <span class="material-symbols-outlined" style="font-size:1rem">folder_open</span>
+                                    </a>
+                                @endif
+                                @if(in_array($batch->status, ['pending', 'failed']))
+                                    <form action="{{ route('admin.delivery-imports.reprocess', $batch) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-warning" title="Tekrar işle">
+                                            <span class="material-symbols-outlined" style="font-size:1rem">refresh</span>
+                                        </button>
+                                    </form>
+                                @endif
+                                <form action="{{ route('admin.delivery-imports.destroy', $batch) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu teslimat raporunu silmek istediğinize emin misiniz?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                        <span class="material-symbols-outlined" style="font-size:1rem">delete</span>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @empty
@@ -84,8 +139,8 @@
                         <td colspan="7" class="text-center py-5">
                             <div class="d-flex flex-column align-items-center gap-2">
                                 <span class="material-symbols-outlined text-secondary" style="font-size: 3rem;">upload_file</span>
-                                <p class="text-secondary mb-0">Henüz teslimat importu bulunmuyor.</p>
-                                <a href="{{ route('admin.delivery-imports.create') }}" class="btn btn-primary btn-sm mt-2">İlk İmportu Yap</a>
+                                <p class="text-secondary mb-0">Henüz teslimat raporu bulunmuyor.</p>
+                                <a href="{{ route('admin.delivery-imports.create') }}" class="btn btn-primary btn-sm mt-2">İlk Raporu Yükle</a>
                             </div>
                         </td>
                     </tr>

@@ -16,16 +16,17 @@
                 @php
                     $sidebarUser = Auth::user();
                 @endphp
-                
-                <!-- Ana Menü -->
-                <li class="mb-2">
+
+                <!-- Sipariş & Teslimat -->
+                <li class="mb-2 mt-3">
+                    <p class="small text-muted fw-bold mb-1 px-3" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Sipariş & Teslimat</p>
+                </li>
+                <li class="mb-1">
                     <a href="{{ route('customer.dashboard') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('customer.dashboard') ? 'sidebar-nav-active shadow-sm' : 'sidebar-nav-inactive' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">dashboard</span>
                         <span class="fw-semibold" style="font-size: 14px;">Dashboard</span>
                     </a>
                 </li>
-
-                <!-- Siparişler -->
                 <li class="mb-1">
                     <a href="{{ route('customer.orders.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('customer.orders.*') ? 'sidebar-nav-active shadow-sm' : 'sidebar-nav-inactive' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">shopping_cart</span>
@@ -33,23 +34,22 @@
                     </a>
                 </li>
 
-                <!-- Belgeler -->
+                <!-- Belgeler & Ödemeler -->
+                <li class="mb-2 mt-3">
+                    <p class="small text-muted fw-bold mb-1 px-3" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Belgeler & Ödemeler</p>
+                </li>
                 <li class="mb-1">
                     <a href="{{ route('customer.documents.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('customer.documents.*') ? 'sidebar-nav-active shadow-sm' : 'sidebar-nav-inactive' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">description</span>
                         <span class="fw-semibold" style="font-size: 14px;">Belgelerim</span>
                     </a>
                 </li>
-
-                <!-- Faturalar -->
                 <li class="mb-1">
                     <a href="{{ route('customer.invoices.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('customer.invoices.*') ? 'sidebar-nav-active shadow-sm' : 'sidebar-nav-inactive' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">receipt_long</span>
                         <span class="fw-semibold" style="font-size: 14px;">Faturalarım</span>
                     </a>
                 </li>
-
-                <!-- Ödemeler -->
                 <li class="mb-1">
                     <a href="{{ route('customer.payments.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('customer.payments.*') ? 'sidebar-nav-active shadow-sm' : 'sidebar-nav-inactive' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">payments</span>
@@ -71,37 +71,22 @@
                     </a>
                 </li>
 
-                <!-- Ayırıcı -->
-                <li class="my-3">
-                    <div class="px-3">
-                        <div class="border-top"></div>
-                    </div>
+                <!-- Hesap & Tercihler -->
+                <li class="mb-2 mt-3">
+                    <p class="small text-muted fw-bold mb-1 px-3" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Hesap & Tercihler</p>
                 </li>
-
-                <!-- Favori Adresler -->
                 <li class="mb-1">
                     <a href="{{ route('customer.favorite-addresses.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('customer.favorite-addresses.*') ? 'sidebar-nav-active shadow-sm' : 'sidebar-nav-inactive' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">location_on</span>
                         <span class="fw-semibold" style="font-size: 14px;">Favori Adresler</span>
                     </a>
                 </li>
-
-                <!-- Sipariş Şablonları -->
                 <li class="mb-1">
                     <a href="{{ route('customer.order-templates.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('customer.order-templates.*') ? 'sidebar-nav-active shadow-sm' : 'sidebar-nav-inactive' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">content_copy</span>
                         <span class="fw-semibold" style="font-size: 14px;">Sipariş Şablonları</span>
                     </a>
                 </li>
-
-                <!-- Ayırıcı -->
-                <li class="my-3">
-                    <div class="px-3">
-                        <div class="border-top"></div>
-                    </div>
-                </li>
-
-                <!-- Profil -->
                 <li class="mb-1">
                     <a href="{{ route('customer.profile') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('customer.profile') ? 'sidebar-nav-active shadow-sm' : 'sidebar-nav-inactive' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">person</span>

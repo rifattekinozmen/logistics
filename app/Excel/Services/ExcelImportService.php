@@ -74,15 +74,112 @@ class ExcelImportService
     }
 
     /**
-     * Excel dosyasını parse et.
-     * 
-     * Not: Şimdilik basit implementasyon. İleride Maatwebsite/Laravel-Excel kullanılabilir.
+     * Excel dosyasını parse et (xlsx/xls). PhpSpreadsheet gerektirir.
      */
     protected function parseExcel(string $filePath): array
     {
-        // Basit CSV gibi davran (gerçek Excel parsing için paket gerekli)
-        // Şimdilik CSV formatında kaydedilmiş Excel dosyalarını destekle
-        return $this->parseCsv($filePath);
+        $this->ensurePhpSpreadsheetInstalled();
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        if (empty($rows)) {
+            return [];
+        }
+
+        $headers = array_map(fn ($v) => trim((string) $v), $rows[0]);
+        $dataRows = array_slice($rows, 1);
+        $result = [];
+
+        foreach ($dataRows as $row) {
+            $values = array_map(fn ($v) => trim((string) $v), array_pad($row, count($headers), ''));
+            $result[] = array_combine($headers, $values);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Excel/CSV dosyasını başlık + satırlar olarak oku.
+     *
+     * @return array{headers: array<int, string>, rows: array<int, array<int, string>>}
+     */
+    public function readFileWithHeaders(string $filePath, string $disk = 'private'): array
+    {
+        $fullPath = Storage::disk($disk)->path($filePath);
+
+        if (! file_exists($fullPath)) {
+            throw new \Exception("Dosya bulunamadı: {$filePath}");
+        }
+
+        $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+
+        return match ($extension) {
+            'csv' => $this->readCsvWithHeaders($fullPath),
+            'xlsx', 'xls' => $this->readXlsxWithHeaders($fullPath),
+            default => throw new \Exception("Desteklenmeyen dosya formatı: {$extension}"),
+        };
+    }
+
+    protected function readCsvWithHeaders(string $filePath): array
+    {
+        $handle = fopen($filePath, 'r');
+        if ($handle === false) {
+            throw new \Exception("CSV dosyası açılamadı: {$filePath}");
+        }
+
+        $headers = fgetcsv($handle);
+        if ($headers === false) {
+            fclose($handle);
+
+            return ['headers' => [], 'rows' => []];
+        }
+
+        $headers = array_map(fn ($h) => trim((string) $h), $headers);
+        $rows = [];
+
+        while (($data = fgetcsv($handle)) !== false) {
+            $rows[] = array_map(fn ($v) => trim((string) $v), array_pad($data, count($headers), ''));
+        }
+
+        fclose($handle);
+
+        return ['headers' => $headers, 'rows' => $rows];
+    }
+
+    protected function readXlsxWithHeaders(string $filePath): array
+    {
+        $this->ensurePhpSpreadsheetInstalled();
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        if (empty($rows)) {
+            return ['headers' => [], 'rows' => []];
+        }
+
+        $headers = array_map(fn ($v) => trim((string) $v), $rows[0]);
+        $dataRows = array_slice($rows, 1);
+        $out = [];
+
+        foreach ($dataRows as $row) {
+            $out[] = array_map(fn ($v) => trim((string) $v), array_pad($row, count($headers), ''));
+        }
+
+        return ['headers' => $headers, 'rows' => $out];
+    }
+
+    /**
+     * xlsx/xls okumak için PhpSpreadsheet paketinin kurulu olması gerekir.
+     */
+    protected function ensurePhpSpreadsheetInstalled(): void
+    {
+        if (! class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
+            throw new \Exception(
+                'Excel (.xlsx) dosyalarını okuyabilmek için PhpSpreadsheet paketi gereklidir. ' .
+                'Proje klasöründe (logistics) terminalde şu komutu çalıştırın: composer require phpoffice/phpspreadsheet'
+            );
+        }
     }
 
     /**

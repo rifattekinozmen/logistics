@@ -14,10 +14,12 @@ class DeliveryImportBatch extends Model
     protected $fillable = [
         'file_name',
         'file_path',
+        'report_type',
         'total_rows',
         'processed_rows',
         'successful_rows',
         'failed_rows',
+        'import_errors',
         'status',
         'imported_by',
     ];
@@ -29,6 +31,7 @@ class DeliveryImportBatch extends Model
             'processed_rows' => 'integer',
             'successful_rows' => 'integer',
             'failed_rows' => 'integer',
+            'import_errors' => 'array',
         ];
     }
 
@@ -46,5 +49,13 @@ class DeliveryImportBatch extends Model
     public function deliveryNumbers(): HasMany
     {
         return $this->hasMany(DeliveryNumber::class, 'import_batch_id');
+    }
+
+    /**
+     * Get the normalized report rows for the batch (başlıklara göre normalize edilmiş satırlar).
+     */
+    public function reportRows(): HasMany
+    {
+        return $this->hasMany(DeliveryReportRow::class, 'delivery_import_batch_id');
     }
 }

@@ -1,19 +1,58 @@
 @extends('layouts.app')
 
-@section('title', 'Teslimat İmport Detayı - Logistics')
+@section('title', 'Teslimat Raporu Detayı - Logistics')
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between mb-4">
+@if($migrationMissing ?? false)
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4" role="alert">
+        <span class="material-symbols-outlined">warning</span>
+        <div>
+            <strong>delivery_report_rows</strong> tablosu bulunamadı. Rapor satırlarını görebilmek için terminalde şu komutu çalıştırın:
+            <code class="d-block mt-2 bg-white bg-black/10 px-2 py-1 rounded">php artisan migrate</code>
+        </div>
+    </div>
+@endif
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <div>
-        <h2 class="h3 fw-bold text-dark mb-1">Teslimat İmport Detayı</h2>
+        <h2 class="h3 fw-bold text-dark mb-1">Teslimat Raporu Detayı</h2>
         <p class="text-secondary mb-0">
             Dosya: <span class="fw-semibold">{{ $batch->file_name }}</span>
+            @if($reportTypeLabel ?? null)
+                <span class="ms-2 badge bg-primary-200 text-primary rounded-pill px-2 py-1 small">{{ $reportTypeLabel }}</span>
+            @endif
         </p>
     </div>
-    <a href="{{ route('admin.delivery-imports.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
-        <span class="material-symbols-outlined">arrow_back</span>
-        Listeye Dön
-    </a>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        @if($fileExists ?? false)
+            <a href="{{ route('admin.delivery-imports.download-original', $batch) }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:1rem">folder_open</span>
+                Orijinal Dosya
+            </a>
+        @endif
+        @if(!($migrationMissing ?? false) && $reportRows->total() > 0)
+            <a href="{{ route('admin.delivery-imports.export', [$batch, 'format' => 'xlsx']) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:1rem">download</span>
+                Excel
+            </a>
+            <a href="{{ route('admin.delivery-imports.export', [$batch, 'format' => 'csv']) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:1rem">download</span>
+                CSV
+            </a>
+        @endif
+        @if(in_array($batch->status, ['pending', 'failed']))
+            <form action="{{ route('admin.delivery-imports.reprocess', $batch) }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1">
+                    <span class="material-symbols-outlined" style="font-size:1rem">refresh</span>
+                    Tekrar İşle
+                </button>
+            </form>
+        @endif
+        <a href="{{ route('admin.delivery-imports.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Listeye Dön
+        </a>
+    </div>
 </div>
 
 <div class="row g-4 mb-4">
@@ -68,54 +107,104 @@
     </div>
 </div>
 
+@if(!empty($batch->import_errors))
+    <div class="alert alert-danger mb-4">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="material-symbols-outlined">error</span>
+            <strong>Hatalı satırlar ({{ count($batch->import_errors) }})</strong>
+        </div>
+        <ul class="mb-0 small">
+            @foreach(array_slice($batch->import_errors, 0, 20, true) as $rowIndex => $message)
+                <li>Satır <strong>{{ $rowIndex }}</strong>: {{ Str::limit($message, 80) }}</li>
+            @endforeach
+            @if(count($batch->import_errors) > 20)
+                <li class="text-secondary">… ve {{ count($batch->import_errors) - 20 }} satır daha.</li>
+            @endif
+        </ul>
+    </div>
+@endif
+
+<form method="GET" action="{{ route('admin.delivery-imports.show', $batch) }}" class="mb-3 d-flex flex-wrap align-items-center gap-2">
+    <input type="hidden" name="sort" value="{{ request('sort', '') }}">
+    <input type="hidden" name="direction" value="{{ request('direction', 'asc') }}">
+    <div class="input-group flex-grow-1" style="max-width: 320px;">
+        <input type="search" name="search" value="{{ request('search') }}" class="form-control" placeholder="Tabloda ara…" aria-label="Ara">
+        <button type="submit" class="btn btn-outline-primary">Ara</button>
+        @if(request('search'))
+            <a href="{{ route('admin.delivery-imports.show', [$batch, 'per_page' => $perPage ?? 25]) }}" class="btn btn-outline-secondary">Temizle</a>
+        @endif
+    </div>
+    <label class="d-flex align-items-center gap-1 small text-secondary mb-0">
+        <span>Sayfa başına:</span>
+        <select name="per_page" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+            @foreach([25, 50, 100] as $n)
+                <option value="{{ $n }}" {{ ($perPage ?? 25) == $n ? 'selected' : '' }}>{{ $n }}</option>
+            @endforeach
+        </select>
+    </label>
+</form>
+
+@if(!($migrationMissing ?? false) && $reportRows->total() > 0)
+    @php
+        $rowDetailsMap = [];
+        foreach ($reportRows as $r) {
+            $rowDetailsMap[$r->row_index] = $r->row_data ?? [];
+        }
+    @endphp
+    <script type="application/json" id="row-details-data">{!! str_replace('</script>', '<\/script>', json_encode($rowDetailsMap)) !!}</script>
+@endif
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
     <div class="table-responsive">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0 table-sm">
             <thead class="bg-primary-200">
                 <tr>
-                    <th class="border-0 small text-secondary fw-semibold">Teslimat No</th>
-                    <th class="border-0 small text-secondary fw-semibold">Müşteri</th>
-                    <th class="border-0 small text-secondary fw-semibold">Telefon</th>
-                    <th class="border-0 small text-secondary fw-semibold">Adres</th>
-                    <th class="border-0 small text-secondary fw-semibold">Durum</th>
-                    <th class="border-0 small text-secondary fw-semibold">Sipariş</th>
-                    <th class="border-0 small text-secondary fw-semibold">Hata</th>
+                    @php
+                        $currentSort = request('sort', -1);
+                        $currentDir = request('direction', 'asc');
+                        $url = fn($col) => route('admin.delivery-imports.show', [$batch, 'search' => request('search'), 'sort' => $col, 'direction' => ($currentSort == $col && $currentDir === 'asc') ? 'desc' : 'asc', 'per_page' => $perPage ?? 25]);
+                    @endphp
+                    <th class="border-0 small text-secondary fw-semibold text-nowrap">
+                        <a href="{{ $url(-1) }}" class="text-decoration-none text-secondary" title="Sıra (sıralama: Excel satır no)">Sıra</a>
+                        @if((int) $currentSort === -1)<span class="material-symbols-outlined small align-middle">{{ $currentDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@endif
+                    </th>
+                    @foreach($expectedHeaders as $colIndex => $header)
+                        <th class="border-0 small text-secondary fw-semibold text-nowrap">
+                            <a href="{{ $url($colIndex) }}" class="text-decoration-none text-secondary" title="{{ $header }} — Sırala">{{ Str::limit($header, 15) }}</a>
+                            @if((int) $currentSort === $colIndex)<span class="material-symbols-outlined small align-middle">{{ $currentDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@endif
+                        </th>
+                    @endforeach
                 </tr>
             </thead>
             <tbody>
-                @forelse($deliveryNumbers as $deliveryNumber)
-                    <tr>
-                        <td class="align-middle">
-                            <span class="fw-semibold text-dark">{{ $deliveryNumber->delivery_number }}</span>
-                        </td>
-                        <td class="align-middle">
-                            <small class="text-secondary">{{ $deliveryNumber->customer_name }}</small>
-                        </td>
-                        <td class="align-middle">
-                            <small class="text-secondary">{{ $deliveryNumber->customer_phone }}</small>
-                        </td>
-                        <td class="align-middle">
-                            <small class="text-secondary">{{ Str::limit($deliveryNumber->delivery_address, 40) }}</small>
-                        </td>
-                        <td class="align-middle">
-                            <small class="text-secondary">{{ $deliveryNumber->status }}</small>
-                        </td>
-                        <td class="align-middle">
-                            <small class="text-secondary">
-                                {{ $deliveryNumber->order?->order_number ?? '-' }}
-                            </small>
-                        </td>
-                        <td class="align-middle">
-                            <small class="text-danger">
-                                {{ $deliveryNumber->error_message ?? '-' }}
-                            </small>
-                        </td>
+                @forelse($reportRows as $reportRow)
+                    @php
+                        $isErrorRow = in_array($reportRow->row_index, $errorRowIndexes ?? [], true);
+                        $errorMessage = $isErrorRow && !empty($batch->import_errors[$reportRow->row_index])
+                            ? $batch->import_errors[$reportRow->row_index]
+                            : null;
+                    @endphp
+                    <tr class="delivery-report-row {{ $isErrorRow ? 'table-danger' : '' }}"
+                        style="cursor: pointer;"
+                        role="button"
+                        tabindex="0"
+                        data-row-index="{{ $reportRow->row_index }}"
+                        data-display-index="{{ ($reportRows->currentPage() - 1) * $reportRows->perPage() + $loop->iteration }}"
+                        data-error-message="{{ $errorMessage ? e($errorMessage) : '' }}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#rowDetailModal"
+                        title="{{ $isErrorRow ? 'Hatalı satır — Detay için tıklayın' : 'Satır detayı için tıklayın' }}">
+                        <td class="align-middle small text-secondary" title="Excel satır: {{ $reportRow->row_index }}">{{ ($reportRows->currentPage() - 1) * $reportRows->perPage() + $loop->iteration }}</td>
+                        @foreach($expectedHeaders as $colIndex => $header)
+                            <td class="align-middle small text-nowrap" title="{{ $reportRow->row_data[$colIndex] ?? '' }}">
+                                {{ Str::limit($reportRow->row_data[$colIndex] ?? '', 30) }}
+                            </td>
+                        @endforeach
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5">
+                        <td colspan="{{ count($expectedHeaders) + 1 }}" class="text-center py-5">
                             <p class="text-secondary mb-0">
-                                Bu import için henüz teslimat kaydı oluşturulmamış.
+                                Bu import için henüz normalize edilmiş satır yok. İşlem tamamlandığında burada listelenecektir.
                             </p>
                         </td>
                     </tr>
@@ -123,11 +212,71 @@
             </tbody>
         </table>
     </div>
-    @if($deliveryNumbers->hasPages())
+    @if($reportRows->hasPages())
         <div class="p-4 border-top">
-            {{ $deliveryNumbers->links() }}
+            {{ $reportRows->links() }}
         </div>
     @endif
 </div>
+
+@if(!($migrationMissing ?? false))
+<div class="modal fade" id="rowDetailModal" tabindex="-1" aria-labelledby="rowDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rowDetailModalLabel">Satır detayı — Sıra <span id="rowDetailDisplayIndex">-</span><span id="rowDetailExcelInfo" class="text-secondary fw-normal small ms-1"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <div id="rowDetailError" class="alert alert-danger d-none mb-3" role="alert"></div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <tbody id="rowDetailBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById('rowDetailModal');
+    if (!modal) return;
+    var headers = @json($expectedHeaders);
+    var rowDetailsEl = document.getElementById('row-details-data');
+    var rowDetailsStore = rowDetailsEl ? (function () { try { return JSON.parse(rowDetailsEl.textContent); } catch (_) { return {}; } }()) : {};
+    modal.addEventListener('show.bs.modal', function (e) {
+        var trigger = e.relatedTarget;
+        if (!trigger || !trigger.dataset.rowIndex) return;
+        var rowIndex = trigger.dataset.rowIndex;
+        var displayIndex = trigger.dataset.displayIndex || rowIndex;
+        var rowData = rowDetailsStore[rowIndex] || rowDetailsStore[String(rowIndex)] || [];
+        if (!Array.isArray(rowData)) { rowData = Object.keys(rowData).length ? Object.values(rowData) : []; }
+        var errorMsg = trigger.dataset.errorMessage || '';
+        document.getElementById('rowDetailDisplayIndex').textContent = displayIndex;
+        document.getElementById('rowDetailExcelInfo').textContent = '(Excel satır: ' + rowIndex + ')';
+        var errEl = document.getElementById('rowDetailError');
+        if (errorMsg) {
+            errEl.textContent = errorMsg;
+            errEl.classList.remove('d-none');
+        } else {
+            errEl.classList.add('d-none');
+        }
+        var tbody = document.getElementById('rowDetailBody');
+        tbody.innerHTML = '';
+        headers.forEach(function (header, i) {
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<th class="text-secondary small text-nowrap" style="width:30%">' + escapeHtml(header) + '</th><td class="small">' + escapeHtml(String(rowData[i] ?? '')) + '</td>';
+            tbody.appendChild(tr);
+        });
+    });
+    function escapeHtml(s) {
+        var div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+    }
+});
+</script>
+@endif
 @endsection
 

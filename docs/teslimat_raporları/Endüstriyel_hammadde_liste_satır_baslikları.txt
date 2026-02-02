@@ -1,0 +1,49 @@
+Satınalma belgesi
+Kalem
+Çerçeve sözleşme
+Sözleşme kalemi
+Tarih
+Doğal sayı
+Şirket kodu
+Şirket adı
+Satıcı
+ÜY Tanım
+Ocak Kodu
+Tanım
+Malzeme
+Malzeme kısa metni
+Dolu Ağırlık
+Boş Ağırlık
+Geçerli Miktar
+Temel ölçü birimi
+Geçerli Miktar
+Temel ölçü birimi
+Parti
+Üretim yeri
+Ad
+Depo yeri
+Depo yeri tanımı
+Teslimat
+Kalem (SD)
+Teslimat miktarı
+Toplam Rutubet
+Rutubet Çarpanı
+İrsaliye Seri
+İrsaliye No
+Araç Giriş Tarihi
+Araç Giriş Saati
+Araç Çıkış Tarihi
+Araç Çıkış Tarihi
+Firma Miktarı
+Plaka
+FİRMA
+Şöför Adı
+Nakliye Firma Kodu
+Nakliye Firma Adı
+Nakliye İrs. Tarihi
+Eylem Kodu
+Gemi Kodu
+Malzeme belgesi
+Malzeme belgesi yılı
+Belge kalemi
+İleti tipi

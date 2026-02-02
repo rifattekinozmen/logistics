@@ -25,13 +25,22 @@
                     </a>
                 </li>
                 
-                <!-- Operasyon -->
-                <li class="mb-2 mt-3">
-                    <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Operasyon</p>
-                </li>
                 @php
                     $sidebarUser = Auth::user();
                 @endphp
+
+                <!-- 1. Müşteri & Sipariş (iş akışı başı) -->
+                <li class="mb-2 mt-3">
+                    <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Müşteri & Sipariş</p>
+                </li>
+                @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('customer.view'))
+                <li class="mb-1">
+                    <a href="{{ route('admin.customers.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.customers.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">people</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Müşteriler</span>
+                    </a>
+                </li>
+                @endif
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('order.view'))
                 <li class="mb-1">
                     <a href="{{ route('admin.orders.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.orders.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
@@ -40,11 +49,16 @@
                     </a>
                 </li>
                 @endif
-                @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('customer.view'))
+
+                <!-- 2. Depo & Sevkiyat -->
+                <li class="mb-2 mt-3">
+                    <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Depo & Sevkiyat</p>
+                </li>
+                @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('warehouse.view'))
                 <li class="mb-1">
-                    <a href="{{ route('admin.customers.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.customers.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">people</span>
-                        <span class="fw-semibold" style="font-size: 14px;">Müşteriler</span>
+                    <a href="{{ route('admin.warehouses.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.warehouses.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">warehouse</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Depo & Stok</span>
                     </a>
                 </li>
                 @endif
@@ -56,22 +70,14 @@
                     </a>
                 </li>
                 @endif
-                @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('warehouse.view'))
-                <li class="mb-1">
-                    <a href="{{ route('admin.warehouses.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.warehouses.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">warehouse</span>
-                        <span class="fw-semibold" style="font-size: 14px;">Depo & Stok</span>
-                    </a>
-                </li>
-                @endif
                 <li class="mb-1">
                     <a href="{{ route('admin.delivery-imports.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.delivery-imports.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">upload_file</span>
-                        <span class="fw-semibold" style="font-size: 14px;">Teslimat Import</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Teslimat Raporları</span>
                     </a>
                 </li>
 
-                <!-- Filo Yönetimi -->
+                <!-- 3. Filo Yönetimi -->
                 <li class="mb-2 mt-3">
                     <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Filo Yönetimi</p>
                 </li>
@@ -98,7 +104,7 @@
                 </li>
                 @endif
 
-                <!-- Personel & İK -->
+                <!-- 4. Personel & İK -->
                 <li class="mb-2 mt-3">
                     <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Personel & İK</p>
                 </li>
@@ -141,7 +147,7 @@
                     </a>
                 </li>
 
-                <!-- Finans & Belgeler -->
+                <!-- 5. Finans & Belgeler -->
                 <li class="mb-2 mt-3">
                     <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Finans & Belgeler</p>
                 </li>
@@ -161,6 +167,11 @@
                     </a>
                 </li>
                 @endif
+
+                <!-- 6. Sistem & Yönetimi -->
+                <li class="mb-2 mt-3">
+                    <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Sistem & Yönetimi</p>
+                </li>
                 <li class="mb-1">
                     <a href="{{ route('admin.notifications.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.notifications.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">notifications</span>
@@ -174,11 +185,6 @@
                             <span class="badge bg-danger rounded-pill ms-auto" style="font-size: 10px;">{{ $unreadCount }}</span>
                         @endif
                     </a>
-                </li>
-
-                <!-- Sistem & Yönetimi -->
-                <li class="mb-2 mt-3">
-                    <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Sistem & Yönetimi</p>
                 </li>
                 @php
                     // Sidebar'dan "Firma Ayarları" linkine tıklandığında:
