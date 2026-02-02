@@ -8,7 +8,7 @@
         <span class="material-symbols-outlined">warning</span>
         <div>
             <strong>delivery_report_rows</strong> tablosu bulunamadı. Rapor satırlarını görebilmek için terminalde şu komutu çalıştırın:
-            <code class="d-block mt-2 bg-white bg-black/10 px-2 py-1 rounded">php artisan migrate</code>
+            <code class="d-block mt-2 bg-white px-2 py-1 rounded">php artisan migrate</code>
         </div>
     </div>
 @endif
@@ -127,7 +127,7 @@
 <form method="GET" action="{{ route('admin.delivery-imports.show', $batch) }}" class="mb-3 d-flex flex-wrap align-items-center gap-2">
     <input type="hidden" name="sort" value="{{ request('sort', '') }}">
     <input type="hidden" name="direction" value="{{ request('direction', 'asc') }}">
-    <div class="input-group flex-grow-1" style="max-width: 320px;">
+    <div class="input-group grow" style="max-width: 320px;">
         <input type="search" name="search" value="{{ request('search') }}" class="form-control" placeholder="Tabloda ara…" aria-label="Ara">
         <button type="submit" class="btn btn-outline-primary">Ara</button>
         @if(request('search'))
