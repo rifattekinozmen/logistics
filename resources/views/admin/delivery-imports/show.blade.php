@@ -13,7 +13,7 @@
     </div>
 @endif
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-    <div class="min-w-0 flex-grow-1">
+    <div class="min-w-0 grow">
         <h2 class="h3 fw-bold text-dark mb-1">Teslimat Raporu Detayı</h2>
         @if($reportTypeLabel ?? null)
             <p class="text-secondary mb-0">
@@ -21,7 +21,7 @@
             </p>
         @endif
     </div>
-    <div class="d-flex flex-wrap align-items-center gap-2 ms-auto flex-shrink-0">
+    <div class="d-flex flex-wrap align-items-center gap-2 ms-auto shrink-0">
         @if(!($migrationMissing ?? false) && $reportRows->total() > 0)
             <a href="{{ route('admin.delivery-imports.veri-analiz-raporu', $batch) }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
                 <span class="material-symbols-outlined" style="font-size:1rem">table_chart</span>
