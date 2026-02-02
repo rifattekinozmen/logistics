@@ -109,6 +109,7 @@ class AppServiceProvider extends ServiceProvider
             'select' => 'Firma Seç',
             'templates' => 'Şablonlar',
             'planning' => 'Planlama',
+            'veri-analiz-raporu' => 'Veri Analiz Raporu',
             'index' => null,
         ];
 

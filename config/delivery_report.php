@@ -10,8 +10,8 @@ return [
     | 2. Raporu "Teslimat Raporları" üzerinden yüklersiniz (rapor tipi seçerek).
     | 3. Sistem satırları beklenen başlıklara göre normalize eder; tarih alanları
     |    d.m.Y (gg.aa.yyyy) formatına çevrilir (Europe/Istanbul).
-    | 4. Rapor detay sayfasından "Malzeme Pivot" ile Tarih x Malzeme özet tablosunu
-    |    görüntüleyebilirsiniz (Cemiloglu uyumlu BOŞ-DOLU / DOLU-DOLU hesapları ile).
+    | 4. Rapor detay sayfasından "Veri Analiz Raporu" ile Tarih x Malzeme özet tablosunu
+    |    görüntüleyebilirsiniz (tarih aralığına göre X günlük başlık; Cemiloglu uyumlu hesaplar).
     |
     |--------------------------------------------------------------------------
     | Rapor Tipleri (başlık setleri)

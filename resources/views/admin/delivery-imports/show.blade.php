@@ -20,7 +20,7 @@
             @if($reportTypeLabel ?? null)
                 <span class="ms-2 badge bg-primary-200 text-primary rounded-pill px-2 py-1 small">{{ $reportTypeLabel }}</span>
             @endif
-            — 7 günlük raporu <strong>Malzeme Pivot</strong> ile Tarih × Malzeme özetine dönüştürebilirsiniz.
+            — Raporu <strong>Veri Analiz Raporu</strong> ile Tarih × Malzeme özetine dönüştürebilirsiniz.
         </p>
     </div>
     <div class="d-flex flex-wrap align-items-center gap-2">
@@ -31,9 +31,9 @@
             </a>
         @endif
         @if(!($migrationMissing ?? false) && $reportRows->total() > 0)
-            <a href="{{ route('admin.delivery-imports.material-pivot', $batch) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
+            <a href="{{ route('admin.delivery-imports.veri-analiz-raporu', $batch) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
                 <span class="material-symbols-outlined" style="font-size:1rem">table_chart</span>
-                Malzeme Pivot
+                Veri Analiz Raporu
             </a>
             <a href="{{ route('admin.delivery-imports.export', [$batch, 'format' => 'xlsx']) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
                 <span class="material-symbols-outlined" style="font-size:1rem">download</span>

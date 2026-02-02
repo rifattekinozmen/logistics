@@ -288,9 +288,9 @@ class DeliveryImportController extends Controller
     }
 
     /**
-     * Malzeme Pivot Tablosu: Tarih x Malzeme özeti.
+     * Veri Analiz Raporu: Tarih x Malzeme özeti (tarih aralığına göre X günlük başlık).
      */
-    public function materialPivot(DeliveryImportBatch $batch, DeliveryReportPivotService $pivotService): View|RedirectResponse
+    public function veriAnalizRaporu(DeliveryImportBatch $batch, DeliveryReportPivotService $pivotService): View|RedirectResponse
     {
         $pivot = $pivotService->buildMaterialPivot($batch);
         if ($pivot['materials'] === [] && $pivot['rows'] === []) {
@@ -303,10 +303,21 @@ class DeliveryImportController extends Controller
             ? $reportTypes[$batch->report_type]['label']
             : null;
 
-        return view('admin.delivery-imports.material-pivot', [
+        $rows = $pivot['rows'] ?? [];
+        $dayCount = count($rows);
+        $dateRangeText = '';
+        if ($dayCount > 0) {
+            $first = $rows[0]['tarih'] ?? '';
+            $last = $rows[array_key_last($rows)]['tarih'] ?? '';
+            $dateRangeText = $first === $last ? $first : $first."\u{2013}".$last;
+        }
+
+        return view('admin.delivery-imports.veri-analiz-raporu', [
             'batch' => $batch,
             'pivot' => $pivot,
             'reportTypeLabel' => $reportTypeLabel,
+            'dayCount' => $dayCount,
+            'dateRangeText' => $dateRangeText,
         ]);
     }
 
