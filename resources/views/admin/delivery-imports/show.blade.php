@@ -13,25 +13,17 @@
     </div>
 @endif
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-    <div>
+    <div class="min-w-0 flex-grow-1">
         <h2 class="h3 fw-bold text-dark mb-1">Teslimat Raporu Detayı</h2>
-        <p class="text-secondary mb-0">
-            Dosya: <span class="fw-semibold">{{ $batch->file_name }}</span>
-            @if($reportTypeLabel ?? null)
-                <span class="ms-2 badge bg-primary-200 text-primary rounded-pill px-2 py-1 small">{{ $reportTypeLabel }}</span>
-            @endif
-            — Raporu <strong>Veri Analiz Raporu</strong> ile Tarih × Malzeme özetine dönüştürebilirsiniz.
-        </p>
-    </div>
-    <div class="d-flex flex-wrap align-items-center gap-2">
-        @if($fileExists ?? false)
-            <a href="{{ route('admin.delivery-imports.download-original', $batch) }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
-                <span class="material-symbols-outlined" style="font-size:1rem">folder_open</span>
-                Orijinal Dosya
-            </a>
+        @if($reportTypeLabel ?? null)
+            <p class="text-secondary mb-0">
+                <span class="badge bg-primary-200 text-primary rounded-pill px-2 py-1 small">{{ $reportTypeLabel }}</span>
+            </p>
         @endif
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-2 ms-auto flex-shrink-0">
         @if(!($migrationMissing ?? false) && $reportRows->total() > 0)
-            <a href="{{ route('admin.delivery-imports.veri-analiz-raporu', $batch) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
+            <a href="{{ route('admin.delivery-imports.veri-analiz-raporu', $batch) }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
                 <span class="material-symbols-outlined" style="font-size:1rem">table_chart</span>
                 Veri Analiz Raporu
             </a>
@@ -62,51 +54,63 @@
 
 <div class="row g-4 mb-4">
     <div class="col-md-3">
-        <div class="bg-white rounded-3xl shadow-sm border p-3">
-            <div class="small text-secondary mb-1">Durum</div>
-            @php
-                $statusColors = [
-                    'pending' => 'warning',
-                    'processing' => 'info',
-                    'completed' => 'success',
-                    'failed' => 'danger',
-                ];
-                $statusLabels = [
-                    'pending' => 'Beklemede',
-                    'processing' => 'İşleniyor',
-                    'completed' => 'Tamamlandı',
-                    'failed' => 'Hata',
-                ];
-                $color = $statusColors[$batch->status] ?? 'secondary';
-                $label = $statusLabels[$batch->status] ?? $batch->status;
-            @endphp
-            <span class="badge bg-{{ $color }}-200 text-{{ $color }} rounded-pill px-3 py-2 fw-semibold">
-                {{ $label }}
-            </span>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="bg-white rounded-3xl shadow-sm border p-3">
-            <div class="small text-secondary mb-1">Toplam Satır</div>
-            <div class="fw-bold text-dark">{{ $batch->total_rows ?? 0 }}</div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="bg-white rounded-3xl shadow-sm border p-3">
-            <div class="small text-secondary mb-1">Başarılı / Hatalı</div>
-            <div class="fw-bold text-dark">
-                {{ $batch->successful_rows ?? 0 }} / {{ $batch->failed_rows ?? 0 }}
+        <div class="bg-white rounded-3xl shadow-sm border p-3 d-flex align-items-start gap-2">
+            <span class="material-symbols-outlined text-secondary" style="font-size:1.25rem" aria-hidden="true">info</span>
+            <div class="min-w-0">
+                <div class="small text-secondary mb-1">Durum</div>
+                @php
+                    $statusColors = [
+                        'pending' => 'warning',
+                        'processing' => 'info',
+                        'completed' => 'success',
+                        'failed' => 'danger',
+                    ];
+                    $statusLabels = [
+                        'pending' => 'Beklemede',
+                        'processing' => 'İşleniyor',
+                        'completed' => 'Tamamlandı',
+                        'failed' => 'Hata',
+                    ];
+                    $color = $statusColors[$batch->status] ?? 'secondary';
+                    $label = $statusLabels[$batch->status] ?? $batch->status;
+                @endphp
+                <span class="badge bg-{{ $color }}-200 text-{{ $color }} rounded-pill px-3 py-2 fw-semibold">
+                    {{ $label }}
+                </span>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="bg-white rounded-3xl shadow-sm border p-3">
-            <div class="small text-secondary mb-1">Yükleyen</div>
-            <div class="fw-bold text-dark">
-                {{ $batch->importer?->name ?? '-' }}
+        <div class="bg-white rounded-3xl shadow-sm border p-3 d-flex align-items-start gap-2">
+            <span class="material-symbols-outlined text-secondary" style="font-size:1.25rem" aria-hidden="true">format_list_numbered</span>
+            <div class="min-w-0">
+                <div class="small text-secondary mb-1">Toplam Satır</div>
+                <div class="fw-bold text-dark">{{ $batch->total_rows ?? 0 }}</div>
             </div>
-            <div class="small text-secondary">
-                {{ $batch->created_at?->format('d.m.Y H:i') ?? '-' }}
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="bg-white rounded-3xl shadow-sm border p-3 d-flex align-items-start gap-2">
+            <span class="material-symbols-outlined text-secondary" style="font-size:1.25rem" aria-hidden="true">check_circle</span>
+            <div class="min-w-0">
+                <div class="small text-secondary mb-1">Başarılı / Hatalı</div>
+                <div class="fw-bold text-dark">
+                    {{ $batch->successful_rows ?? 0 }} / {{ $batch->failed_rows ?? 0 }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="bg-white rounded-3xl shadow-sm border p-3 d-flex align-items-start gap-2">
+            <span class="material-symbols-outlined text-secondary" style="font-size:1.25rem" aria-hidden="true">person</span>
+            <div class="min-w-0">
+                <div class="small text-secondary mb-1">Yükleyen</div>
+                <div class="fw-bold text-dark">
+                    {{ $batch->importer?->name ?? '-' }}
+                </div>
+                <div class="small text-secondary">
+                    {{ $batch->created_at?->format('d.m.Y H:i') ?? '-' }}
+                </div>
             </div>
         </div>
     </div>
@@ -129,6 +133,7 @@
     </div>
 @endif
 
+<h3 class="h5 fw-semibold text-dark mb-3">Rapor satırları</h3>
 <form method="GET" action="{{ route('admin.delivery-imports.show', $batch) }}" class="mb-3 d-flex flex-wrap align-items-center gap-2">
     <input type="hidden" name="sort" value="{{ request('sort', '') }}">
     <input type="hidden" name="direction" value="{{ request('direction', 'asc') }}">

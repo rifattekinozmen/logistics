@@ -6,7 +6,7 @@
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
         <h2 class="h3 fw-bold text-dark mb-1">Teslimat Raporları</h2>
-        <p class="text-secondary mb-0">Excel ile yüklenmiş teslimat raporu batch'lerini görüntüleyin. Raporları Veri Analiz Raporu ile Tarih × Malzeme özetine dönüştürebilirsiniz.</p>
+        <p class="text-secondary mb-0">Excel ile yüklediğiniz teslimat raporlarını burada görüntüleyebilir; rapor detayından Veri Analiz Raporu ile tarih ve malzeme bazlı özet tabloya geçebilirsiniz.</p>
     </div>
     <a href="{{ route('admin.delivery-imports.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
         <span class="material-symbols-outlined" style="font-size: 1.25rem;">upload_file</span>
@@ -110,11 +110,6 @@
                                 @if($batch->report_rows_count > 0)
                                     <a href="{{ route('admin.delivery-imports.export', [$batch, 'format' => 'xlsx']) }}" class="btn btn-sm btn-outline-primary" title="Excel indir">xlsx</a>
                                     <a href="{{ route('admin.delivery-imports.export', [$batch, 'format' => 'csv']) }}" class="btn btn-sm btn-outline-primary" title="CSV indir">csv</a>
-                                @endif
-                                @if($batch->file_path && \Illuminate\Support\Facades\Storage::disk('private')->exists($batch->file_path))
-                                    <a href="{{ route('admin.delivery-imports.download-original', $batch) }}" class="btn btn-sm btn-outline-secondary" title="Orijinal dosyayı indir">
-                                        <span class="material-symbols-outlined" style="font-size:1rem">folder_open</span>
-                                    </a>
                                 @endif
                                 @if(in_array($batch->status, ['pending', 'failed']))
                                     <form action="{{ route('admin.delivery-imports.reprocess', $batch) }}" method="POST" class="d-inline">
