@@ -20,6 +20,7 @@
             @if($reportTypeLabel ?? null)
                 <span class="ms-2 badge bg-primary-200 text-primary rounded-pill px-2 py-1 small">{{ $reportTypeLabel }}</span>
             @endif
+            — 7 günlük raporu <strong>Malzeme Pivot</strong> ile Tarih × Malzeme özetine dönüştürebilirsiniz.
         </p>
     </div>
     <div class="d-flex flex-wrap align-items-center gap-2">
@@ -202,10 +203,11 @@
             $num = (float) $value;
             $prev = \PhpOffice\PhpSpreadsheet\Shared\Date::getExcelCalendar();
             $lastDt = null;
+            $tz = new \DateTimeZone('Europe/Istanbul');
             try {
                 foreach ([\PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_WINDOWS_1900, \PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_MAC_1904] as $cal) {
                     \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($cal);
-                    $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($num);
+                    $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($num, $tz);
                     $lastDt = $dt;
                     $year = (int) $dt->format('Y');
                     if ($year >= 1990 && $year <= 2030) {
@@ -238,19 +240,25 @@
             }
         }
         $str = trim((string) $value);
-        $formats = ['n/j/Y', 'm/d/Y', 'n-j-Y', 'm-d-Y', 'd.m.Y', 'd.m.Y H:i', 'd.m.Y g:i:s A', 'Y-m-d', 'Y-m-d H:i:s'];
+        $formats = ['j.n.Y H:i:s', 'j.n.Y H:i', 'j.n.Y g:i:s A', 'j.n.Y', 'd.m.Y', 'd.m.Y H:i', 'd.m.Y g:i:s A', 'Y-m-d', 'Y-m-d H:i:s', 'n/j/Y', 'm/d/Y', 'n-j-Y', 'm-d-Y'];
         foreach ($formats as $fmt) {
-            $parsed = @\Carbon\Carbon::createFromFormat($fmt, $str);
-            if ($parsed !== false) {
-                if ($isTime) {
-                    return $parsed->format('g:i:s A');
-                }
-                if ($dateOnly) {
-                    return $parsed->format('d.m.Y');
-                }
-                $hasTime = $parsed->format('His') !== '000000';
+            try {
+                $parsed = \Carbon\Carbon::createFromFormat($fmt, $str);
+                if ($parsed !== false) {
+                    if ($isTime) {
+                        return $parsed->format('g:i:s A');
+                    }
+                    if ($dateOnly) {
+                        return $parsed->format('d.m.Y');
+                    }
+                    $hasTime = $parsed->format('His') !== '000000';
 
-                return $hasTime ? $parsed->format('d.m.Y g:i:s A') : $parsed->format('d.m.Y');
+                    return $hasTime ? $parsed->format('d.m.Y g:i:s A') : $parsed->format('d.m.Y');
+                }
+            } catch (\Carbon\Exceptions\InvalidFormatException $e) {
+                continue;
+            } catch (\Throwable $e) {
+                continue;
             }
         }
         try {
@@ -306,7 +314,7 @@
                         @if((int) $currentSort === -1)<span class="material-symbols-outlined small align-middle">{{ $currentDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@endif
                     </th>
                     @foreach($expectedHeaders as $colIndex => $header)
-                        <th class="border-0 small fw-semibold text-dark" style="white-space: normal; min-width: 6rem;">
+                        <th class="border-0 small fw-semibold text-dark" style="white-space: normal; min-width: 6rem;" @if(trim((string) $header) === 'Tarih') title="Tarih (gg.aa.yyyy)" @endif>
                             <a href="{{ $url($colIndex) }}" class="text-decoration-none text-dark" title="{{ $header }} — Sırala">{{ $header }}</a>
                             @if((int) $currentSort === $colIndex)<span class="material-symbols-outlined small align-middle">{{ $currentDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@endif
                         </th>

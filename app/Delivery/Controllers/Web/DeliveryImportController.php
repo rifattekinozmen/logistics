@@ -221,6 +221,14 @@ class DeliveryImportController extends Controller
             ? $reportTypes[$batch->report_type]['date_only_column_indices']
             : [];
 
+        if (empty($dateColumnIndices) && ! empty($expectedHeaders)) {
+            $tarihIndices = array_keys(array_filter($expectedHeaders, fn ($h): bool => trim((string) $h) === 'Tarih'));
+            if ($tarihIndices !== []) {
+                $dateColumnIndices = $tarihIndices;
+                $dateOnlyColumnIndices = array_merge($dateOnlyColumnIndices, $tarihIndices);
+            }
+        }
+
         return view('admin.delivery-imports.show', [
             'batch' => $batch,
             'reportRows' => $reportRows,

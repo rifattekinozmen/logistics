@@ -251,7 +251,7 @@ class DeliveryReportImportService
             }
         }
 
-        if ($numericValue !== null && $numericValue >= 1 && $numericValue < 2958466 && class_exists(\PhpOffice\PhpSpreadsheet\Shared\Date::class)) {
+        if ($numericValue !== null && $numericValue >= 1000 && $numericValue < 2958466 && class_exists(\PhpOffice\PhpSpreadsheet\Shared\Date::class)) {
             $dt = $this->excelSerialToDateTime($numericValue, $excelCalendar);
             if ($dt !== null) {
                 $hasTime = (int) $dt->format('His') !== 0;
@@ -260,7 +260,29 @@ class DeliveryReportImportService
             }
         }
 
-        return trim((string) $value);
+        $str = trim((string) $value);
+        $formats = ['j.n.Y H:i:s', 'j.n.Y H:i', 'j.n.Y g:i:s A', 'j.n.Y', 'd.m.Y H:i:s', 'd.m.Y H:i', 'd.m.Y g:i:s A', 'd.m.Y', 'Y-m-d H:i:s', 'Y-m-d'];
+        if (str_contains($str, '/')) {
+            $formatsSlashFirst = ['n/j/Y', 'm/d/Y', 'n/j/Y H:i:s', 'm/d/Y H:i:s', 'j/n/Y', 'd/m/Y'];
+            foreach ($formatsSlashFirst as $fmt) {
+                $dt = @\DateTime::createFromFormat($fmt, $str);
+                if ($dt !== false) {
+                    $hasTime = (int) $dt->format('His') !== 0;
+
+                    return $hasTime ? $dt->format('d.m.Y g:i:s A') : $dt->format('d.m.Y');
+                }
+            }
+        }
+        foreach ($formats as $fmt) {
+            $dt = @\DateTime::createFromFormat($fmt, $str);
+            if ($dt !== false) {
+                $hasTime = (int) $dt->format('His') !== 0;
+
+                return $hasTime ? $dt->format('d.m.Y g:i:s A') : $dt->format('d.m.Y');
+            }
+        }
+
+        return $str;
     }
 
     /**
@@ -290,18 +312,20 @@ class DeliveryReportImportService
 
     /**
      * Excel seri numarasını DateTime'a çevirir; takvim yanlışsa 1904 dener.
+     * Türkiye saat dilimi (Europe/Istanbul) kullanılır; tarih kayması önlenir.
      */
     private function excelSerialToDateTime(float $numericValue, int $excelCalendar): ?\DateTimeInterface
     {
+        $timezone = new \DateTimeZone('Europe/Istanbul');
         $prev = \PhpOffice\PhpSpreadsheet\Shared\Date::getExcelCalendar();
         \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($excelCalendar);
         try {
-            $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($numericValue);
+            $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($numericValue, $timezone);
             $year = (int) $dt->format('Y');
             $nowYear = (int) date('Y');
             if ($year > $nowYear + 1 || $year < $nowYear - 2) {
                 \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar(\PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_MAC_1904);
-                $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($numericValue);
+                $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($numericValue, $timezone);
             }
 
             return $dt;

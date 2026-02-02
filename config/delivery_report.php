@@ -4,6 +4,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Teslimat Raporu Akışı (7 günlük Excel → Pivot)
+    |--------------------------------------------------------------------------
+    | 1. Tarafınıza haftalık (7 günlük) Excel teslimat raporu iletilir.
+    | 2. Raporu "Teslimat Raporları" üzerinden yüklersiniz (rapor tipi seçerek).
+    | 3. Sistem satırları beklenen başlıklara göre normalize eder; tarih alanları
+    |    d.m.Y (gg.aa.yyyy) formatına çevrilir (Europe/Istanbul).
+    | 4. Rapor detay sayfasından "Malzeme Pivot" ile Tarih x Malzeme özet tablosunu
+    |    görüntüleyebilirsiniz (Cemiloglu uyumlu BOŞ-DOLU / DOLU-DOLU hesapları ile).
+    |
+    |--------------------------------------------------------------------------
     | Rapor Tipleri (başlık setleri)
     |--------------------------------------------------------------------------
     | Her tipin bir anahtarı ve beklenen başlık listesi vardır.

@@ -6,7 +6,7 @@
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
         <h2 class="h3 fw-bold text-dark mb-1">Teslimat Raporları</h2>
-        <p class="text-secondary mb-0">Excel ile yüklenmiş teslimat numarası batch’lerini görüntüleyin</p>
+        <p class="text-secondary mb-0">Excel ile yüklenmiş teslimat raporu batch'lerini görüntüleyin. 7 günlük raporları Malzeme Pivot ile Tarih × Malzeme özetine dönüştürebilirsiniz.</p>
     </div>
     <a href="{{ route('admin.delivery-imports.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
         <span class="material-symbols-outlined" style="font-size: 1.25rem;">upload_file</span>
@@ -155,4 +155,3 @@
     @endif
 </div>
 @endsection
-

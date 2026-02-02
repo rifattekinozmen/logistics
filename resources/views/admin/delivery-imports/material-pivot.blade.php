@@ -11,6 +11,7 @@
             @if($reportTypeLabel ?? null)
                 <span class="ms-2 badge bg-primary-200 text-primary rounded-pill px-2 py-1 small">{{ $reportTypeLabel }}</span>
             @endif
+            — 7 günlük Excel raporundan üretilen Tarih × Malzeme pivot özeti.
         </p>
     </div>
     <div class="d-flex flex-wrap align-items-center gap-2">

@@ -37,6 +37,44 @@ class DeliveryReportPivotService
     }
 
     /**
+     * Rapor Detayı ile aynı başlık setini döndürür (row_data sütun sırası buna göredir).
+     *
+     * @return array<int, string>
+     */
+    protected function getExpectedHeadersForBatch(DeliveryImportBatch $batch): array
+    {
+        $types = config('delivery_report.report_types', []);
+        if ($batch->report_type && isset($types[$batch->report_type]['headers'])) {
+            return $types[$batch->report_type]['headers'];
+        }
+
+        return config('delivery_report.expected_headers', []);
+    }
+
+    /**
+     * Rapor Detayı'ndaki "Tarih" (date-only) sütununun row_data index'ini döndürür.
+     * Rapor Detayı ile aynı sütunu kullanmak için date_only_column_indices kullanılır.
+     */
+    protected function resolveDateColumnIndex(DeliveryImportBatch $batch, array $materialPivotConfig): int
+    {
+        $types = config('delivery_report.report_types', []);
+        if ($batch->report_type && isset($types[$batch->report_type]['date_only_column_indices'])) {
+            $indices = $types[$batch->report_type]['date_only_column_indices'];
+            if ($indices !== [] && isset($indices[0])) {
+                return (int) $indices[0];
+            }
+        }
+
+        $expectedHeaders = $this->getExpectedHeadersForBatch($batch);
+        $tarihIndex = array_search('Tarih', $expectedHeaders, true);
+        if ($tarihIndex !== false) {
+            return (int) $tarihIndex;
+        }
+
+        return (int) ($materialPivotConfig['date_index'] ?? 0);
+    }
+
+    /**
      * Malzeme Pivot Tablosu (Cemiloglu uyumlu): Tarih x Malzeme.
      * Hücre = Geçerli Miktar (ilk). BOŞ-DOLU / DOLU-DOLU Klinker-Cüruf-Petrokok formülü ile hesaplanır.
      *
@@ -47,7 +85,7 @@ class DeliveryReportPivotService
         $config = $this->getReportTypeConfig($batch);
         $mp = $config['material_pivot'] ?? null;
 
-        if (! $mp || ! isset($mp['date_index'], $mp['material_code_index'], $mp['quantity_index'])) {
+        if (! $mp || ! isset($mp['material_code_index'], $mp['quantity_index'])) {
             return [
                 'dates' => [],
                 'materials' => [],
@@ -56,7 +94,7 @@ class DeliveryReportPivotService
             ];
         }
 
-        $dateIndex = (int) $mp['date_index'];
+        $dateIndex = $this->resolveDateColumnIndex($batch, $mp);
         $materialCodeIndex = (int) $mp['material_code_index'];
         $materialShortIndex = isset($mp['material_short_text_index']) ? (int) $mp['material_short_text_index'] : null;
         $quantityIndex = (int) $mp['quantity_index'];
@@ -375,16 +413,17 @@ class DeliveryReportPivotService
             }
         }
 
-        if ($numericValue !== null && $numericValue >= 1 && $numericValue < 2958466 && class_exists(\PhpOffice\PhpSpreadsheet\Shared\Date::class)) {
+        if ($numericValue !== null && $numericValue >= 1000 && $numericValue < 2958466 && class_exists(\PhpOffice\PhpSpreadsheet\Shared\Date::class)) {
+            $tz = new \DateTimeZone('Europe/Istanbul');
             $prev = \PhpOffice\PhpSpreadsheet\Shared\Date::getExcelCalendar();
             \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar(\PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_WINDOWS_1900);
             try {
-                $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($numericValue);
+                $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($numericValue, $tz);
                 $year = (int) $dt->format('Y');
                 $nowYear = (int) date('Y');
                 if ($year > $nowYear + 1 || $year < $nowYear - 2) {
                     \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar(\PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_MAC_1904);
-                    $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($numericValue);
+                    $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($numericValue, $tz);
                 }
 
                 return $dt->format('d.m.Y');
@@ -394,22 +433,54 @@ class DeliveryReportPivotService
             }
         }
 
-        $dt = \DateTime::createFromFormat('d.m.Y g:i:s A', $value)
-            ?: \DateTime::createFromFormat('d.m.Y g:i A', $value)
-            ?: \DateTime::createFromFormat('d.m.Y H:i', $value)
-            ?: \DateTime::createFromFormat('d.m.Y H:i:s', $value)
-            ?: \DateTime::createFromFormat('d.m.Y', $value)
-            ?: \DateTime::createFromFormat('Y-m-d', $value)
-            ?: \DateTime::createFromFormat('d/m/Y', $value)
-            ?: \DateTime::createFromFormat('m/d/Y', $value)
-            ?: \DateTime::createFromFormat('n/j/Y', $value)
-            ?: @\DateTime::createFromFormat('Y-m-d H:i:s', $value);
-        if ($dt) {
-            return $dt->format('d.m.Y');
+        $formats = [
+            'j.n.Y H:i:s',
+            'j.n.Y H:i',
+            'j.n.Y g:i:s A',
+            'j.n.Y',
+            'd.m.Y g:i:s A',
+            'd.m.Y g:i A',
+            'd.m.Y H:i',
+            'd.m.Y H:i:s',
+            'd.m.Y',
+            'Y-m-d H:i:s',
+            'Y-m-d',
+            'n/j/Y',
+            'm/d/Y',
+            'j/n/Y',
+            'd/m/Y',
+        ];
+        if (str_contains($value, '/')) {
+            $formatsSlashFirst = ['n/j/Y', 'm/d/Y', 'n/j/Y H:i:s', 'm/d/Y H:i:s', 'j/n/Y', 'd/m/Y'];
+            foreach ($formatsSlashFirst as $fmt) {
+                $dt = @\DateTime::createFromFormat($fmt, $value);
+                if ($dt !== false) {
+                    return $dt->format('d.m.Y');
+                }
+            }
+        }
+        foreach ($formats as $fmt) {
+            $dt = @\DateTime::createFromFormat($fmt, $value);
+            if ($dt !== false) {
+                return $dt->format('d.m.Y');
+            }
         }
 
-        if (preg_match('/^(\d{1,2}\.\d{1,2}\.\d{4})/', $value, $m)) {
-            return $m[1];
+        if (preg_match('/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s|$)/', $value, $m)) {
+            $d = (int) $m[1];
+            $mo = (int) $m[2];
+            $y = (int) $m[3];
+            if ($d >= 1 && $d <= 31 && $mo >= 1 && $mo <= 12 && $y >= 1900 && $y <= 2100) {
+                return sprintf('%02d.%02d.%04d', $d, $mo, $y);
+            }
+        }
+
+        try {
+            $parsed = \Carbon\Carbon::parse($value);
+            if ($parsed->year >= 1900 && $parsed->year <= 2100) {
+                return $parsed->format('d.m.Y');
+            }
+        } catch (\Throwable) {
         }
 
         return $value;

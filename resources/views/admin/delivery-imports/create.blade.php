@@ -6,7 +6,7 @@
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
         <h2 class="h3 fw-bold text-dark mb-1">Yeni Teslimat Raporu</h2>
-        <p class="text-secondary mb-0">Excel dosyası ile teslimat raporu yükleyin</p>
+        <p class="text-secondary mb-0">7 günlük Excel teslimat raporunuzu yükleyin. İşlem tamamlandıktan sonra rapor detayından <strong>Malzeme Pivot</strong> ile tarih bazlı özeti görüntüleyebilirsiniz.</p>
     </div>
     <div class="d-flex align-items-center gap-2">
         <a href="{{ route('admin.delivery-imports.template') }}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
