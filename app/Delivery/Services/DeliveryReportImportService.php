@@ -149,6 +149,192 @@ class DeliveryReportImportService
     }
 
     /**
+     * Rapor tipine göre sadece tarih (saat gösterme) kolon index'lerini döndürür (detay/export'ta d.m.Y).
+     *
+     * @return array<int, int>
+     */
+    protected function getDateOnlyColumnIndicesForBatch(DeliveryImportBatch $batch): array
+    {
+        $types = config('delivery_report.report_types', []);
+        if (! $batch->report_type || ! isset($types[$batch->report_type]['date_only_column_indices'])) {
+            return [];
+        }
+
+        return $types[$batch->report_type]['date_only_column_indices'];
+    }
+
+    /**
+     * Tek bir satırın row_data'sını Teslimat Raporu Detayı listesindeki gibi formatlar.
+     * Tarih/saat kolonları d.m.Y, g:i:s A vb.; diğer kolonlarda tarih benzeri string'ler dd.mm.yyyy'ye normalize edilir.
+     *
+     * @param  array<int, mixed>  $rowData
+     * @return array<int, string>
+     */
+    public function formatRowDataForDisplay(DeliveryImportBatch $batch, array $rowData): array
+    {
+        $dateColumnIndices = $this->getDateColumnExpectedIndicesForBatch($batch);
+        $timeColumnIndices = $this->getTimeColumnExpectedIndicesForBatch($batch);
+        $dateOnlyColumnIndices = $this->getDateOnlyColumnIndicesForBatch($batch);
+
+        $out = [];
+        foreach ($rowData as $idx => $val) {
+            if (in_array($idx, $dateColumnIndices, true) || in_array($idx, $timeColumnIndices, true)) {
+                $out[$idx] = $this->formatDateForDisplay($val, $idx, $dateColumnIndices, $timeColumnIndices, $dateOnlyColumnIndices);
+            } else {
+                $v = $val;
+                if ($v !== '' && $v !== null && preg_match('/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/', trim((string) $v))) {
+                    $v = $this->normalizeAnyDateToDmY($v);
+                }
+                $out[$idx] = $v === null || $v === '' ? '' : (string) $v;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Tarih benzeri string'i dd.mm.yyyy formatına normalize eder (liste/export ile uyumlu).
+     */
+    protected function normalizeAnyDateToDmY(mixed $value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+        $str = trim((string) $value);
+        if ($str === '') {
+            return '';
+        }
+        $datePart = preg_replace('/\s+.*$/', '', $str);
+        if (! preg_match('/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/', $datePart)) {
+            return $str;
+        }
+        $sep = strpos($datePart, '/') !== false ? '/' : '-';
+        $parts = array_map('intval', explode($sep, $datePart));
+        if (count($parts) !== 3 || $parts[2] < 1900 || $parts[2] > 2100) {
+            return $str;
+        }
+        $a = $parts[0];
+        $b = $parts[1];
+        $y = $parts[2];
+        if ($a > 12) {
+            $d = $a;
+            $m = $b;
+        } elseif ($b > 12) {
+            $m = $a;
+            $d = $b;
+        } else {
+            $m = $a;
+            $d = $b;
+        }
+        if ($m < 1 || $m > 12 || $d < 1 || $d > 31) {
+            return $str;
+        }
+
+        return sprintf('%02d.%02d.%04d', $d, $m, $y);
+    }
+
+    /**
+     * Tek bir hücre değerini detay sayfasındaki tarih/saat formatına çevirir.
+     *
+     * @param  array<int, int>  $dateColumnIndices
+     * @param  array<int, int>  $timeColumnIndices
+     * @param  array<int, int>  $dateOnlyColumnIndices
+     */
+    protected function formatDateForDisplay(
+        mixed $value,
+        int $colIndex,
+        array $dateColumnIndices,
+        array $timeColumnIndices,
+        array $dateOnlyColumnIndices
+    ): string {
+        $isTime = in_array($colIndex, $timeColumnIndices, true);
+        $isDate = in_array($colIndex, $dateColumnIndices, true);
+        $dateOnly = in_array($colIndex, $dateOnlyColumnIndices, true);
+        if (! $isTime && ! $isDate) {
+            return $value === null || $value === '' ? '' : (string) $value;
+        }
+        if ($value === null || $value === '') {
+            return '';
+        }
+        if (is_numeric($value) && class_exists(\PhpOffice\PhpSpreadsheet\Shared\Date::class)) {
+            $num = (float) $value;
+            $prev = \PhpOffice\PhpSpreadsheet\Shared\Date::getExcelCalendar();
+            $lastDt = null;
+            $tz = new \DateTimeZone('Europe/Istanbul');
+            try {
+                foreach ([\PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_WINDOWS_1900, \PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_MAC_1904] as $cal) {
+                    \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($cal);
+                    $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($num, $tz);
+                    $lastDt = $dt;
+                    $year = (int) $dt->format('Y');
+                    if ($year >= 1990 && $year <= 2030) {
+                        \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($prev);
+                        if ($isTime) {
+                            return $dt->format('g:i:s A');
+                        }
+                        if ($dateOnly) {
+                            return $dt->format('d.m.Y');
+                        }
+                        $hasTime = (int) $dt->format('His') !== 0;
+
+                        return $hasTime ? $dt->format('d.m.Y g:i:s A') : $dt->format('d.m.Y');
+                    }
+                }
+                \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($prev);
+                if ($lastDt !== null) {
+                    if ($isTime) {
+                        return $lastDt->format('g:i:s A');
+                    }
+                    if ($dateOnly) {
+                        return $lastDt->format('d.m.Y');
+                    }
+                    $hasTime = (int) $lastDt->format('His') !== 0;
+
+                    return $hasTime ? $lastDt->format('d.m.Y g:i:s A') : $lastDt->format('d.m.Y');
+                }
+            } catch (\Throwable $e) {
+                \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($prev);
+            }
+        }
+        $str = trim((string) $value);
+        $formats = ['j.n.Y H:i:s', 'j.n.Y H:i', 'j.n.Y g:i:s A', 'j.n.Y', 'd.m.Y', 'd.m.Y H:i', 'd.m.Y g:i:s A', 'Y-m-d', 'Y-m-d H:i:s', 'n/j/Y', 'm/d/Y', 'n-j-Y', 'm-d-Y'];
+        foreach ($formats as $fmt) {
+            try {
+                $parsed = \Carbon\Carbon::createFromFormat($fmt, $str);
+                if ($parsed !== false) {
+                    if ($isTime) {
+                        return $parsed->format('g:i:s A');
+                    }
+                    if ($dateOnly) {
+                        return $parsed->format('d.m.Y');
+                    }
+                    $hasTime = $parsed->format('His') !== '000000';
+
+                    return $hasTime ? $parsed->format('d.m.Y g:i:s A') : $parsed->format('d.m.Y');
+                }
+            } catch (\Carbon\Exceptions\InvalidFormatException $e) {
+                continue;
+            } catch (\Throwable $e) {
+                continue;
+            }
+        }
+        try {
+            $parsed = \Carbon\Carbon::parse($value);
+            if ($isTime) {
+                return $parsed->format('g:i:s A');
+            }
+            if ($dateOnly) {
+                return $parsed->format('d.m.Y');
+            }
+            $hasTime = $parsed->format('His') !== '000000';
+
+            return $hasTime ? $parsed->format('d.m.Y g:i:s A') : $parsed->format('d.m.Y');
+        } catch (\Throwable $e) {
+            return (string) $value;
+        }
+    }
+
+    /**
      * Rapor tipine göre sayısal kolon expected index'lerini döndürür (TR 1.234,56 → 1234.56 saklanır).
      *
      * @return array<int, int>

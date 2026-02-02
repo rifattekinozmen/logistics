@@ -258,23 +258,26 @@ class DeliveryImportController extends Controller
         $query = $batch->reportRows()->orderBy('row_index');
         $rows = $query->get();
 
-        $dataRows = $rows->map(fn (DeliveryReportRow $row) => $row->row_data ?? [])->all();
-
         $baseName = pathinfo($batch->file_name, PATHINFO_FILENAME).'_rapor_'.now()->format('Y-m-d_His');
 
-        if ($format === 'csv') {
-            $rowsArray = $rows->map(fn (DeliveryReportRow $row) => array_merge([$row->row_index], $row->row_data ?? []))->all();
+        $formattedRows = $rows->map(function (DeliveryReportRow $row) use ($reportImportService, $batch): array {
+            $rowData = $row->row_data ?? [];
+            $formatted = $reportImportService->formatRowDataForDisplay($batch, $rowData);
 
+            return array_merge([$row->row_index], $formatted);
+        })->all();
+
+        if ($format === 'csv') {
             return app(ExportService::class)->csv(
                 array_merge(['#'], $expectedHeaders),
-                $rowsArray,
+                $formattedRows,
                 $baseName.'.csv'
             );
         }
 
         $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->fromArray(array_merge([array_merge(['#'], $expectedHeaders)], $rows->map(fn (DeliveryReportRow $r) => array_merge([$r->row_index], $r->row_data ?? []))->all()), null, 'A1');
+        $sheet->fromArray(array_merge([array_merge(['#'], $expectedHeaders)], $formattedRows), null, 'A1');
 
         $writer = new XlsxWriter($spreadsheet);
         $filename = $baseName.'.xlsx';
