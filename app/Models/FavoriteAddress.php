@@ -16,6 +16,8 @@ class FavoriteAddress extends Model
         'name',
         'type',
         'address',
+        'latitude',
+        'longitude',
         'contact_name',
         'contact_phone',
         'notes',
@@ -25,6 +27,8 @@ class FavoriteAddress extends Model
     protected function casts(): array
     {
         return [
+            'latitude' => 'decimal:8',
+            'longitude' => 'decimal:8',
             'sort_order' => 'integer',
         ];
     }

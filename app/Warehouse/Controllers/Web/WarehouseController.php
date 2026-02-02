@@ -88,7 +88,7 @@ class WarehouseController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'branch_id' => 'required|exists:branches,id',
+            'branch_id' => 'nullable|exists:branches,id',
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50|unique:warehouses,code',
             'address' => 'nullable|string|max:1000',
@@ -130,7 +130,7 @@ class WarehouseController extends Controller
         $warehouse = \App\Models\Warehouse::findOrFail($id);
 
         $validated = $request->validate([
-            'branch_id' => 'required|exists:branches,id',
+            'branch_id' => 'nullable|exists:branches,id',
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50|unique:warehouses,code,' . $warehouse->id,
             'address' => 'nullable|string|max:1000',

@@ -32,7 +32,7 @@
                 <dd class="col-sm-8">{{ $warehouse->code ?? '-' }}</dd>
 
                 <dt class="col-sm-4">Şube</dt>
-                <dd class="col-sm-8">{{ $warehouse->branch->name ?? '-' }}</dd>
+                <dd class="col-sm-8">{{ $warehouse->branch?->name ?? 'Merkez' }}</dd>
 
                 <dt class="col-sm-4">Adres</dt>
                 <dd class="col-sm-8">{{ $warehouse->address ?? '-' }}</dd>

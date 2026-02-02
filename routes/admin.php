@@ -159,7 +159,12 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     Route::middleware('permission:order.view')->resource('orders', OrderController::class);
 
     // Customers
-    Route::middleware('permission:customer.view')->resource('customers', CustomerController::class);
+    Route::middleware('permission:customer.view')->group(function () {
+        Route::resource('customers', CustomerController::class);
+        Route::post('customers/{customer}/favorite-addresses', [CustomerController::class, 'storeFavoriteAddress'])->name('customers.favorite-addresses.store');
+        Route::put('customers/{customer}/favorite-addresses/{favoriteAddress}', [CustomerController::class, 'updateFavoriteAddress'])->name('customers.favorite-addresses.update');
+        Route::delete('customers/{customer}/favorite-addresses/{favoriteAddress}', [CustomerController::class, 'destroyFavoriteAddress'])->name('customers.favorite-addresses.destroy');
+    });
 
     // Shipments
     Route::middleware('permission:shipment.view')->resource('shipments', ShipmentController::class);

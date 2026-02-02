@@ -26,7 +26,9 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('admin.dashboard');
     })->name('dashboard');
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-    
+
+    Route::get('geocode/reverse', [\App\Http\Controllers\GeocodingController::class, 'reverse'])->name('geocode.reverse');
+
     Route::resource('personel', PersonelController::class);
 });
 

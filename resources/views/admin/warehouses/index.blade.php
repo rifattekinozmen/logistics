@@ -84,7 +84,7 @@
                         <small class="text-secondary">{{ $warehouse->code ?? '-' }}</small>
                     </td>
                     <td class="align-middle">
-                        <small class="text-secondary">{{ $warehouse->branch->name ?? '-' }}</small>
+                        <small class="text-secondary">{{ $warehouse->branch?->name ?? 'Merkez' }}</small>
                     </td>
                     <td class="align-middle">
                         <small class="text-secondary">{{ Str::limit($warehouse->address, 30) }}</small>

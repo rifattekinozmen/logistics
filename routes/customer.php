@@ -85,6 +85,9 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::delete('/favorite-addresses/{favoriteAddress}', [CustomerPortalController::class, 'deleteFavoriteAddress'])
         ->middleware('permission:customer.portal.favorite-addresses.manage')
         ->name('favorite-addresses.destroy');
+    Route::get('/favorite-addresses/geocode', [CustomerPortalController::class, 'geocodeAddress'])
+        ->middleware('permission:customer.portal.favorite-addresses.manage')
+        ->name('favorite-addresses.geocode');
     
     // Sipariş Şablonları
     Route::get('/order-templates', [CustomerPortalController::class, 'orderTemplates'])

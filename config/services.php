@@ -44,4 +44,20 @@ return [
         'endpoint' => env('PYTHON_BRIDGE_ENDPOINT', 'http://localhost:8001/api/process'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Geocoding (Adres -> Enlem/Boylam)
+    |--------------------------------------------------------------------------
+    | provider: nominatim (OpenStreetMap, ücretsiz) veya google (API key gerekir)
+    | Nominatim: rate limit 1 istek/saniye; user_agent ve email önerilir
+    */
+    'geocoding' => [
+        'provider' => env('GEOCODING_PROVIDER', 'nominatim'),
+        'nominatim_url' => env('GEOCODING_NOMINATIM_URL', 'https://nominatim.openstreetmap.org/search'),
+        'nominatim_reverse_url' => env('GEOCODING_NOMINATIM_REVERSE_URL', 'https://nominatim.openstreetmap.org/reverse'),
+        'nominatim_email' => env('GEOCODING_NOMINATIM_EMAIL', ''),
+        'google_api_key' => env('GOOGLE_MAPS_GEOCODING_API_KEY'),
+        'user_agent' => env('GEOCODING_USER_AGENT', env('APP_NAME', 'Laravel').'/1.0'),
+    ],
+
 ];

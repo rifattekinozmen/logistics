@@ -20,15 +20,16 @@
 
         <div class="row g-4">
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">Şube <span class="text-danger">*</span></label>
-                <select name="branch_id" class="form-select border-success-200 focus:border-success focus:ring-success @error('branch_id') is-invalid border-danger @enderror" required>
-                    <option value="">Şube Seçin</option>
+                <label class="form-label fw-semibold text-dark">Şube</label>
+                <select name="branch_id" class="form-select border-success-200 focus:border-success focus:ring-success @error('branch_id') is-invalid border-danger @enderror">
+                    <option value="">Merkez depo (şube yok)</option>
                     @foreach($branches ?? [] as $branch)
                     <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
                         {{ $branch->name }}
                     </option>
                     @endforeach
                 </select>
+                <small class="text-secondary">Boş bırakılırsa merkez depo olarak kaydedilir.</small>
                 @error('branch_id')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror

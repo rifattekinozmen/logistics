@@ -9,8 +9,10 @@ use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\FavoriteAddress;
 use App\Models\OrderTemplate;
+use App\Core\Services\GeocodingService;
 use App\Order\Services\OrderService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +22,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class CustomerPortalController extends Controller
 {
     public function __construct(
-        protected OrderService $orderService
+        protected OrderService $orderService,
+        protected GeocodingService $geocodingService
     ) {}
 
     /**
@@ -842,6 +845,8 @@ class CustomerPortalController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:pickup,delivery,both',
             'address' => 'required|string|max:1000',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'contact_name' => 'nullable|string|max:255',
             'contact_phone' => 'nullable|string|max:20',
             'notes' => 'nullable|string',
@@ -873,6 +878,30 @@ class CustomerPortalController extends Controller
         $favoriteAddress->delete();
 
         return back()->with('success', 'Favori adres başarıyla silindi.');
+    }
+
+    /**
+     * Adres metninden enlem/boylam getirir (geocoding). Müşteri portalı formu için.
+     */
+    public function geocodeAddress(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        if (! $user->hasPermission('customer.portal.favorite-addresses.manage')) {
+            abort(403, 'Favori adresler yönetme yetkiniz bulunmamaktadır.');
+        }
+
+        $address = $request->input('address', '');
+        $address = is_string($address) ? trim($address) : '';
+        if ($address === '') {
+            return response()->json(['message' => 'Adres boş olamaz.'], 422);
+        }
+
+        $result = $this->geocodingService->geocode($address);
+        if ($result === null) {
+            return response()->json(['message' => 'Bu adres için konum bulunamadı.'], 404);
+        }
+
+        return response()->json($result);
     }
 
     /**

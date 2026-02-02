@@ -65,6 +65,7 @@
                     <th class="border-0 fw-semibold text-secondary small">E-posta</th>
                     <th class="border-0 fw-semibold text-secondary small">Telefon</th>
                     <th class="border-0 fw-semibold text-secondary small">Vergi No</th>
+                    <th class="border-0 fw-semibold text-secondary small">Favori / Teslimat Adresleri</th>
                     <th class="border-0 fw-semibold text-secondary small">Durum</th>
                     <th class="border-0 fw-semibold text-secondary small text-end">İşlemler</th>
                 </tr>
@@ -83,6 +84,16 @@
                     </td>
                     <td class="align-middle">
                         <small class="text-secondary">{{ $customer->tax_number ?? '-' }}</small>
+                    </td>
+                    <td class="align-middle">
+                        @if($customer->favorite_addresses_count > 0)
+                            <a href="{{ route('admin.customers.show', $customer->id) }}#favorite-addresses" class="badge bg-primary-200 text-primary px-3 py-2 rounded-pill fw-semibold text-decoration-none">
+                                <span class="material-symbols-outlined align-middle" style="font-size: 0.875rem;">location_on</span>
+                                {{ $customer->favorite_addresses_count }} adres
+                            </a>
+                        @else
+                            <span class="text-secondary small">-</span>
+                        @endif
                     </td>
                     <td class="align-middle">
                         @if($customer->status == 1)
@@ -111,7 +122,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-5">
+                    <td colspan="7" class="text-center py-5">
                         <div class="d-flex flex-column align-items-center gap-2">
                             <span class="material-symbols-outlined text-secondary" style="font-size: 3rem;">people</span>
                             <p class="text-secondary mb-0">Henüz müşteri bulunmuyor.</p>
