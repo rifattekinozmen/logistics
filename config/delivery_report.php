@@ -13,6 +13,26 @@ return [
         'endustriyel_hammadde' => [
             'label' => 'Endüstriyel Hammadde',
             /*
+             * Import: Tarih sütunları takvime göre (1900/1904) d.m.Y veya d.m.Y 9:02:54 AM formatında.
+             * Index = expected headers (4 = Tarih, 58 = Araç Giriş Tarihi, 60 = Araç Çıkış Tarihi, 67 = Nakliye İrs. Tarihi).
+             */
+            'date_column_expected_indices' => [4, 58, 60, 67],
+            /*
+             * Sadece tarih (saat gösterme): Detay sayfasında bu kolonlar her zaman d.m.Y olarak gösterilir.
+             * 4 = Tarih.
+             */
+            'date_only_column_indices' => [4],
+            /*
+             * Saat sütunları: Excel seri → 9:02:54 AM (g:i:s A) formatında.
+             * 59 = Araç Giriş Saati, 61 = Araç Çıkış Saati.
+             */
+            'time_column_expected_indices' => [59, 61],
+            /*
+             * Sayısal kolonlar: TR formatı (1.234,56) → nokta ondalık (1234.56) olarak saklanır.
+             * 14 = Dolu Ağırlık, 15 = Boş Ağırlık, 16/18 = Geçerli Miktar, 26 = Toplam Rutubet, 27 = Teslimat miktarı, 36 = Firma Miktarı.
+             */
+            'numeric_column_expected_indices' => [14, 15, 16, 18, 26, 27, 36],
+            /*
              * Excel'de bazen "Araç Çıkış Saati" yerine "Araç Çıkış Tarihi" başlığı kullanılıyor.
              * Bu sütunun "Araç Çıkış Saati" olarak eşlenmesi için alias tanımlanır.
              */
@@ -70,9 +90,64 @@ return [
                 'Belge kalemi',
                 'İleti tipi',
             ],
+            /*
+             * Pivot özet: Hangi sütun index'leri boyut (gruplama), hangileri metrik (toplam/adet).
+             * key = config'teki header index (int), value = 'sum' | 'count' (metrik) veya boyut adı.
+             */
+            'pivot_dimensions' => [
+                4 => 'Tarih',
+                38 => 'Firma',
+                12 => 'Malzeme',
+                31 => 'İrsaliye No',
+                37 => 'Plaka',
+            ],
+            'pivot_metrics' => [
+                27 => 'sum',   // Teslimat miktarı
+                16 => 'sum',   // Geçerli Miktar (ilk)
+                'rows' => 'count',
+            ],
+            'pivot_metric_labels' => [
+                27 => 'Teslimat miktarı',
+                16 => 'Geçerli Miktar',
+                'rows' => 'Satır sayısı',
+            ],
+            /*
+             * Fatura kalemleri: row_data index => fatura alan adı (Logo/e-Fatura uyumlu).
+             */
+            'invoice_line_mapping' => [
+                'malzeme_kodu' => 12,
+                'malzeme_adi' => 13,
+                'miktar' => 27,
+                'birim' => 17,
+                'irsaliye_no' => 31,
+                'irsaliye_seri' => 30,
+                'tarih' => 4,
+                'firma' => 38,
+                'plaka' => 37,
+                'teslimat' => 25,
+                'satin alma belgesi' => 0,
+                'kalem' => 1,
+            ],
+            /*
+             * Malzeme Pivot Tablosu (Cemiloglu uyumlu): Tarih x Malzeme.
+             * Hücre değeri = gecerli_miktar_1 (ilk Geçerli Miktar). BOŞ-DOLU/DOLU-DOLU formülle hesaplanır.
+             */
+            'material_pivot' => [
+                'date_index' => 4,
+                'material_code_index' => 12,
+                'material_short_text_index' => 13,
+                'quantity_index' => 16,
+                'dolu_agirlik_index' => 14,
+                'bos_agirlik_index' => 15,
+                'gecerli_miktar_2_index' => 18,
+                'firma_miktari_index' => 36,
+            ],
         ],
         'dokme_cimento' => [
             'label' => 'Dökme Çimento',
+            'date_column_expected_indices' => [2, 13],
+            'date_only_column_indices' => [2],
+            'numeric_column_expected_indices' => [7],
             'headers' => [
                 'Satınalma belgesi',
                 'Kalem',
@@ -88,6 +163,40 @@ return [
                 'Firma',
                 'İrsaliye No',
                 'Tarih/Saat',
+            ],
+            'pivot_dimensions' => [
+                2 => 'Tarih',
+                11 => 'Firma',
+                5 => 'Malzeme',
+                12 => 'İrsaliye No',
+                10 => 'Plaka',
+            ],
+            'pivot_metrics' => [
+                7 => 'sum',
+                'rows' => 'count',
+            ],
+            'pivot_metric_labels' => [
+                7 => 'Miktar',
+                'rows' => 'Satır sayısı',
+            ],
+            'invoice_line_mapping' => [
+                'malzeme_kodu' => 5,
+                'malzeme_adi' => 6,
+                'miktar' => 7,
+                'birim' => 8,
+                'irsaliye_no' => 12,
+                'tarih' => 2,
+                'firma' => 11,
+                'plaka' => 10,
+                'teslimat' => 9,
+            ],
+            'material_pivot' => [
+                'date_index' => 2,
+                'material_code_index' => 5,
+                'material_short_text_index' => 6,
+                'quantity_index' => 7,
+                'boş_dolu_quantity_index' => null,
+                'dolu_dolu_quantity_index' => null,
             ],
         ],
     ],

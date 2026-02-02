@@ -30,6 +30,10 @@
             </a>
         @endif
         @if(!($migrationMissing ?? false) && $reportRows->total() > 0)
+            <a href="{{ route('admin.delivery-imports.material-pivot', $batch) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:1rem">table_chart</span>
+                Malzeme Pivot
+            </a>
             <a href="{{ route('admin.delivery-imports.export', [$batch, 'format' => 'xlsx']) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
                 <span class="material-symbols-outlined" style="font-size:1rem">download</span>
                 Excel
@@ -144,11 +148,145 @@
     </label>
 </form>
 
+@php
+    $dateColumnIndices = $dateColumnIndices ?? [];
+    $timeColumnIndices = $timeColumnIndices ?? [];
+    $dateOnlyColumnIndices = $dateOnlyColumnIndices ?? [];
+    $normalizeAnyDateToDmY = function ($value) {
+        if ($value === null || $value === '') {
+            return '';
+        }
+        $str = trim((string) $value);
+        if ($str === '') {
+            return '';
+        }
+        $datePart = preg_replace('/\s+.*$/', '', $str);
+        if (! preg_match('/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/', $datePart)) {
+            return $str;
+        }
+        $sep = strpos($datePart, '/') !== false ? '/' : '-';
+        $parts = array_map('intval', explode($sep, $datePart));
+        if (count($parts) !== 3 || $parts[2] < 1900 || $parts[2] > 2100) {
+            return $str;
+        }
+        $a = $parts[0];
+        $b = $parts[1];
+        $y = $parts[2];
+        if ($a > 12) {
+            $d = $a;
+            $m = $b;
+        } elseif ($b > 12) {
+            $m = $a;
+            $d = $b;
+        } else {
+            $m = $a;
+            $d = $b;
+        }
+        if ($m < 1 || $m > 12 || $d < 1 || $d > 31) {
+            return $str;
+        }
+
+        return sprintf('%02d.%02d.%04d', $d, $m, $y);
+    };
+    $formatDateForDisplay = function ($value, $colIndex) use ($dateColumnIndices, $timeColumnIndices, $dateOnlyColumnIndices) {
+        $isTime = in_array($colIndex, $timeColumnIndices, true);
+        $isDate = in_array($colIndex, $dateColumnIndices, true);
+        $dateOnly = in_array($colIndex, $dateOnlyColumnIndices, true);
+        if (! $isTime && ! $isDate) {
+            return $value === null || $value === '' ? '' : (string) $value;
+        }
+        if ($value === null || $value === '') {
+            return '';
+        }
+        if (is_numeric($value) && class_exists(\PhpOffice\PhpSpreadsheet\Shared\Date::class)) {
+            $num = (float) $value;
+            $prev = \PhpOffice\PhpSpreadsheet\Shared\Date::getExcelCalendar();
+            $lastDt = null;
+            try {
+                foreach ([\PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_WINDOWS_1900, \PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_MAC_1904] as $cal) {
+                    \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($cal);
+                    $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($num);
+                    $lastDt = $dt;
+                    $year = (int) $dt->format('Y');
+                    if ($year >= 1990 && $year <= 2030) {
+                        \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($prev);
+                        if ($isTime) {
+                            return $dt->format('g:i:s A');
+                        }
+                        if ($dateOnly) {
+                            return $dt->format('d.m.Y');
+                        }
+                        $hasTime = (int) $dt->format('His') !== 0;
+
+                        return $hasTime ? $dt->format('d.m.Y g:i:s A') : $dt->format('d.m.Y');
+                    }
+                }
+                \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($prev);
+                if ($lastDt !== null) {
+                    if ($isTime) {
+                        return $lastDt->format('g:i:s A');
+                    }
+                    if ($dateOnly) {
+                        return $lastDt->format('d.m.Y');
+                    }
+                    $hasTime = (int) $lastDt->format('His') !== 0;
+
+                    return $hasTime ? $lastDt->format('d.m.Y g:i:s A') : $lastDt->format('d.m.Y');
+                }
+            } catch (\Throwable $e) {
+                \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($prev);
+            }
+        }
+        $str = trim((string) $value);
+        $formats = ['n/j/Y', 'm/d/Y', 'n-j-Y', 'm-d-Y', 'd.m.Y', 'd.m.Y H:i', 'd.m.Y g:i:s A', 'Y-m-d', 'Y-m-d H:i:s'];
+        foreach ($formats as $fmt) {
+            $parsed = @\Carbon\Carbon::createFromFormat($fmt, $str);
+            if ($parsed !== false) {
+                if ($isTime) {
+                    return $parsed->format('g:i:s A');
+                }
+                if ($dateOnly) {
+                    return $parsed->format('d.m.Y');
+                }
+                $hasTime = $parsed->format('His') !== '000000';
+
+                return $hasTime ? $parsed->format('d.m.Y g:i:s A') : $parsed->format('d.m.Y');
+            }
+        }
+        try {
+            $parsed = \Carbon\Carbon::parse($value);
+            if ($isTime) {
+                return $parsed->format('g:i:s A');
+            }
+            if ($dateOnly) {
+                return $parsed->format('d.m.Y');
+            }
+            $hasTime = $parsed->format('His') !== '000000';
+
+            return $hasTime ? $parsed->format('d.m.Y g:i:s A') : $parsed->format('d.m.Y');
+        } catch (\Throwable $e) {
+            return (string) $value;
+        }
+    };
+@endphp
 @if(!($migrationMissing ?? false) && $reportRows->total() > 0)
     @php
         $rowDetailsMap = [];
         foreach ($reportRows as $r) {
-            $rowDetailsMap[$r->row_index] = $r->row_data ?? [];
+            $rowData = $r->row_data ?? [];
+            $out = [];
+            foreach ($rowData as $idx => $val) {
+                if (in_array($idx, $dateColumnIndices, true) || in_array($idx, $timeColumnIndices, true)) {
+                    $out[$idx] = $formatDateForDisplay($val, $idx);
+                } else {
+                    $v = $val;
+                    if ($v !== '' && $v !== null && preg_match('/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/', trim((string) $v))) {
+                        $v = $normalizeAnyDateToDmY($v);
+                    }
+                    $out[$idx] = $v;
+                }
+            }
+            $rowDetailsMap[$r->row_index] = $out;
         }
     @endphp
     <script type="application/json" id="row-details-data">{!! str_replace('</script>', '<\/script>', json_encode($rowDetailsMap)) !!}</script>
@@ -163,13 +301,13 @@
                         $currentDir = request('direction', 'asc');
                         $url = fn($col) => route('admin.delivery-imports.show', [$batch, 'search' => request('search'), 'sort' => $col, 'direction' => ($currentSort == $col && $currentDir === 'asc') ? 'desc' : 'asc', 'per_page' => $perPage ?? 25]);
                     @endphp
-                    <th class="border-0 small text-secondary fw-semibold text-nowrap">
-                        <a href="{{ $url(-1) }}" class="text-decoration-none text-secondary" title="Sıra (sıralama: Excel satır no)">Sıra</a>
+                    <th class="border-0 small fw-semibold text-nowrap text-dark">
+                        <a href="{{ $url(-1) }}" class="text-decoration-none text-dark" title="Sıra (sıralama: Excel satır no)">Sıra</a>
                         @if((int) $currentSort === -1)<span class="material-symbols-outlined small align-middle">{{ $currentDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@endif
                     </th>
                     @foreach($expectedHeaders as $colIndex => $header)
-                        <th class="border-0 small text-secondary fw-semibold text-nowrap">
-                            <a href="{{ $url($colIndex) }}" class="text-decoration-none text-secondary" title="{{ $header }} — Sırala">{{ Str::limit($header, 15) }}</a>
+                        <th class="border-0 small fw-semibold text-dark" style="white-space: normal; min-width: 6rem;">
+                            <a href="{{ $url($colIndex) }}" class="text-decoration-none text-dark" title="{{ $header }} — Sırala">{{ $header }}</a>
                             @if((int) $currentSort === $colIndex)<span class="material-symbols-outlined small align-middle">{{ $currentDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@endif
                         </th>
                     @endforeach
@@ -193,10 +331,21 @@
                         data-bs-toggle="modal"
                         data-bs-target="#rowDetailModal"
                         title="{{ $isErrorRow ? 'Hatalı satır — Detay için tıklayın' : 'Satır detayı için tıklayın' }}">
-                        <td class="align-middle small text-secondary" title="Excel satır: {{ $reportRow->row_index }}">{{ ($reportRows->currentPage() - 1) * $reportRows->perPage() + $loop->iteration }}</td>
+                        <td class="align-middle small text-body" title="Excel satır: {{ $reportRow->row_index }}">{{ ($reportRows->currentPage() - 1) * $reportRows->perPage() + $loop->iteration }}</td>
                         @foreach($expectedHeaders as $colIndex => $header)
-                            <td class="align-middle small text-nowrap" title="{{ $reportRow->row_data[$colIndex] ?? '' }}">
-                                {{ Str::limit($reportRow->row_data[$colIndex] ?? '', 30) }}
+                            @php
+                                $raw = $reportRow->row_data[$colIndex] ?? '';
+                                if (in_array($colIndex, $dateColumnIndices, true) || in_array($colIndex, $timeColumnIndices, true)) {
+                                    $display = $formatDateForDisplay($raw, $colIndex);
+                                } else {
+                                    $display = (string) $raw;
+                                    if ($display !== '' && preg_match('/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/', $display)) {
+                                        $display = $normalizeAnyDateToDmY($display);
+                                    }
+                                }
+                            @endphp
+                            <td class="align-middle small text-nowrap text-body" title="{{ $raw }}">
+                                {{ Str::limit($display, 40) }}
                             </td>
                         @endforeach
                     </tr>
@@ -227,7 +376,7 @@
                 <h5 class="modal-title" id="rowDetailModalLabel">Satır detayı — Sıra <span id="rowDetailDisplayIndex">-</span><span id="rowDetailExcelInfo" class="text-secondary fw-normal small ms-1"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body text-body">
                 <div id="rowDetailError" class="alert alert-danger d-none mb-3" role="alert"></div>
                 <div class="table-responsive">
                     <table class="table table-sm table-striped">
@@ -266,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tbody.innerHTML = '';
         headers.forEach(function (header, i) {
             var tr = document.createElement('tr');
-            tr.innerHTML = '<th class="text-secondary small text-nowrap" style="width:30%">' + escapeHtml(header) + '</th><td class="small">' + escapeHtml(String(rowData[i] ?? '')) + '</td>';
+            tr.innerHTML = '<th class="text-body small text-nowrap fw-semibold" style="width:30%">' + escapeHtml(header) + '</th><td class="small text-body">' + escapeHtml(String(rowData[i] ?? '')) + '</td>';
             tbody.appendChild(tr);
         });
     });

@@ -5,6 +5,7 @@ namespace App\Delivery\Controllers\Web;
 use App\Core\Services\ExportService;
 use App\Delivery\Jobs\ProcessDeliveryImportJob;
 use App\Delivery\Services\DeliveryReportImportService;
+use App\Delivery\Services\DeliveryReportPivotService;
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryImportBatch;
 use App\Models\DeliveryReportRow;
@@ -210,6 +211,15 @@ class DeliveryImportController extends Controller
         $reportTypeLabel = ($batch->report_type && isset($reportTypes[$batch->report_type]['label']))
             ? $reportTypes[$batch->report_type]['label']
             : null;
+        $dateColumnIndices = ($batch->report_type && isset($reportTypes[$batch->report_type]['date_column_expected_indices']))
+            ? $reportTypes[$batch->report_type]['date_column_expected_indices']
+            : [];
+        $timeColumnIndices = ($batch->report_type && isset($reportTypes[$batch->report_type]['time_column_expected_indices']))
+            ? $reportTypes[$batch->report_type]['time_column_expected_indices']
+            : [];
+        $dateOnlyColumnIndices = ($batch->report_type && isset($reportTypes[$batch->report_type]['date_only_column_indices']))
+            ? $reportTypes[$batch->report_type]['date_only_column_indices']
+            : [];
 
         return view('admin.delivery-imports.show', [
             'batch' => $batch,
@@ -220,6 +230,9 @@ class DeliveryImportController extends Controller
             'reportTypeLabel' => $reportTypeLabel,
             'errorRowIndexes' => $errorRowIndexes,
             'perPage' => $perPage,
+            'dateColumnIndices' => $dateColumnIndices,
+            'timeColumnIndices' => $timeColumnIndices,
+            'dateOnlyColumnIndices' => $dateOnlyColumnIndices,
         ]);
     }
 
@@ -263,6 +276,29 @@ class DeliveryImportController extends Controller
         }, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="'.str_replace('"', '\\"', $filename).'"',
+        ]);
+    }
+
+    /**
+     * Malzeme Pivot Tablosu: Tarih x Malzeme özeti.
+     */
+    public function materialPivot(DeliveryImportBatch $batch, DeliveryReportPivotService $pivotService): View|RedirectResponse
+    {
+        $pivot = $pivotService->buildMaterialPivot($batch);
+        if ($pivot['materials'] === [] && $pivot['rows'] === []) {
+            return redirect()->route('admin.delivery-imports.show', $batch)
+                ->with('info', 'Bu rapor için malzeme pivot verisi yok veya rapor tipi desteklenmiyor.');
+        }
+
+        $reportTypes = config('delivery_report.report_types', []);
+        $reportTypeLabel = ($batch->report_type && isset($reportTypes[$batch->report_type]['label']))
+            ? $reportTypes[$batch->report_type]['label']
+            : null;
+
+        return view('admin.delivery-imports.material-pivot', [
+            'batch' => $batch,
+            'pivot' => $pivot,
+            'reportTypeLabel' => $reportTypeLabel,
         ]);
     }
 

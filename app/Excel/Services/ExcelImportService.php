@@ -144,7 +144,7 @@ class ExcelImportService
 
         fclose($handle);
 
-        return ['headers' => $headers, 'rows' => $rows];
+        return ['headers' => $headers, 'rows' => $rows, 'excel_calendar' => null];
     }
 
     protected function readXlsxWithHeaders(string $filePath): array
@@ -155,7 +155,7 @@ class ExcelImportService
         $rows = $sheet->toArray();
 
         if (empty($rows)) {
-            return ['headers' => [], 'rows' => []];
+            return ['headers' => [], 'rows' => [], 'excel_calendar' => null];
         }
 
         $headers = array_map(fn ($v) => trim((string) $v), $rows[0]);
@@ -163,10 +163,28 @@ class ExcelImportService
         $out = [];
 
         foreach ($dataRows as $row) {
-            $out[] = array_map(fn ($v) => trim((string) $v), array_pad($row, count($headers), ''));
+            $padded = array_pad($row, count($headers), '');
+            $out[] = array_map(function ($v) {
+                if ($v === null || $v === '') {
+                    return '';
+                }
+                if (is_numeric($v)) {
+                    return $v;
+                }
+
+                return trim((string) $v);
+            }, $padded);
         }
 
-        return ['headers' => $headers, 'rows' => $out];
+        $excelCalendar = null;
+        if (method_exists($spreadsheet, 'getExcelCalendar')) {
+            $cal = $spreadsheet->getExcelCalendar();
+            if ($cal === \PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_WINDOWS_1900 || $cal === \PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_MAC_1904) {
+                $excelCalendar = $cal;
+            }
+        }
+
+        return ['headers' => $headers, 'rows' => $out, 'excel_calendar' => $excelCalendar];
     }
 
     /**
