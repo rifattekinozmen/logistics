@@ -53,6 +53,11 @@
                 <label class="form-label fw-semibold text-dark">Şoför</label>
                 <select name="driver_id" class="form-select border-primary-200 focus:border-primary focus:ring-primary @error('driver_id') is-invalid border-danger @enderror">
                     <option value="">Şoför Seçin</option>
+                    @foreach($employees ?? [] as $employee)
+                    <option value="{{ $employee->id }}" {{ old('driver_id') == $employee->id ? 'selected' : '' }}>
+                        {{ $employee->first_name }} {{ $employee->last_name }}{{ $employee->employee_number ? ' (' . $employee->employee_number . ')' : '' }}
+                    </option>
+                    @endforeach
                 </select>
                 @error('driver_id')
                 <div class="invalid-feedback">{{ $message }}</div>

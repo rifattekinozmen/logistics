@@ -88,8 +88,9 @@ class ShipmentController extends Controller
     {
         $orders = \App\Models\Order::where('status', '!=', 'cancelled')->orderBy('id', 'desc')->get();
         $vehicles = \App\Models\Vehicle::where('status', 1)->orderBy('plate')->get();
+        $employees = \App\Models\Employee::where('status', 1)->orderBy('first_name')->orderBy('last_name')->get();
 
-        return view('admin.shipments.create', compact('orders', 'vehicles'));
+        return view('admin.shipments.create', compact('orders', 'vehicles', 'employees'));
     }
 
     /**
@@ -130,8 +131,9 @@ class ShipmentController extends Controller
         $shipment = \App\Models\Shipment::findOrFail($id);
         $orders = \App\Models\Order::where('status', '!=', 'cancelled')->orderBy('id', 'desc')->get();
         $vehicles = \App\Models\Vehicle::where('status', 1)->orderBy('plate')->get();
+        $employees = \App\Models\Employee::where('status', 1)->orderBy('first_name')->orderBy('last_name')->get();
 
-        return view('admin.shipments.edit', compact('shipment', 'orders', 'vehicles'));
+        return view('admin.shipments.edit', compact('shipment', 'orders', 'vehicles', 'employees'));
     }
 
     /**

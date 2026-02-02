@@ -32,7 +32,11 @@ class DocumentController extends Controller
      */
     public function create(): View
     {
-        return view('admin.documents.create');
+        $vehicles = \App\Models\Vehicle::where('status', 1)->orderBy('plate')->get();
+        $employees = \App\Models\Employee::where('status', 1)->orderBy('first_name')->orderBy('last_name')->get();
+        $orders = \App\Models\Order::where('status', '!=', 'cancelled')->orderBy('id', 'desc')->get();
+
+        return view('admin.documents.create', compact('vehicles', 'employees', 'orders'));
     }
 
     /**

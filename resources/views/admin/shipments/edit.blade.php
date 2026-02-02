@@ -51,6 +51,21 @@
             </div>
 
             <div class="col-md-6">
+                <label for="driver_id" class="form-label fw-semibold text-dark">Şoför</label>
+                <select name="driver_id" id="driver_id" class="form-select @error('driver_id') is-invalid @enderror">
+                    <option value="">Şoför Seçin</option>
+                    @foreach($employees ?? [] as $employee)
+                        <option value="{{ $employee->id }}" {{ old('driver_id', $shipment->driver_id) == $employee->id ? 'selected' : '' }}>
+                            {{ $employee->first_name }} {{ $employee->last_name }}{{ $employee->employee_number ? ' (' . $employee->employee_number . ')' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('driver_id')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-6">
                 <label for="status" class="form-label fw-semibold text-dark">Durum <span class="text-danger">*</span></label>
                 <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
                     <option value="assigned" {{ old('status', $shipment->status) === 'assigned' ? 'selected' : '' }}>Atandı</option>
