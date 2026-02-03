@@ -128,4 +128,68 @@
         </table>
     </div>
 </div>
+
+@if(!empty($pivot['fatura_kalemleri'] ?? []))
+<div class="mt-5">
+    <h3 class="h5 fw-bold text-dark mb-3">Fatura Kalemleri</h3>
+    <p class="text-secondary small mb-2"><strong>Fatura Dönemi:</strong> {{ $dateRangeText ?? '–' }}</p>
+    <div class="bg-white rounded-3xl shadow-sm border overflow-hidden w-100">
+        <table class="table table-bordered table-sm mb-0 w-100 veri-analiz-table" style="font-size: 0.875rem;">
+            <thead>
+                <tr style="background-color: #e7f1ff;">
+                    <th class="text-secondary fw-semibold">Malzeme Kodu / Lokasyon Nereden Nereye + Malzeme Kısa Metni</th>
+                    <th class="text-secondary fw-semibold text-center">Taşıma Tipi</th>
+                    <th class="text-secondary fw-semibold text-center">Toplam Miktar</th>
+                    <th class="text-secondary fw-semibold text-center">Birim</th>
+                    <th class="text-secondary fw-semibold text-center">Birim Fiyat</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($pivot['fatura_kalemleri'] as $kalem)
+                <tr>
+                    <td class="align-middle">{{ $kalem['material_label'] }}</td>
+                    <td class="align-middle text-center">{{ $kalem['tasima_tipi'] }}</td>
+                    <td class="align-middle text-center">{{ number_format($kalem['miktar'], 2, ',', '.') }}</td>
+                    <td class="align-middle text-center">Ton</td>
+                    <td class="align-middle text-center">–</td>
+                </tr>
+                @endforeach
+                <tr class="fw-bold" style="background-color: #e7f1ff;">
+                    <td class="align-middle" colspan="2">TOPLAM</td>
+                    <td class="align-middle text-center">{{ number_format($pivot['fatura_toplam'] ?? 0, 2, ',', '.') }}</td>
+                    <td class="align-middle text-center">Ton</td>
+                    <td class="align-middle text-center">–</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-3 d-flex flex-wrap align-items-center gap-2">
+        <span class="text-secondary small me-2">Fatura işlem durumu:</span>
+        <form method="POST" action="{{ route('admin.delivery-imports.invoice-status.update', $batch) }}" class="d-inline" onsubmit="return confirm('Fatura durumunu «Fatura Beklemede» olarak güncellemek istediğinize emin misiniz?');">
+            @csrf
+            @method('PATCH')
+            <input type="hidden" name="invoice_status" value="pending">
+            <input type="hidden" name="back" value="veri-analiz-raporu">
+            <button type="submit" class="btn {{ ($batch->invoice_status ?? null) === 'pending' ? 'btn-warning' : 'btn-outline-warning' }} btn-sm">Fatura Beklemede</button>
+        </form>
+        <form method="POST" action="{{ route('admin.delivery-imports.invoice-status.update', $batch) }}" class="d-inline" onsubmit="return confirm('Fatura durumunu «Fatura Oluşturuldu» olarak güncellemek istediğinize emin misiniz?');">
+            @csrf
+            @method('PATCH')
+            <input type="hidden" name="invoice_status" value="created">
+            <input type="hidden" name="back" value="veri-analiz-raporu">
+            <button type="submit" class="btn {{ ($batch->invoice_status ?? null) === 'created' ? 'btn-info' : 'btn-outline-info' }} btn-sm">Fatura Oluşturuldu</button>
+        </form>
+        <form method="POST" action="{{ route('admin.delivery-imports.invoice-status.update', $batch) }}" class="d-inline" onsubmit="return confirm('Fatura durumunu «Gönderildi» olarak güncellemek istediğinize emin misiniz?');">
+            @csrf
+            @method('PATCH')
+            <input type="hidden" name="invoice_status" value="sent">
+            <input type="hidden" name="back" value="veri-analiz-raporu">
+            <button type="submit" class="btn {{ ($batch->invoice_status ?? null) === 'sent' ? 'btn-success' : 'btn-outline-success' }} btn-sm">Gönderildi</button>
+        </form>
+        @if($batch->invoice_status ?? null)
+            <span class="badge bg-secondary ms-2">Mevcut: {{ match($batch->invoice_status) { 'pending' => 'Fatura Beklemede', 'created' => 'Fatura Oluşturuldu', 'sent' => 'Gönderildi', default => $batch->invoice_status } }}</span>
+        @endif
+    </div>
+</div>
+@endif
 @endsection

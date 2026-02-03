@@ -158,6 +158,7 @@ class DeliveryReportPivotService
         $totalsMaterialCounts = [];
         $totalsBoşDolu = 0;
         $totalsDoluDolu = 0;
+        $faturaTotals = [];
         $outRows = [];
 
         foreach ($pivotData as $date => $materials) {
@@ -170,6 +171,9 @@ class DeliveryReportPivotService
             $klinkerQuantity = 0;
             $curufQuantity = 0;
             $petrokokQuantity = 0;
+            $klinkerKey = null;
+            $curufKey = null;
+            $petrokokKey = null;
             foreach ($pivotData[$date] as $materialKey => $values) {
                 $q = $values['quantity'] ?? 0;
                 $upper = mb_strtoupper($materialKey);
@@ -179,10 +183,13 @@ class DeliveryReportPivotService
                 if ((stripos($materialCode, 'KLINKER') !== false || stripos($materialShort, 'KLINKER') !== false) &&
                     (stripos($materialCode, 'GRİ') !== false || stripos($materialCode, 'GRI') !== false || stripos($materialShort, 'GRİ') !== false || stripos($materialShort, 'GRI') !== false)) {
                     $klinkerQuantity += $q;
+                    $klinkerKey = $materialKey;
                 } elseif (stripos($materialCode, 'CÜRUF') !== false || stripos($materialCode, 'CURUF') !== false || stripos($materialShort, 'CÜRUF') !== false || stripos($materialShort, 'CURUF') !== false) {
                     $curufQuantity += $q;
+                    $curufKey = $materialKey;
                 } elseif (stripos($materialCode, 'PETROKOK') !== false || stripos($materialCode, 'P.KOK') !== false || stripos($materialShort, 'PETROKOK') !== false || stripos($materialShort, 'P.KOK') !== false || stripos($materialCode, 'MS') !== false || stripos($materialShort, 'MS') !== false) {
                     $petrokokQuantity += $q;
+                    $petrokokKey = $materialKey;
                 }
             }
 
@@ -266,6 +273,51 @@ class DeliveryReportPivotService
                 $pivotData[$date][$materialKey]['bos_dolu_malzeme'] = $satirBosDoluMalzeme;
             }
 
+            $partnerKey = $curufQuantity > 0 && $petrokokQuantity > 0
+                ? ($curufQuantity <= $petrokokQuantity ? $curufKey : $petrokokKey)
+                : ($curufQuantity > 0 ? $curufKey : $petrokokKey);
+            if ($klinkerKey !== null) {
+                $faturaTotals[$klinkerKey] = $faturaTotals[$klinkerKey] ?? ['d_d' => 0, 'b_d' => 0];
+                $faturaTotals[$klinkerKey]['d_d'] += $doluDoluSatir;
+            }
+            if ($partnerKey !== null) {
+                $faturaTotals[$partnerKey] = $faturaTotals[$partnerKey] ?? ['d_d' => 0, 'b_d' => 0];
+                $faturaTotals[$partnerKey]['d_d'] += $doluDoluSatir;
+            }
+            $klinkerBd = 0;
+            $curufBd = 0;
+            $petrokokBd = 0;
+            if ($klinkerQuantity <= 0.001) {
+                $curufBd = $curufQuantity;
+                $petrokokBd = $petrokokQuantity;
+            } elseif ($curufQuantity > 0 && $petrokokQuantity > 0) {
+                $klinkerBd = $klinkerQuantity > $curufQuantity ? $klinkerQuantity - $curufQuantity : 0;
+                $curufBd = $curufQuantity > $klinkerQuantity ? $curufQuantity - $klinkerQuantity : 0;
+                if (in_array($satirBosDoluMalzeme, ['Petrokok (MS)', 'Klinker(Gri)+Petrokok (MS)', 'Petrokok (MS)+Curuf'], true)) {
+                    $petrokokBd = $petrokokQuantity;
+                }
+            } else {
+                if ($curufQuantity > 0.001) {
+                    $klinkerBd = $klinkerQuantity >= $curufQuantity ? $klinkerQuantity - $curufQuantity : 0;
+                    $curufBd = $curufQuantity > $klinkerQuantity ? $curufQuantity - $klinkerQuantity : 0;
+                } else {
+                    $klinkerBd = $klinkerQuantity >= $petrokokQuantity ? $klinkerQuantity - $petrokokQuantity : 0;
+                    $petrokokBd = $petrokokQuantity > $klinkerQuantity ? $petrokokQuantity - $klinkerQuantity : 0;
+                }
+            }
+            if ($klinkerKey !== null && $klinkerBd > 0.001) {
+                $faturaTotals[$klinkerKey] = $faturaTotals[$klinkerKey] ?? ['d_d' => 0, 'b_d' => 0];
+                $faturaTotals[$klinkerKey]['b_d'] += $klinkerBd;
+            }
+            if ($curufKey !== null && $curufBd > 0.001) {
+                $faturaTotals[$curufKey] = $faturaTotals[$curufKey] ?? ['d_d' => 0, 'b_d' => 0];
+                $faturaTotals[$curufKey]['b_d'] += $curufBd;
+            }
+            if ($petrokokKey !== null && $petrokokBd > 0.001) {
+                $faturaTotals[$petrokokKey] = $faturaTotals[$petrokokKey] ?? ['d_d' => 0, 'b_d' => 0];
+                $faturaTotals[$petrokokKey]['b_d'] += $petrokokBd;
+            }
+
             $allMatList = $this->collectAllMaterialKeys($pivotData);
             $materialTotals = [];
             $materialCounts = [];
@@ -298,6 +350,27 @@ class DeliveryReportPivotService
         $allMaterials = $this->reorderMaterialsCemilogluStyle($allMaterials);
         $grandTotal = array_sum($totalsMaterial);
 
+        $faturaKalemleri = [];
+        foreach ($faturaTotals as $matKey => $totals) {
+            $label = str_contains($matKey, ' | ') ? str_replace(' | ', ' - ', $matKey) : $matKey;
+            if (($totals['d_d'] ?? 0) > 0.001) {
+                $faturaKalemleri[] = [
+                    'material_key' => $matKey,
+                    'material_label' => $label,
+                    'tasima_tipi' => 'Dolu-Dolu',
+                    'miktar' => round($totals['d_d'], 2),
+                ];
+            }
+            if (($totals['b_d'] ?? 0) > 0.001) {
+                $faturaKalemleri[] = [
+                    'material_key' => $matKey,
+                    'material_label' => $label,
+                    'tasima_tipi' => 'Boş-Dolu',
+                    'miktar' => round($totals['b_d'], 2),
+                ];
+            }
+        }
+
         return [
             'dates' => array_keys($pivotData),
             'materials' => $allMaterials,
@@ -310,6 +383,8 @@ class DeliveryReportPivotService
                 'boş_dolu' => $totalsBoşDolu,
                 'dolu_dolu' => $totalsDoluDolu,
             ],
+            'fatura_kalemleri' => $faturaKalemleri,
+            'fatura_toplam' => $grandTotal,
         ];
     }
 

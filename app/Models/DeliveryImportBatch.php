@@ -21,8 +21,13 @@ class DeliveryImportBatch extends Model
         'failed_rows',
         'import_errors',
         'status',
+        'invoice_status',
         'imported_by',
     ];
+
+    public const INVOICE_STATUS_PENDING = 'pending';
+    public const INVOICE_STATUS_CREATED = 'created';
+    public const INVOICE_STATUS_SENT = 'sent';
 
     protected function casts(): array
     {

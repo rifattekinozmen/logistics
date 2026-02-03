@@ -177,6 +177,7 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         Route::post('/', [DeliveryImportController::class, 'store'])->name('store');
         Route::get('/{batch}', [DeliveryImportController::class, 'show'])->name('show');
         Route::get('/{batch}/veri-analiz-raporu', [DeliveryImportController::class, 'veriAnalizRaporu'])->name('veri-analiz-raporu');
+        Route::patch('/{batch}/invoice-status', [DeliveryImportController::class, 'updateInvoiceStatus'])->name('invoice-status.update');
         Route::get('/{batch}/export', [DeliveryImportController::class, 'export'])->name('export');
         Route::get('/{batch}/download-original', [DeliveryImportController::class, 'downloadOriginal'])->name('download-original');
         Route::post('/{batch}/reprocess', [DeliveryImportController::class, 'reprocess'])->name('reprocess');

@@ -325,6 +325,26 @@ class DeliveryImportController extends Controller
     }
 
     /**
+     * Fatura işlem durumunu güncelle (Fatura Beklemede / Fatura Oluşturuldu / Gönderildi).
+     */
+    public function updateInvoiceStatus(Request $request, DeliveryImportBatch $batch): RedirectResponse
+    {
+        $valid = $request->validate([
+            'invoice_status' => 'required|string|in:pending,created,sent',
+        ]);
+        $batch->update(['invoice_status' => $valid['invoice_status']]);
+
+        $back = $request->input('back', 'veri-analiz-raporu');
+        if ($back === 'show') {
+            return redirect()->route('admin.delivery-imports.show', $batch)
+                ->with('success', 'Fatura durumu güncellendi.');
+        }
+
+        return redirect()->route('admin.delivery-imports.veri-analiz-raporu', $batch)
+            ->with('success', 'Fatura durumu güncellendi.');
+    }
+
+    /**
      * Batch'i tekrar işle (report rows silinir, status pending yapılır; show'da yeniden import çalışır).
      */
     public function reprocess(DeliveryImportBatch $batch): RedirectResponse
