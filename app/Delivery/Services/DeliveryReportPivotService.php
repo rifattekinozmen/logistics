@@ -125,6 +125,7 @@ class DeliveryReportPivotService
             if (! isset($pivotData[$date][$matKey])) {
                 $pivotData[$date][$matKey] = [
                     'quantity' => 0,
+                    'row_count' => 0,
                     'dolu_agirlik' => 0,
                     'bos_agirlik' => 0,
                     'gecerli_miktar_1' => 0,
@@ -134,6 +135,7 @@ class DeliveryReportPivotService
             }
 
             $pivotData[$date][$matKey]['quantity'] += $qty;
+            $pivotData[$date][$matKey]['row_count'] += 1;
             $pivotData[$date][$matKey]['gecerli_miktar_1'] += $qty;
 
             if ($doluAgirlikIndex !== null) {
@@ -153,6 +155,7 @@ class DeliveryReportPivotService
         $pivotData = $this->sortPivotDataByDate($pivotData);
 
         $totalsMaterial = [];
+        $totalsMaterialCounts = [];
         $totalsBoşDolu = 0;
         $totalsDoluDolu = 0;
         $outRows = [];
@@ -175,11 +178,11 @@ class DeliveryReportPivotService
                 $materialShort = trim($parts[1] ?? '');
                 if ((stripos($materialCode, 'KLINKER') !== false || stripos($materialShort, 'KLINKER') !== false) &&
                     (stripos($materialCode, 'GRİ') !== false || stripos($materialCode, 'GRI') !== false || stripos($materialShort, 'GRİ') !== false || stripos($materialShort, 'GRI') !== false)) {
-                    $klinkerQuantity = $q;
+                    $klinkerQuantity += $q;
                 } elseif (stripos($materialCode, 'CÜRUF') !== false || stripos($materialCode, 'CURUF') !== false || stripos($materialShort, 'CÜRUF') !== false || stripos($materialShort, 'CURUF') !== false) {
-                    $curufQuantity = $q;
+                    $curufQuantity += $q;
                 } elseif (stripos($materialCode, 'PETROKOK') !== false || stripos($materialCode, 'P.KOK') !== false || stripos($materialShort, 'PETROKOK') !== false || stripos($materialShort, 'P.KOK') !== false || stripos($materialCode, 'MS') !== false || stripos($materialShort, 'MS') !== false) {
-                    $petrokokQuantity = $q;
+                    $petrokokQuantity += $q;
                 }
             }
 
@@ -193,9 +196,30 @@ class DeliveryReportPivotService
                     $bosDoluMalzemeler[] = $calc;
                 }
             }
-            if ($bosDoluMalzemeler !== []) {
-                $satirBosDoluMalzeme = implode('+', $bosDoluMalzemeler);
+            if ($klinkerQuantity <= 0.001) {
+                if ($curufQuantity > 0.001 && $petrokokQuantity > 0.001) {
+                    $satirBosDoluMalzeme = 'Petrokok (MS)+Curuf';
+                } elseif ($petrokokQuantity > 0.001) {
+                    $satirBosDoluMalzeme = 'Petrokok (MS)';
+                } elseif ($curufQuantity > 0.001) {
+                    $satirBosDoluMalzeme = 'Curuf';
+                } else {
+                    $satirBosDoluMalzeme = '--';
+                }
             } else {
+                $onlyOnePartner = ($curufQuantity > 0.001 && $petrokokQuantity <= 0.001)
+                    || ($curufQuantity <= 0.001 && $petrokokQuantity > 0.001);
+                if ($onlyOnePartner) {
+                    $satirBosDoluMalzeme = $curufQuantity > 0.001
+                        ? ($klinkerQuantity >= $curufQuantity ? 'Klinker' : 'Curuf')
+                        : ($klinkerQuantity >= $petrokokQuantity ? 'Klinker' : 'Petrokok (MS)');
+                } elseif ($bosDoluMalzemeler !== []) {
+                    $order = ['Petrokok (MS)' => 0, 'Curuf' => 1, 'Klinker(Gri)' => 2, 'Klinker' => 2];
+                    usort($bosDoluMalzemeler, fn (string $a, string $b): int => ($order[$a] ?? 3) <=> ($order[$b] ?? 3));
+                    $satirBosDoluMalzeme = implode('+', $bosDoluMalzemeler);
+                }
+            }
+            if ($satirBosDoluMalzeme === '--') {
                 $rowDolu = 0;
                 $rowBos = 0;
                 $rowGecerli2 = 0;
@@ -213,16 +237,27 @@ class DeliveryReportPivotService
                 } elseif ($rowFirma < 0.01) {
                     $satirBosDoluMalzeme = 'Curuf';
                 } elseif ($satirToplami <= $rowFirma) {
-                    $satirBosDoluMalzeme = 'P.kok';
+                    $satirBosDoluMalzeme = 'Petrokok (MS)';
                 } else {
-                    $satirBosDoluMalzeme = 'P.kok+Curuf';
+                    $satirBosDoluMalzeme = 'Petrokok (MS)+Curuf';
                 }
             }
 
-            $doluDoluSatir = 2 * min($klinkerQuantity, $curufQuantity);
-            $bosDoluSatir = abs($klinkerQuantity - $curufQuantity);
-            if ($satirBosDoluMalzeme === 'P.kok' || $satirBosDoluMalzeme === 'Klinker(Gri)+P.kok') {
-                $bosDoluSatir += $petrokokQuantity;
+            $partnerQuantity = $curufQuantity > 0 && $petrokokQuantity > 0
+                ? min($curufQuantity, $petrokokQuantity)
+                : ($curufQuantity > 0 ? $curufQuantity : $petrokokQuantity);
+            $doluDoluSatir = 2 * min($klinkerQuantity, $partnerQuantity);
+            if ($klinkerQuantity <= 0.001) {
+                $bosDoluSatir = $curufQuantity + $petrokokQuantity;
+            } elseif ($curufQuantity > 0 && $petrokokQuantity > 0) {
+                $bosDoluSatir = abs($klinkerQuantity - $curufQuantity);
+                if (in_array($satirBosDoluMalzeme, ['Petrokok (MS)', 'Klinker(Gri)+Petrokok (MS)', 'Petrokok (MS)+Curuf'], true)) {
+                    $bosDoluSatir += $petrokokQuantity;
+                }
+            } else {
+                $bosDoluSatir = $curufQuantity > 0
+                    ? abs($klinkerQuantity - $curufQuantity)
+                    : abs($klinkerQuantity - $petrokokQuantity);
             }
 
             foreach ($pivotData[$date] as $materialKey => $values) {
@@ -233,18 +268,24 @@ class DeliveryReportPivotService
 
             $allMatList = $this->collectAllMaterialKeys($pivotData);
             $materialTotals = [];
+            $materialCounts = [];
             $rowTotal = 0;
             foreach ($allMatList as $m) {
                 $mKey = $m['key'];
                 $val = $pivotData[$date][$mKey]['quantity'] ?? 0;
+                $cnt = $pivotData[$date][$mKey]['row_count'] ?? 0;
                 $materialTotals[$mKey] = $val;
+                $materialCounts[$mKey] = $cnt;
                 $rowTotal += $val;
                 $totalsMaterial[$mKey] = ($totalsMaterial[$mKey] ?? 0) + $val;
+                $totalsMaterialCounts[$mKey] = ($totalsMaterialCounts[$mKey] ?? 0) + $cnt;
             }
             $outRows[] = [
                 'tarih' => $date,
                 'material_totals' => $materialTotals,
+                'material_counts' => $materialCounts,
                 'row_total' => $rowTotal,
+                'row_total_count' => array_sum($materialCounts),
                 'boş_dolu' => $bosDoluSatir,
                 'dolu_dolu' => $doluDoluSatir,
                 'malzeme_kisa_metni' => $satirBosDoluMalzeme,
@@ -263,7 +304,9 @@ class DeliveryReportPivotService
             'rows' => $outRows,
             'totals_row' => [
                 'material_totals' => $totalsMaterial,
+                'material_counts' => $totalsMaterialCounts,
                 'row_total' => $grandTotal,
+                'row_total_count' => array_sum($totalsMaterialCounts),
                 'boş_dolu' => $totalsBoşDolu,
                 'dolu_dolu' => $totalsDoluDolu,
             ],
@@ -352,6 +395,14 @@ class DeliveryReportPivotService
         $curufQuantity = $curuf['values']['quantity'] ?? 0;
         $petrokokQuantity = $petrokok['values']['quantity'] ?? 0;
 
+        if ($klinkerQuantity <= 0.001) {
+            $klinkerGri['values']['bos_dolu_malzeme_calculated'] = '--';
+            $curuf['values']['bos_dolu_malzeme_calculated'] = $curufQuantity > 0.001 ? 'Curuf' : '--';
+            $petrokok['values']['bos_dolu_malzeme_calculated'] = $petrokokQuantity > 0.001 ? 'Petrokok (MS)' : '--';
+
+            return;
+        }
+
         $curufKucuk = $curufQuantity <= $petrokokQuantity;
         $kucukMalzemeQuantity = $curufKucuk ? $curufQuantity : $petrokokQuantity;
 
@@ -372,7 +423,7 @@ class DeliveryReportPivotService
 
         $klinkerGri['values']['bos_dolu_malzeme_calculated'] = $klinkerBosDolu > 0 ? 'Klinker(Gri)' : '--';
         $curuf['values']['bos_dolu_malzeme_calculated'] = $curufBosDolu > 0 ? 'Curuf' : '--';
-        $petrokok['values']['bos_dolu_malzeme_calculated'] = $petrokokBosDolu > 0 ? 'P.kok' : '--';
+        $petrokok['values']['bos_dolu_malzeme_calculated'] = $petrokokBosDolu > 0 ? 'Petrokok (MS)' : '--';
     }
 
     /**

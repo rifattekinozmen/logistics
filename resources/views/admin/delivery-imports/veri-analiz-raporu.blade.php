@@ -82,9 +82,17 @@
                     <tr>
                         <td class="fw-semibold align-middle">{{ $row['tarih'] }}</td>
                         @foreach($pivot['materials'] as $m)
-                            <td class="align-middle">{{ number_format($row['material_totals'][$m['key']] ?? 0, 2, ',', '.') }}</td>
+                            @php
+                                $qty = $row['material_totals'][$m['key']] ?? 0;
+                                $adet = $row['material_counts'][$m['key']] ?? 0;
+                            @endphp
+                            <td class="align-middle small lh-sm">{{ number_format($qty, 2, ',', '.') }} Ton / {{ $adet }} Adet</td>
                         @endforeach
-                        <td class="fw-semibold align-middle" style="background-color: #f0f4f8;">{{ number_format($row['row_total'], 2, ',', '.') }}</td>
+                        @php
+                            $rowTotalQty = $row['row_total'];
+                            $rowTotalAdet = $row['row_total_count'] ?? 0;
+                        @endphp
+                        <td class="fw-semibold align-middle small lh-sm" style="background-color: #f0f4f8;">{{ number_format($rowTotalQty, 2, ',', '.') }} Ton / {{ $rowTotalAdet }} Adet</td>
                         <td class="fw-semibold text-primary align-middle" style="background-color: #cfe2ff;">{{ number_format($row['boş_dolu'], 2, ',', '.') }}</td>
                         <td class="fw-semibold align-middle" style="background-color: #d1e7dd; color: #0f5132;">{{ number_format($row['dolu_dolu'], 2, ',', '.') }}</td>
                         <td class="align-middle" style="white-space: normal; min-width: 8rem; background-color: #f8f9fa; overflow: visible;">{{ $row['malzeme_kisa_metni'] ?? '--' }}</td>
@@ -100,9 +108,17 @@
                 <tr class="fw-bold" style="background-color: #e7f1ff;">
                     <td class="align-middle" style="background-color: #cfe2ff;">Toplam</td>
                     @foreach($pivot['materials'] as $m)
-                        <td class="align-middle" style="background-color: #e7f1ff;">{{ number_format($pivot['totals_row']['material_totals'][$m['key']] ?? 0, 2, ',', '.') }}</td>
+                        @php
+                            $totQty = $pivot['totals_row']['material_totals'][$m['key']] ?? 0;
+                            $totAdet = $pivot['totals_row']['material_counts'][$m['key']] ?? 0;
+                        @endphp
+                        <td class="align-middle small lh-sm" style="background-color: #e7f1ff;">{{ number_format($totQty, 2, ',', '.') }} Ton / {{ $totAdet }} Adet</td>
                     @endforeach
-                    <td class="align-middle" style="background-color: #cfe2ff;">{{ number_format($pivot['totals_row']['row_total'], 2, ',', '.') }}</td>
+                    @php
+                        $grandTotalQty = $pivot['totals_row']['row_total'];
+                        $grandTotalAdet = $pivot['totals_row']['row_total_count'] ?? 0;
+                    @endphp
+                    <td class="align-middle small lh-sm" style="background-color: #cfe2ff;">{{ number_format($grandTotalQty, 2, ',', '.') }} Ton / {{ $grandTotalAdet }} Adet</td>
                     <td class="text-primary align-middle fw-bold" style="background-color: #cfe2ff;">{{ number_format($pivot['totals_row']['boş_dolu'], 2, ',', '.') }}</td>
                     <td class="align-middle fw-bold" style="background-color: #d1e7dd; color: #0f5132;">{{ number_format($pivot['totals_row']['dolu_dolu'], 2, ',', '.') }}</td>
                     <td class="align-middle" style="background-color: #cfe2ff;">-</td>
