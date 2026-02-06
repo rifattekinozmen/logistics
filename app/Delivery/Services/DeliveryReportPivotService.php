@@ -106,6 +106,13 @@ class DeliveryReportPivotService
         $uyTanimIndex = 9;
         $adIndex = 22;
 
+        /*
+         * Petrokok rota tercihi: 'ekinciler' (varsayılan) veya 'isdemir'.
+         * 'isdemir' seçildiğinde Petrokok, curuf_route grubuna dahil edilir.
+         */
+        $petrokokRoutePref = $batch->petrokok_route_preference ?? 'ekinciler';
+        $petrokokRouteKey = $petrokokRoutePref === 'isdemir' ? 'curuf_route' : 'petrokok_route';
+
         $rows = $batch->reportRows()->orderBy('row_index')->get();
         $pivotData = [];
         /** @var array<string, array{uy_tanim: string, ad: string}> Malzeme key → ÜY Tanım & Ad bilgisi */
@@ -308,7 +315,7 @@ class DeliveryReportPivotService
             $halfDd = $doluDoluSatir / 2;
 
             if ($halfDd > 0.001) {
-                $route = $partnerType === 'curuf' ? 'curuf_route' : 'petrokok_route';
+                $route = $partnerType === 'curuf' ? 'curuf_route' : $petrokokRouteKey;
 
                 foreach ($klinkerVariants as $kKey => $kQty) {
                     $share = $klinkerQuantity > 0.001 ? $halfDd * ($kQty / $klinkerQuantity) : 0;
@@ -360,8 +367,8 @@ class DeliveryReportPivotService
                 $faturaTotals['curuf_route'][$curufKey]['b_d'] += $curufBd;
             }
             if ($petrokokKey !== null && $petrokokBd > 0.001) {
-                $faturaTotals['petrokok_route'][$petrokokKey] = $faturaTotals['petrokok_route'][$petrokokKey] ?? ['d_d' => 0, 'b_d' => 0];
-                $faturaTotals['petrokok_route'][$petrokokKey]['b_d'] += $petrokokBd;
+                $faturaTotals[$petrokokRouteKey][$petrokokKey] = $faturaTotals[$petrokokRouteKey][$petrokokKey] ?? ['d_d' => 0, 'b_d' => 0];
+                $faturaTotals[$petrokokRouteKey][$petrokokKey]['b_d'] += $petrokokBd;
             }
 
             $allMatList = $this->collectAllMaterialKeys($pivotData);
@@ -412,11 +419,13 @@ class DeliveryReportPivotService
         $baseFactory = $klinkerInfo['uy_tanim'] ?? 'Adana Fabrika';
         $klinkerDest = $klinkerInfo['ad'] ?? 'İskenderun 1';
 
+        $isdemirLabel = (stripos($klinkerDest, 'skenderun') !== false || stripos($klinkerDest, 'İSDEMİR') !== false)
+            ? 'İsdemir Tesisi'
+            : ($klinkerDest ?: 'İsdemir Tesisi');
+
         $routeConfigs = [
             'curuf_route' => [
-                'label' => (stripos($klinkerDest, 'skenderun') !== false || stripos($klinkerDest, 'İSDEMİR') !== false)
-                    ? 'İsdemir Tesisi'
-                    : ($klinkerDest ?: 'İsdemir Tesisi'),
+                'label' => $isdemirLabel,
                 'klinker_dir' => $baseFactory.' → '.$klinkerDest,
                 'partner_dir' => $klinkerDest.' → '.$baseFactory,
             ],
@@ -426,6 +435,12 @@ class DeliveryReportPivotService
                 'partner_dir' => 'Ekinciler Limanı → '.$baseFactory,
             ],
         ];
+
+        /*
+         * Petrokok İsdemir'e yönlendirilmişse, curuf_route içindeki Petrokok malzemeleri için
+         * özel yön bilgisi kullanılacak (İskenderun yönü, Ekinciler değil).
+         */
+        $petrokokInIsdemir = $petrokokRoutePref === 'isdemir';
 
         $faturaRotaGruplari = [];
         $faturaGenelToplam = 0;
@@ -444,7 +459,16 @@ class DeliveryReportPivotService
                 $materialCode = trim($codeParts[0] ?? '');
                 $materialShort = trim($codeParts[1] ?? $materialCode);
                 $isKlinker = stripos($matKey, 'KLINKER') !== false;
-                $direction = $isKlinker ? $cfg['klinker_dir'] : $cfg['partner_dir'];
+                $isPetrokok = stripos($matKey, 'PETROKOK') !== false || stripos($matKey, 'P.KOK') !== false;
+
+                if ($isKlinker) {
+                    $direction = $cfg['klinker_dir'];
+                } elseif ($isPetrokok && $petrokokInIsdemir && $routeKey === 'curuf_route') {
+                    // Petrokok İsdemir grubunda: İskenderun yönü yerine gerçek Petrokok yönü
+                    $direction = $klinkerDest.' → '.$baseFactory;
+                } else {
+                    $direction = $cfg['partner_dir'];
+                }
 
                 if (($totals['d_d'] ?? 0) > 0.001) {
                     $amount = round($totals['d_d'], 2);

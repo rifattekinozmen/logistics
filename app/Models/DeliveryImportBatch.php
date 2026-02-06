@@ -22,12 +22,16 @@ class DeliveryImportBatch extends Model
         'import_errors',
         'status',
         'invoice_status',
+        'petrokok_route_preference',
         'imported_by',
     ];
 
     public const INVOICE_STATUS_PENDING = 'pending';
     public const INVOICE_STATUS_CREATED = 'created';
     public const INVOICE_STATUS_SENT = 'sent';
+
+    public const PETROKOK_ROUTE_EKINCILER = 'ekinciler';
+    public const PETROKOK_ROUTE_ISDEMIR = 'isdemir';
 
     protected function casts(): array
     {

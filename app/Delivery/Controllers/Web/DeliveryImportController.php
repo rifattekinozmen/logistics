@@ -325,6 +325,20 @@ class DeliveryImportController extends Controller
     }
 
     /**
+     * Petrokok rota tercihini güncelle (Ekinciler / İsdemir).
+     */
+    public function updatePetrokokRoute(Request $request, DeliveryImportBatch $batch): RedirectResponse
+    {
+        $valid = $request->validate([
+            'petrokok_route_preference' => 'required|string|in:ekinciler,isdemir',
+        ]);
+        $batch->update(['petrokok_route_preference' => $valid['petrokok_route_preference']]);
+
+        return redirect()->route('admin.delivery-imports.veri-analiz-raporu', $batch)
+            ->with('success', 'Petrokok rota tercihi güncellendi.');
+    }
+
+    /**
      * Fatura işlem durumunu güncelle (Fatura Beklemede / Fatura Oluşturuldu / Gönderildi).
      */
     public function updateInvoiceStatus(Request $request, DeliveryImportBatch $batch): RedirectResponse
