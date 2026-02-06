@@ -103,8 +103,13 @@ class DeliveryReportPivotService
         $gecerli2Index = isset($mp['gecerli_miktar_2_index']) ? (int) $mp['gecerli_miktar_2_index'] : null;
         $firmaMiktariIndex = isset($mp['firma_miktari_index']) ? (int) $mp['firma_miktari_index'] : null;
 
+        $uyTanimIndex = 9;
+        $adIndex = 22;
+
         $rows = $batch->reportRows()->orderBy('row_index')->get();
         $pivotData = [];
+        /** @var array<string, array{uy_tanim: string, ad: string}> Malzeme key → ÜY Tanım & Ad bilgisi */
+        $materialLocationInfo = [];
 
         foreach ($rows as $row) {
             $data = $row->row_data ?? [];
@@ -120,6 +125,13 @@ class DeliveryReportPivotService
             $qty = $this->extractQuantity($data[$quantityIndex] ?? null);
             if ($qty === null) {
                 continue;
+            }
+
+            if (! isset($materialLocationInfo[$matKey])) {
+                $materialLocationInfo[$matKey] = [
+                    'uy_tanim' => trim((string) ($data[$uyTanimIndex] ?? '')),
+                    'ad' => trim((string) ($data[$adIndex] ?? '')),
+                ];
             }
 
             if (! isset($pivotData[$date][$matKey])) {
@@ -168,10 +180,11 @@ class DeliveryReportPivotService
                 $satirToplami += $values['quantity'] ?? 0;
             }
 
+            /** @var array<string, float> Klinker varyant key → miktar (Gri, Beyaz, vb.) */
+            $klinkerVariants = [];
             $klinkerQuantity = 0;
             $curufQuantity = 0;
             $petrokokQuantity = 0;
-            $klinkerKey = null;
             $curufKey = null;
             $petrokokKey = null;
             foreach ($pivotData[$date] as $materialKey => $values) {
@@ -180,10 +193,9 @@ class DeliveryReportPivotService
                 $parts = explode('|', $upper);
                 $materialCode = trim($parts[0] ?? '');
                 $materialShort = trim($parts[1] ?? '');
-                if ((stripos($materialCode, 'KLINKER') !== false || stripos($materialShort, 'KLINKER') !== false) &&
-                    (stripos($materialCode, 'GRİ') !== false || stripos($materialCode, 'GRI') !== false || stripos($materialShort, 'GRİ') !== false || stripos($materialShort, 'GRI') !== false)) {
+                if (stripos($materialCode, 'KLINKER') !== false || stripos($materialShort, 'KLINKER') !== false) {
+                    $klinkerVariants[$materialKey] = $q;
                     $klinkerQuantity += $q;
-                    $klinkerKey = $materialKey;
                 } elseif (stripos($materialCode, 'CÜRUF') !== false || stripos($materialCode, 'CURUF') !== false || stripos($materialShort, 'CÜRUF') !== false || stripos($materialShort, 'CURUF') !== false) {
                     $curufQuantity += $q;
                     $curufKey = $materialKey;
@@ -273,49 +285,83 @@ class DeliveryReportPivotService
                 $pivotData[$date][$materialKey]['bos_dolu_malzeme'] = $satirBosDoluMalzeme;
             }
 
+            /*
+             * Fatura kalemlerini ROTA bazlı takip et.
+             * partnerType: 'curuf' veya 'petrokok' → hangi rota grubuna ait olduğunu belirler.
+             * D-D her Klinker varyantına orantılı bölünür (halfDd * varyantMiktar / toplamKlinker).
+             * Partner malzeme tam halfDd alır.
+             * B-D her malzemenin "ev rotası"na eklenir:
+             *   Klinker (tüm varyantlar), Cüruf → curuf_route (Başlangıç Yeri)
+             *   Petrokok → petrokok_route (Dönüş Yeri)
+             */
             $partnerKey = $curufQuantity > 0 && $petrokokQuantity > 0
                 ? ($curufQuantity <= $petrokokQuantity ? $curufKey : $petrokokKey)
                 : ($curufQuantity > 0 ? $curufKey : $petrokokKey);
-            if ($klinkerKey !== null) {
-                $faturaTotals[$klinkerKey] = $faturaTotals[$klinkerKey] ?? ['d_d' => 0, 'b_d' => 0];
-                $faturaTotals[$klinkerKey]['d_d'] += $doluDoluSatir;
+
+            $partnerType = 'none';
+            if ($partnerKey === $curufKey && $curufKey !== null) {
+                $partnerType = 'curuf';
+            } elseif ($partnerKey === $petrokokKey && $petrokokKey !== null) {
+                $partnerType = 'petrokok';
             }
-            if ($partnerKey !== null) {
-                $faturaTotals[$partnerKey] = $faturaTotals[$partnerKey] ?? ['d_d' => 0, 'b_d' => 0];
-                $faturaTotals[$partnerKey]['d_d'] += $doluDoluSatir;
+
+            $halfDd = $doluDoluSatir / 2;
+
+            if ($halfDd > 0.001) {
+                $route = $partnerType === 'curuf' ? 'curuf_route' : 'petrokok_route';
+
+                foreach ($klinkerVariants as $kKey => $kQty) {
+                    $share = $klinkerQuantity > 0.001 ? $halfDd * ($kQty / $klinkerQuantity) : 0;
+                    if ($share > 0.001) {
+                        $faturaTotals[$route][$kKey] = $faturaTotals[$route][$kKey] ?? ['d_d' => 0, 'b_d' => 0];
+                        $faturaTotals[$route][$kKey]['d_d'] += $share;
+                    }
+                }
+
+                if ($partnerKey !== null) {
+                    $faturaTotals[$route][$partnerKey] = $faturaTotals[$route][$partnerKey] ?? ['d_d' => 0, 'b_d' => 0];
+                    $faturaTotals[$route][$partnerKey]['d_d'] += $halfDd;
+                }
             }
-            $klinkerBd = 0;
+
+            $totalKlinkerBd = 0;
             $curufBd = 0;
             $petrokokBd = 0;
             if ($klinkerQuantity <= 0.001) {
                 $curufBd = $curufQuantity;
                 $petrokokBd = $petrokokQuantity;
             } elseif ($curufQuantity > 0 && $petrokokQuantity > 0) {
-                $klinkerBd = $klinkerQuantity > $curufQuantity ? $klinkerQuantity - $curufQuantity : 0;
+                $totalKlinkerBd = $klinkerQuantity > $curufQuantity ? $klinkerQuantity - $curufQuantity : 0;
                 $curufBd = $curufQuantity > $klinkerQuantity ? $curufQuantity - $klinkerQuantity : 0;
                 if (in_array($satirBosDoluMalzeme, ['Petrokok (MS)', 'Klinker(Gri)+Petrokok (MS)', 'Petrokok (MS)+Curuf'], true)) {
                     $petrokokBd = $petrokokQuantity;
                 }
             } else {
                 if ($curufQuantity > 0.001) {
-                    $klinkerBd = $klinkerQuantity >= $curufQuantity ? $klinkerQuantity - $curufQuantity : 0;
+                    $totalKlinkerBd = $klinkerQuantity >= $curufQuantity ? $klinkerQuantity - $curufQuantity : 0;
                     $curufBd = $curufQuantity > $klinkerQuantity ? $curufQuantity - $klinkerQuantity : 0;
                 } else {
-                    $klinkerBd = $klinkerQuantity >= $petrokokQuantity ? $klinkerQuantity - $petrokokQuantity : 0;
+                    $totalKlinkerBd = $klinkerQuantity >= $petrokokQuantity ? $klinkerQuantity - $petrokokQuantity : 0;
                     $petrokokBd = $petrokokQuantity > $klinkerQuantity ? $petrokokQuantity - $klinkerQuantity : 0;
                 }
             }
-            if ($klinkerKey !== null && $klinkerBd > 0.001) {
-                $faturaTotals[$klinkerKey] = $faturaTotals[$klinkerKey] ?? ['d_d' => 0, 'b_d' => 0];
-                $faturaTotals[$klinkerKey]['b_d'] += $klinkerBd;
+
+            if ($totalKlinkerBd > 0.001) {
+                foreach ($klinkerVariants as $kKey => $kQty) {
+                    $share = $klinkerQuantity > 0.001 ? $totalKlinkerBd * ($kQty / $klinkerQuantity) : 0;
+                    if ($share > 0.001) {
+                        $faturaTotals['curuf_route'][$kKey] = $faturaTotals['curuf_route'][$kKey] ?? ['d_d' => 0, 'b_d' => 0];
+                        $faturaTotals['curuf_route'][$kKey]['b_d'] += $share;
+                    }
+                }
             }
             if ($curufKey !== null && $curufBd > 0.001) {
-                $faturaTotals[$curufKey] = $faturaTotals[$curufKey] ?? ['d_d' => 0, 'b_d' => 0];
-                $faturaTotals[$curufKey]['b_d'] += $curufBd;
+                $faturaTotals['curuf_route'][$curufKey] = $faturaTotals['curuf_route'][$curufKey] ?? ['d_d' => 0, 'b_d' => 0];
+                $faturaTotals['curuf_route'][$curufKey]['b_d'] += $curufBd;
             }
             if ($petrokokKey !== null && $petrokokBd > 0.001) {
-                $faturaTotals[$petrokokKey] = $faturaTotals[$petrokokKey] ?? ['d_d' => 0, 'b_d' => 0];
-                $faturaTotals[$petrokokKey]['b_d'] += $petrokokBd;
+                $faturaTotals['petrokok_route'][$petrokokKey] = $faturaTotals['petrokok_route'][$petrokokKey] ?? ['d_d' => 0, 'b_d' => 0];
+                $faturaTotals['petrokok_route'][$petrokokKey]['b_d'] += $petrokokBd;
             }
 
             $allMatList = $this->collectAllMaterialKeys($pivotData);
@@ -350,24 +396,119 @@ class DeliveryReportPivotService
         $allMaterials = $this->reorderMaterialsCemilogluStyle($allMaterials);
         $grandTotal = array_sum($totalsMaterial);
 
-        $faturaKalemleri = [];
-        foreach ($faturaTotals as $matKey => $totals) {
-            $label = str_contains($matKey, ' | ') ? str_replace(' | ', ' - ', $matKey) : $matKey;
-            if (($totals['d_d'] ?? 0) > 0.001) {
-                $faturaKalemleri[] = [
-                    'material_key' => $matKey,
-                    'material_label' => $label,
-                    'tasima_tipi' => 'Dolu-Dolu',
-                    'miktar' => round($totals['d_d'], 2),
-                ];
+        /*
+         * Rota etiketlerini ve yön bilgilerini oluştur.
+         * curuf_route → İsdemir Tesisi  |  Klinker: Adana Fabrika → İskenderun 1, Cüruf: İskenderun 1 → Adana Fabrika
+         * petrokok_route → Ekinciler Tesisi  |  Klinker: Adana Fabrika → Ekinciler Limanı, Petrokok: Ekinciler Limanı → Adana Fabrika
+         */
+        $klinkerInfo = null;
+        foreach ($materialLocationInfo as $matKey => $info) {
+            if (stripos(mb_strtoupper($matKey), 'KLINKER') !== false) {
+                $klinkerInfo = $info;
+                break;
             }
-            if (($totals['b_d'] ?? 0) > 0.001) {
-                $faturaKalemleri[] = [
-                    'material_key' => $matKey,
-                    'material_label' => $label,
-                    'tasima_tipi' => 'Boş-Dolu',
-                    'miktar' => round($totals['b_d'], 2),
+        }
+
+        $baseFactory = $klinkerInfo['uy_tanim'] ?? 'Adana Fabrika';
+        $klinkerDest = $klinkerInfo['ad'] ?? 'İskenderun 1';
+
+        $routeConfigs = [
+            'curuf_route' => [
+                'label' => (stripos($klinkerDest, 'skenderun') !== false || stripos($klinkerDest, 'İSDEMİR') !== false)
+                    ? 'İsdemir Tesisi'
+                    : ($klinkerDest ?: 'İsdemir Tesisi'),
+                'klinker_dir' => $baseFactory.' → '.$klinkerDest,
+                'partner_dir' => $klinkerDest.' → '.$baseFactory,
+            ],
+            'petrokok_route' => [
+                'label' => 'Ekinciler Tesisi',
+                'klinker_dir' => $baseFactory.' → Ekinciler Limanı',
+                'partner_dir' => 'Ekinciler Limanı → '.$baseFactory,
+            ],
+        ];
+
+        $faturaRotaGruplari = [];
+        $faturaGenelToplam = 0;
+
+        foreach (['curuf_route', 'petrokok_route'] as $routeKey) {
+            $routeItems = $faturaTotals[$routeKey] ?? [];
+            if ($routeItems === []) {
+                continue;
+            }
+
+            $cfg = $routeConfigs[$routeKey];
+            $routeKalemleri = [];
+            $routeToplam = 0;
+            foreach ($routeItems as $matKey => $totals) {
+                $codeParts = explode(' | ', $matKey, 2);
+                $materialCode = trim($codeParts[0] ?? '');
+                $materialShort = trim($codeParts[1] ?? $materialCode);
+                $isKlinker = stripos($matKey, 'KLINKER') !== false;
+                $direction = $isKlinker ? $cfg['klinker_dir'] : $cfg['partner_dir'];
+
+                if (($totals['d_d'] ?? 0) > 0.001) {
+                    $amount = round($totals['d_d'], 2);
+                    $routeKalemleri[] = [
+                        'material_key' => $matKey,
+                        'material_code' => $materialCode,
+                        'material_short' => $materialShort,
+                        'nerden_nereye' => $direction,
+                        'tasima_tipi' => 'Dolu-Dolu',
+                        'miktar' => $amount,
+                    ];
+                    $routeToplam += $amount;
+                }
+                if (($totals['b_d'] ?? 0) > 0.001) {
+                    $amount = round($totals['b_d'], 2);
+                    $routeKalemleri[] = [
+                        'material_key' => $matKey,
+                        'material_code' => $materialCode,
+                        'material_short' => $materialShort,
+                        'nerden_nereye' => $direction,
+                        'tasima_tipi' => 'Boş-Dolu',
+                        'miktar' => $amount,
+                    ];
+                    $routeToplam += $amount;
+                }
+            }
+
+            /* Sıralama: Klinker → Cüruf → Petrokok → diğer. Aynı malzeme için D-D önce, B-D sonra. */
+            usort($routeKalemleri, function (array $a, array $b): int {
+                $groupOrder = function (string $key): int {
+                    $u = mb_strtoupper($key);
+                    if (stripos($u, 'KLINKER') !== false) {
+                        return 0;
+                    }
+                    if (stripos($u, 'CÜRUF') !== false || stripos($u, 'CURUF') !== false) {
+                        return 1;
+                    }
+                    if (stripos($u, 'PETROKOK') !== false || stripos($u, 'P.KOK') !== false) {
+                        return 2;
+                    }
+
+                    return 3;
+                };
+                $cmpGroup = $groupOrder($a['material_key']) <=> $groupOrder($b['material_key']);
+                if ($cmpGroup !== 0) {
+                    return $cmpGroup;
+                }
+                $cmpKey = $a['material_key'] <=> $b['material_key'];
+                if ($cmpKey !== 0) {
+                    return $cmpKey;
+                }
+                $tipOrder = ['Dolu-Dolu' => 0, 'Boş-Dolu' => 1];
+
+                return ($tipOrder[$a['tasima_tipi']] ?? 2) <=> ($tipOrder[$b['tasima_tipi']] ?? 2);
+            });
+
+            if ($routeKalemleri !== []) {
+                $faturaRotaGruplari[] = [
+                    'route_key' => $routeKey,
+                    'route_label' => $cfg['label'],
+                    'kalemler' => $routeKalemleri,
+                    'route_toplam' => round($routeToplam, 2),
                 ];
+                $faturaGenelToplam += $routeToplam;
             }
         }
 
@@ -383,8 +524,8 @@ class DeliveryReportPivotService
                 'boş_dolu' => $totalsBoşDolu,
                 'dolu_dolu' => $totalsDoluDolu,
             ],
-            'fatura_kalemleri' => $faturaKalemleri,
-            'fatura_toplam' => $grandTotal,
+            'fatura_rota_gruplari' => $faturaRotaGruplari,
+            'fatura_toplam' => round($faturaGenelToplam, 2),
         ];
     }
 
@@ -442,7 +583,8 @@ class DeliveryReportPivotService
      */
     protected function applyMaterialMatchingLogic(array &$materials, float $satirToplami): void
     {
-        $klinkerGri = null;
+        /** @var array<int, array{key: string, values: array}> Tüm Klinker varyantları (Gri, Beyaz, vb.) */
+        $klinkerRefs = [];
         $curuf = null;
         $petrokok = null;
 
@@ -452,9 +594,8 @@ class DeliveryReportPivotService
             $materialCode = trim($parts[0] ?? '');
             $materialShort = trim($parts[1] ?? '');
 
-            if ((stripos($materialCode, 'KLINKER') !== false || stripos($materialShort, 'KLINKER') !== false) &&
-                (stripos($materialCode, 'GRİ') !== false || stripos($materialCode, 'GRI') !== false || stripos($materialShort, 'GRİ') !== false || stripos($materialShort, 'GRI') !== false)) {
-                $klinkerGri = ['key' => $materialKey, 'values' => &$materials[$materialKey]];
+            if (stripos($materialCode, 'KLINKER') !== false || stripos($materialShort, 'KLINKER') !== false) {
+                $klinkerRefs[] = ['key' => $materialKey, 'values' => &$materials[$materialKey]];
             } elseif (stripos($materialCode, 'CÜRUF') !== false || stripos($materialCode, 'CURUF') !== false || stripos($materialShort, 'CÜRUF') !== false || stripos($materialShort, 'CURUF') !== false) {
                 $curuf = ['key' => $materialKey, 'values' => &$materials[$materialKey]];
             } elseif (stripos($materialCode, 'PETROKOK') !== false || stripos($materialCode, 'P.KOK') !== false || stripos($materialShort, 'PETROKOK') !== false || stripos($materialShort, 'P.KOK') !== false || stripos($materialCode, 'MS') !== false || stripos($materialShort, 'MS') !== false) {
@@ -462,43 +603,63 @@ class DeliveryReportPivotService
             }
         }
 
-        if ($klinkerGri === null || $curuf === null || $petrokok === null) {
+        $totalKlinkerQty = 0;
+        foreach ($klinkerRefs as &$ref) {
+            $totalKlinkerQty += $ref['values']['quantity'] ?? 0;
+        }
+        unset($ref);
+
+        $curufQuantity = $curuf !== null ? ($curuf['values']['quantity'] ?? 0) : 0;
+        $petrokokQuantity = $petrokok !== null ? ($petrokok['values']['quantity'] ?? 0) : 0;
+
+        if ($klinkerRefs === [] && $curuf === null && $petrokok === null) {
             return;
         }
 
-        $klinkerQuantity = $klinkerGri['values']['quantity'] ?? 0;
-        $curufQuantity = $curuf['values']['quantity'] ?? 0;
-        $petrokokQuantity = $petrokok['values']['quantity'] ?? 0;
-
-        if ($klinkerQuantity <= 0.001) {
-            $klinkerGri['values']['bos_dolu_malzeme_calculated'] = '--';
-            $curuf['values']['bos_dolu_malzeme_calculated'] = $curufQuantity > 0.001 ? 'Curuf' : '--';
-            $petrokok['values']['bos_dolu_malzeme_calculated'] = $petrokokQuantity > 0.001 ? 'Petrokok (MS)' : '--';
+        if ($totalKlinkerQty <= 0.001) {
+            foreach ($klinkerRefs as &$ref) {
+                $ref['values']['bos_dolu_malzeme_calculated'] = '--';
+            }
+            unset($ref);
+            if ($curuf !== null) {
+                $curuf['values']['bos_dolu_malzeme_calculated'] = $curufQuantity > 0.001 ? 'Curuf' : '--';
+            }
+            if ($petrokok !== null) {
+                $petrokok['values']['bos_dolu_malzeme_calculated'] = $petrokokQuantity > 0.001 ? 'Petrokok (MS)' : '--';
+            }
 
             return;
         }
 
-        $curufKucuk = $curufQuantity <= $petrokokQuantity;
-        $kucukMalzemeQuantity = $curufKucuk ? $curufQuantity : $petrokokQuantity;
+        $partnerQuantity = $curufQuantity > 0 && $petrokokQuantity > 0
+            ? min($curufQuantity, $petrokokQuantity)
+            : ($curufQuantity > 0 ? $curufQuantity : $petrokokQuantity);
 
-        if ($curufKucuk) {
-            $curufDoluDolu = $curufQuantity;
-            $curufBosDolu = 0;
-            $petrokokDoluDolu = 0;
-            $petrokokBosDolu = $petrokokQuantity;
-        } else {
-            $petrokokDoluDolu = $petrokokQuantity;
-            $petrokokBosDolu = 0;
-            $curufDoluDolu = 0;
-            $curufBosDolu = $curufQuantity;
+        $klinkerBosDolu = max($totalKlinkerQty - $partnerQuantity, 0);
+        $curufBosDolu = $curufQuantity > $totalKlinkerQty ? $curufQuantity - $totalKlinkerQty : 0;
+        $petrokokBosDolu = $petrokokQuantity > 0 && ($curufQuantity <= 0 || $curufQuantity <= $petrokokQuantity) ? $petrokokQuantity : 0;
+
+        if ($curufQuantity > 0 && $petrokokQuantity > 0) {
+            if ($curufQuantity <= $petrokokQuantity) {
+                $curufBosDolu = 0;
+                $petrokokBosDolu = $petrokokQuantity;
+            } else {
+                $petrokokBosDolu = 0;
+                $curufBosDolu = $curufQuantity;
+            }
+            $klinkerBosDolu = max($totalKlinkerQty - min($curufQuantity, $petrokokQuantity), 0);
         }
 
-        $klinkerDoluDolu = min($klinkerQuantity, $kucukMalzemeQuantity);
-        $klinkerBosDolu = $klinkerQuantity - $klinkerDoluDolu;
-
-        $klinkerGri['values']['bos_dolu_malzeme_calculated'] = $klinkerBosDolu > 0 ? 'Klinker(Gri)' : '--';
-        $curuf['values']['bos_dolu_malzeme_calculated'] = $curufBosDolu > 0 ? 'Curuf' : '--';
-        $petrokok['values']['bos_dolu_malzeme_calculated'] = $petrokokBosDolu > 0 ? 'Petrokok (MS)' : '--';
+        foreach ($klinkerRefs as &$ref) {
+            $ref['values']['bos_dolu_malzeme_calculated'] = $klinkerBosDolu > 0.001 ? 'Klinker' : '--';
+        }
+        unset($ref);
+        if ($curuf !== null) {
+            $curuf['values']['bos_dolu_malzeme_calculated'] = $curufBosDolu > 0.001 ? 'Curuf' : '--';
+        }
+        if ($petrokok !== null) {
+            $petrokok['values']['bos_dolu_malzeme_calculated'] = $petrokokBosDolu > 0.001 ? 'Petrokok (MS)' : '--';
+        }
     }
 
     /**

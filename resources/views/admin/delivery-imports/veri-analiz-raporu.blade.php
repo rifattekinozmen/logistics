@@ -129,7 +129,7 @@
     </div>
 </div>
 
-@if(!empty($pivot['fatura_kalemleri'] ?? []))
+@if(!empty($pivot['fatura_rota_gruplari'] ?? []))
 <div class="mt-5">
     <h3 class="h5 fw-bold text-dark mb-3">Fatura Kalemleri</h3>
     <p class="text-secondary small mb-2"><strong>Fatura Dönemi:</strong> {{ $dateRangeText ?? '–' }}</p>
@@ -137,7 +137,9 @@
         <table class="table table-bordered table-sm mb-0 w-100 veri-analiz-table" style="font-size: 0.875rem;">
             <thead>
                 <tr style="background-color: #e7f1ff;">
-                    <th class="text-secondary fw-semibold">Malzeme Kodu / Lokasyon Nereden Nereye + Malzeme Kısa Metni</th>
+                    <th class="text-secondary fw-semibold">Malzeme Kodu</th>
+                    <th class="text-secondary fw-semibold">Malzeme Kısa Metni</th>
+                    <th class="text-secondary fw-semibold text-center">Nerden Nereye</th>
                     <th class="text-secondary fw-semibold text-center">Taşıma Tipi</th>
                     <th class="text-secondary fw-semibold text-center">Toplam Miktar</th>
                     <th class="text-secondary fw-semibold text-center">Birim</th>
@@ -145,17 +147,24 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($pivot['fatura_kalemleri'] as $kalem)
+                @foreach($pivot['fatura_rota_gruplari'] as $rotaGrup)
+                <tr style="background-color: #f8f9fa;">
+                    <td class="fw-bold text-dark" colspan="7">{{ $rotaGrup['route_label'] }}</td>
+                </tr>
+                @foreach($rotaGrup['kalemler'] as $kalem)
                 <tr>
-                    <td class="align-middle">{{ $kalem['material_label'] }}</td>
+                    <td class="align-middle ps-3">{{ $kalem['material_code'] }}</td>
+                    <td class="align-middle">{{ $kalem['material_short'] }}</td>
+                    <td class="align-middle text-center">{{ $kalem['nerden_nereye'] }}</td>
                     <td class="align-middle text-center">{{ $kalem['tasima_tipi'] }}</td>
                     <td class="align-middle text-center">{{ number_format($kalem['miktar'], 2, ',', '.') }}</td>
                     <td class="align-middle text-center">Ton</td>
                     <td class="align-middle text-center">–</td>
                 </tr>
                 @endforeach
+                @endforeach
                 <tr class="fw-bold" style="background-color: #e7f1ff;">
-                    <td class="align-middle" colspan="2">TOPLAM</td>
+                    <td class="align-middle" colspan="4">TOPLAM</td>
                     <td class="align-middle text-center">{{ number_format($pivot['fatura_toplam'] ?? 0, 2, ',', '.') }}</td>
                     <td class="align-middle text-center">Ton</td>
                     <td class="align-middle text-center">–</td>
