@@ -135,7 +135,7 @@ class DeliveryImportController extends Controller
         $sortCol = $request->integer('sort', -1);
         $direction = strtolower($request->string('direction', 'asc')->toString()) === 'desc' ? 'desc' : 'asc';
         $perPage = (int) $request->input('per_page', 25);
-        $perPage = in_array($perPage, [25, 50, 100], true) ? $perPage : 25;
+        $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 25;
         $errorRowIndexes = array_keys($batch->import_errors ?? []);
 
         if (! Schema::hasTable('delivery_report_rows')) {

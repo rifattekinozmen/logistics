@@ -147,7 +147,7 @@
     <label class="d-flex align-items-center gap-1 small text-secondary mb-0">
         <span>Sayfa başına:</span>
         <select name="per_page" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
-            @foreach([25, 50, 100] as $n)
+            @foreach([10, 25, 50, 100] as $n)
                 <option value="{{ $n }}" {{ ($perPage ?? 25) == $n ? 'selected' : '' }}>{{ $n }}</option>
             @endforeach
         </select>

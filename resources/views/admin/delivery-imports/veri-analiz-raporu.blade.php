@@ -43,8 +43,15 @@
                     <th class="border-0 text-secondary fw-semibold" style="width: 5rem; white-space: normal; background-color: #e7f1ff;" title="Tarih (gg.aa.yyyy)">TARİH</th>
                     @foreach($pivot['materials'] as $m)
                         @php
-                            $parts = explode(' | ', $m['label'], 2);
-                            $code = $parts[0] ?? $m['label'];
+                            // matKey format: "KOD | KISA METİN" veya "KOD | KISA METİN [ÜY TANIM]"
+                            $labelRaw = $m['label'];
+                            $firmaSuffix = '';
+                            if (preg_match('/\[(.+)\]\s*$/', $labelRaw, $fMatch)) {
+                                $firmaSuffix = $fMatch[1];
+                                $labelRaw = trim(preg_replace('/\s*\[.+\]\s*$/', '', $labelRaw));
+                            }
+                            $parts = explode(' | ', $labelRaw, 2);
+                            $code = $parts[0] ?? $labelRaw;
                             $text = $parts[1] ?? '';
                         @endphp
                         <th class="border-0 text-secondary fw-semibold align-middle" style="white-space: normal; min-width: 4rem; line-height: 1.3; background-color: #e7f1ff;" title="{{ $m['label'] }}">
@@ -52,6 +59,9 @@
                                 <span class="small text-dark">{{ $code }}</span>
                                 @if($text !== '')
                                     <span class="small text-secondary">{{ $text }}</span>
+                                @endif
+                                @if($firmaSuffix !== '')
+                                    <span class="small fw-semibold" style="color: #6f42c1; font-size: 0.7rem;">{{ $firmaSuffix }}</span>
                                 @endif
                             </div>
                         </th>
@@ -170,6 +180,9 @@
                 </select>
             </form>
             <span class="fw-bold" style="font-size: 1.15rem; color: #1a1a2e;">{{ number_format($pivot['fatura_toplam'] ?? 0, 2, ',', '.') }} <span class="fw-normal text-secondary" style="font-size: 0.85rem;">Ton</span></span>
+            <button type="button" id="btnCopyFatura" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1" style="font-size: 0.82rem;" title="Mail İçin Kopyala" onclick="copyFaturaToClipboard()">
+                <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
+            </button>
         </div>
     </div>
 
@@ -204,7 +217,20 @@
                     <td class="align-middle text-start">
                         <code class="text-dark" style="font-size: 0.8rem; background: #f0f2f5; padding: 0.15rem 0.4rem; border-radius: 3px;">{{ $kalem['material_code'] }}</code>
                     </td>
-                    <td class="align-middle text-start fw-medium text-dark">{{ $kalem['material_short'] }}</td>
+                    <td class="align-middle text-start fw-medium text-dark">
+                        @php
+                            $matShort = $kalem['material_short'];
+                            $faturaFirma = '';
+                            if (preg_match('/\[(.+)\]\s*$/', $matShort, $fm)) {
+                                $faturaFirma = $fm[1];
+                                $matShort = trim(preg_replace('/\s*\[.+\]\s*$/', '', $matShort));
+                            }
+                        @endphp
+                        {{ $matShort }}
+                        @if($faturaFirma !== '')
+                            <br><span class="small" style="color: #6f42c1; font-size: 0.72rem;">{{ $faturaFirma }}</span>
+                        @endif
+                    </td>
                     <td class="align-middle text-center">
                         @php
                             $dirParts = explode('→', $kalem['nerden_nereye']);
@@ -236,6 +262,95 @@
             </tbody>
         </table>
     </div>
+
+    {{-- Firma bazlı fatura tabloları (1. tabloyla aynı yapı) --}}
+    @foreach(($pivot['firma_fatura_gruplari'] ?? []) as $fgIdx => $firmaGrup)
+    <div class="mt-4">
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-2">
+            <h4 class="h6 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined" style="font-size: 1.2rem; color: #6f42c1;">business</span>
+                {{ $firmaGrup['label'] }}
+            </h4>
+            <span class="fw-bold" style="font-size: 1rem; color: #1a1a2e;">{{ number_format($firmaGrup['toplam'], 2, ',', '.') }} <span class="fw-normal text-secondary" style="font-size: 0.8rem;">Ton</span></span>
+        </div>
+
+        <div class="bg-white rounded-3 shadow-sm border overflow-hidden">
+            <table class="table table-sm mb-0 w-100 fatura-table">
+                <thead>
+                    <tr style="background: linear-gradient(180deg, #f3eeff 0%, #ece4fa 100%); border-bottom: 2px solid #d0c4e6;">
+                        <th class="text-secondary fw-semibold text-start" style="width: 11%;">Malzeme Kodu</th>
+                        <th class="text-secondary fw-semibold text-start" style="width: 16%;">Malzeme Kısa Metni</th>
+                        <th class="text-secondary fw-semibold text-center" style="width: 26%;">Nerden Nereye</th>
+                        <th class="text-secondary fw-semibold text-center" style="width: 12%;">Taşıma Tipi</th>
+                        <th class="text-secondary fw-semibold text-end" style="width: 14%;">Toplam Miktar</th>
+                        <th class="text-secondary fw-semibold text-center" style="width: 8%;">Birim</th>
+                        <th class="text-secondary fw-semibold text-end" style="width: 13%;">Birim Fiyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($firmaGrup['rota_gruplari'] as $rgIdx => $rotaGrup)
+                    {{-- Rota grup başlığı --}}
+                    <tr class="fatura-route-header" style="background-color: #f8f5ff; border-top: {{ $rgIdx > 0 ? '2px solid #e0dce6' : 'none' }};">
+                        <td colspan="7" class="fw-bold" style="color: #4a347a; font-size: 0.82rem;">
+                            <span class="material-symbols-outlined align-middle me-1" style="font-size: 1rem; color: #6f42c1;">location_on</span>
+                            {{ $rotaGrup['route_label'] }}
+                            <span class="text-secondary fw-normal ms-2" style="font-size: 0.75rem;">
+                                ({{ number_format($rotaGrup['route_toplam'], 2, ',', '.') }} Ton)
+                            </span>
+                        </td>
+                    </tr>
+                    @foreach($rotaGrup['kalemler'] as $kalem)
+                    <tr style="border-bottom: 1px solid #eef0f4;">
+                        <td class="align-middle text-start">
+                            <code class="text-dark" style="font-size: 0.8rem; background: #f0f2f5; padding: 0.15rem 0.4rem; border-radius: 3px;">{{ $kalem['material_code'] }}</code>
+                        </td>
+                        <td class="align-middle text-start fw-medium text-dark">
+                            @php
+                                $matShort2 = $kalem['material_short'];
+                                $faturaFirma2 = '';
+                                if (preg_match('/\[(.+)\]\s*$/', $matShort2, $fm2)) {
+                                    $faturaFirma2 = $fm2[1];
+                                    $matShort2 = trim(preg_replace('/\s*\[.+\]\s*$/', '', $matShort2));
+                                }
+                            @endphp
+                            {{ $matShort2 }}
+                            @if($faturaFirma2 !== '')
+                                <br><span class="small" style="color: #6f42c1; font-size: 0.72rem;">{{ $faturaFirma2 }}</span>
+                            @endif
+                        </td>
+                        <td class="align-middle text-center">
+                            @php
+                                $dirParts2 = explode('→', $kalem['nerden_nereye']);
+                                $from2 = trim($dirParts2[0] ?? '');
+                                $to2 = trim($dirParts2[1] ?? '');
+                            @endphp
+                            <span class="text-dark">{{ $from2 }}</span>
+                            <span class="fatura-arrow mx-1">→</span>
+                            <span class="text-dark">{{ $to2 }}</span>
+                        </td>
+                        <td class="align-middle text-center">
+                            <span class="fatura-tip-badge {{ $kalem['tasima_tipi'] === 'Dolu-Dolu' ? 'fatura-tip-dd' : 'fatura-tip-bd' }}">
+                                {{ $kalem['tasima_tipi'] }}
+                            </span>
+                        </td>
+                        <td class="align-middle text-end fatura-miktar">{{ number_format($kalem['miktar'], 2, ',', '.') }}</td>
+                        <td class="align-middle text-center text-secondary">Ton</td>
+                        <td class="align-middle text-end text-secondary">–</td>
+                    </tr>
+                    @endforeach
+                    @endforeach
+                    {{-- Toplam satırı --}}
+                    <tr style="background: linear-gradient(180deg, #ece4fa 0%, #e5dcf5 100%); border-top: 2px solid #c4b5db;">
+                        <td colspan="4" class="fw-bold text-end" style="font-size: 0.85rem; color: #4a347a; padding-right: 1rem !important;">GENEL TOPLAM</td>
+                        <td class="fw-bold text-end" style="font-size: 0.95rem; color: #1a1a2e;">{{ number_format($firmaGrup['toplam'], 2, ',', '.') }}</td>
+                        <td class="fw-bold text-center" style="color: #4a347a;">Ton</td>
+                        <td class="text-end text-secondary">–</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endforeach
 
     {{-- Fatura durumu kartı --}}
     <div class="fatura-status-card rounded-3 border mt-3 p-3 d-flex flex-wrap align-items-center gap-3">
@@ -279,5 +394,126 @@
         @endif
     </div>
 </div>
+
+<script>
+function copyFaturaToClipboard() {
+    const btn = document.getElementById('btnCopyFatura');
+    const dateRange = @json($dateRangeText ?? '');
+    const rotaGruplari = @json($pivot['fatura_rota_gruplari'] ?? []);
+    const genelToplam = @json($pivot['fatura_toplam'] ?? 0);
+
+    function formatNumber(n) {
+        return Number(n).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function cleanBracket(text) {
+        const m = text.match(/^(.*?)\s*\[(.+)\]\s*$/);
+        return m ? { name: m[1].trim(), firma: m[2].trim() } : { name: text, firma: '' };
+    }
+
+    /* HTML tablo (mail istemcileri için) */
+    const cellStyle = 'padding:6px 10px;border:1px solid #d0d0d0;font-size:13px;font-family:Calibri,Arial,sans-serif;';
+    const headerStyle = cellStyle + 'background:#e9efff;font-weight:600;color:#2b3a67;';
+    const routeStyle = cellStyle + 'background:#f1f4f9;font-weight:700;color:#2b3a67;font-size:13px;';
+    const totalStyle = cellStyle + 'background:#e0e8f5;font-weight:700;color:#1a1a2e;';
+    const ddBadge = 'display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:#d1e7dd;color:#0a5c36;';
+    const bdBadge = 'display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:#cfe2ff;color:#084298;';
+
+    let html = '';
+    html += '<p style="font-family:Calibri,Arial,sans-serif;font-size:14px;color:#333;margin-bottom:8px;">';
+    html += '<strong>Fatura Kalemleri</strong>';
+    if (dateRange) html += ' &mdash; ' + dateRange;
+    html += '</p>';
+    html += '<table style="border-collapse:collapse;width:100%;max-width:800px;font-family:Calibri,Arial,sans-serif;">';
+    html += '<thead><tr>';
+    html += '<th style="' + headerStyle + 'text-align:left;">Malzeme Kodu</th>';
+    html += '<th style="' + headerStyle + 'text-align:left;">Malzeme Kısa Metni</th>';
+    html += '<th style="' + headerStyle + 'text-align:center;">Nerden Nereye</th>';
+    html += '<th style="' + headerStyle + 'text-align:center;">Taşıma Tipi</th>';
+    html += '<th style="' + headerStyle + 'text-align:right;">Toplam Miktar</th>';
+    html += '<th style="' + headerStyle + 'text-align:center;">Birim</th>';
+    html += '</tr></thead><tbody>';
+
+    /* Düz metin (plain text fallback) */
+    let plain = 'Fatura Kalemleri';
+    if (dateRange) plain += ' — ' + dateRange;
+    plain += '\n' + '='.repeat(70) + '\n\n';
+
+    rotaGruplari.forEach(function(grup) {
+        html += '<tr><td colspan="6" style="' + routeStyle + '">';
+        html += '📍 ' + grup.route_label;
+        html += ' <span style="font-weight:400;color:#6c757d;font-size:12px;">(' + formatNumber(grup.route_toplam) + ' Ton)</span>';
+        html += '</td></tr>';
+
+        plain += '▸ ' + grup.route_label + ' (' + formatNumber(grup.route_toplam) + ' Ton)\n';
+        plain += '-'.repeat(70) + '\n';
+
+        grup.kalemler.forEach(function(k) {
+            const parsed = cleanBracket(k.material_short);
+            const matDisplay = parsed.firma ? parsed.name + ' (' + parsed.firma + ')' : parsed.name;
+            const tipBadge = k.tasima_tipi === 'Dolu-Dolu' ? ddBadge : bdBadge;
+
+            html += '<tr>';
+            html += '<td style="' + cellStyle + 'text-align:left;">' + k.material_code + '</td>';
+            html += '<td style="' + cellStyle + 'text-align:left;">' + matDisplay + '</td>';
+            html += '<td style="' + cellStyle + 'text-align:center;">' + k.nerden_nereye + '</td>';
+            html += '<td style="' + cellStyle + 'text-align:center;"><span style="' + tipBadge + '">' + k.tasima_tipi + '</span></td>';
+            html += '<td style="' + cellStyle + 'text-align:right;font-weight:600;">' + formatNumber(k.miktar) + '</td>';
+            html += '<td style="' + cellStyle + 'text-align:center;">Ton</td>';
+            html += '</tr>';
+
+            const tipLabel = k.tasima_tipi === 'Dolu-Dolu' ? 'D-D' : 'B-D';
+            plain += '  ' + k.material_code.padEnd(12) + matDisplay.padEnd(30) + tipLabel.padEnd(6) + formatNumber(k.miktar).padStart(12) + ' Ton\n';
+            plain += '  ' + ' '.repeat(12) + k.nerden_nereye + '\n';
+        });
+
+        plain += '\n';
+    });
+
+    html += '<tr>';
+    html += '<td colspan="4" style="' + totalStyle + 'text-align:right;">GENEL TOPLAM</td>';
+    html += '<td style="' + totalStyle + 'text-align:right;font-size:14px;">' + formatNumber(genelToplam) + '</td>';
+    html += '<td style="' + totalStyle + 'text-align:center;">Ton</td>';
+    html += '</tr>';
+    html += '</tbody></table>';
+
+    plain += '='.repeat(70) + '\n';
+    plain += 'GENEL TOPLAM: ' + formatNumber(genelToplam) + ' Ton\n';
+
+    /* Clipboard'a kopyala (HTML + plain text) */
+    const blob = new Blob([html], { type: 'text/html' });
+    const blobPlain = new Blob([plain], { type: 'text/plain' });
+
+    navigator.clipboard.write([
+        new ClipboardItem({
+            'text/html': blob,
+            'text/plain': blobPlain
+        })
+    ]).then(function() {
+        const origText = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">check</span> Kopyalandı!';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-success', 'text-white');
+        setTimeout(function() {
+            btn.innerHTML = origText;
+            btn.classList.remove('btn-success', 'text-white');
+            btn.classList.add('btn-outline-primary');
+        }, 2000);
+    }).catch(function() {
+        /* Fallback: sadece plain text */
+        navigator.clipboard.writeText(plain).then(function() {
+            const origText = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">check</span> Kopyalandı!';
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-success', 'text-white');
+            setTimeout(function() {
+                btn.innerHTML = origText;
+                btn.classList.remove('btn-success', 'text-white');
+                btn.classList.add('btn-outline-primary');
+            }, 2000);
+        });
+    });
+}
+</script>
 @endif
 @endsection

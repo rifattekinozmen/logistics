@@ -48,6 +48,7 @@ return [
              */
             'header_aliases' => [
                 'Araç Çıkış Saati' => ['Araç Çıkış Tarihi'],
+                'FİRMA' => ['Firma_Adı', 'Firma Adı', 'FIRMA', 'firma_adı', 'Firma_adı'],
             ],
             'headers' => [
                 'Satınalma belgesi',
