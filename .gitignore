@@ -24,3 +24,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Laravel Boost — auto-generated internal files (safe to ignore)
+/.ai/boost-main/
+/.ai/boost/
