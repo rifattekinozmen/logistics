@@ -1,3 +1,11 @@
+## Session State
+
+**Status:** Active — Delivery import pipeline (pivot, invoice status, petrokok route)
+**Last work:** Invoice status tracking + petrokok route preference on DeliveryImportBatch
+**Session tracker:** [`.ai/session.md`](.ai/session.md) | **Architecture map:** [`.ai/project-map.md`](.ai/project-map.md)
+
+---
+
 # Logistics ERP + CRM + Filo Yönetim Sistemi
 
 PHP 8.2, Laravel 12, Bootstrap 5 ve Pest ile geliştirilmiş kurumsal lojistik yönetim platformu.

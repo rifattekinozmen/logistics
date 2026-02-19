@@ -3,7 +3,9 @@
 namespace App\Delivery\Services;
 
 use App\Models\DeliveryImportBatch;
-use App\Models\DeliveryReportRow;
+use DateTime;
+use DateTimeZone;
+use Throwable;
 
 class DeliveryReportPivotService
 {
@@ -259,12 +261,12 @@ class DeliveryReportPivotService
 
             if ($klinkerQuantity <= 0.001) {
                 $bosDoluSatir = $curufQuantity + $petrokokQuantity;
-                } else {
+            } else {
                 $bosDoluSatir = $totalKlinkerBd + $curufBd + $petrokokBd;
             }
 
             /* BOŞ-DOLU TAŞINAN MALZEME KISA METNİ belirleme */
-                    $satirBosDoluMalzeme = '--';
+            $satirBosDoluMalzeme = '--';
             $bdParts = [];
             if ($petrokokBd > 0.001) {
                 $bdParts[] = 'Petrokok (MS)';
@@ -291,15 +293,15 @@ class DeliveryReportPivotService
                 }
                 if (abs($rowDolu - ($rowFirma + $rowGecerli2)) >= 0.01) {
                     if ($rowDolu > ($rowFirma + $rowGecerli2)) {
-                    $satirBosDoluMalzeme = 'Klinker(Gri)';
-                } elseif ($rowFirma < 0.01) {
-                    $satirBosDoluMalzeme = 'Curuf';
-                } elseif ($satirToplami <= $rowFirma) {
-                    $satirBosDoluMalzeme = 'Petrokok (MS)';
-                } else {
-                    $satirBosDoluMalzeme = 'Petrokok (MS)+Curuf';
+                        $satirBosDoluMalzeme = 'Klinker(Gri)';
+                    } elseif ($rowFirma < 0.01) {
+                        $satirBosDoluMalzeme = 'Curuf';
+                    } elseif ($satirToplami <= $rowFirma) {
+                        $satirBosDoluMalzeme = 'Petrokok (MS)';
+                    } else {
+                        $satirBosDoluMalzeme = 'Petrokok (MS)+Curuf';
+                    }
                 }
-            }
             }
 
             foreach ($pivotData[$date] as $materialKey => $values) {
@@ -1138,8 +1140,8 @@ class DeliveryReportPivotService
         $petrokokQuantity = 0;
         foreach ($petrokokRefs as &$ref) {
             $petrokokQuantity += $ref['values']['quantity'] ?? 0;
-            }
-            unset($ref);
+        }
+        unset($ref);
 
         if ($klinkerRefs === [] && $curufRefs === [] && $petrokokRefs === []) {
             return;
@@ -1211,7 +1213,7 @@ class DeliveryReportPivotService
         }
 
         if ($numericValue !== null && $numericValue >= 1000 && $numericValue < 2958466 && class_exists(\PhpOffice\PhpSpreadsheet\Shared\Date::class)) {
-            $tz = new \DateTimeZone('Europe/Istanbul');
+            $tz = new DateTimeZone('Europe/Istanbul');
             $prev = \PhpOffice\PhpSpreadsheet\Shared\Date::getExcelCalendar();
             \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar(\PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_WINDOWS_1900);
             try {
@@ -1224,7 +1226,7 @@ class DeliveryReportPivotService
                 }
 
                 return $dt->format('d.m.Y');
-            } catch (\Throwable) {
+            } catch (Throwable) {
             } finally {
                 \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($prev);
             }
@@ -1250,14 +1252,14 @@ class DeliveryReportPivotService
         if (str_contains($value, '/')) {
             $formatsSlashFirst = ['n/j/Y', 'm/d/Y', 'n/j/Y H:i:s', 'm/d/Y H:i:s', 'j/n/Y', 'd/m/Y'];
             foreach ($formatsSlashFirst as $fmt) {
-                $dt = @\DateTime::createFromFormat($fmt, $value);
+                $dt = @DateTime::createFromFormat($fmt, $value);
                 if ($dt !== false) {
                     return $dt->format('d.m.Y');
                 }
             }
         }
         foreach ($formats as $fmt) {
-            $dt = @\DateTime::createFromFormat($fmt, $value);
+            $dt = @DateTime::createFromFormat($fmt, $value);
             if ($dt !== false) {
                 return $dt->format('d.m.Y');
             }
@@ -1277,7 +1279,7 @@ class DeliveryReportPivotService
             if ($parsed->year >= 1900 && $parsed->year <= 2100) {
                 return $parsed->format('d.m.Y');
             }
-        } catch (\Throwable) {
+        } catch (Throwable) {
         }
 
         return $value;
@@ -1292,8 +1294,8 @@ class DeliveryReportPivotService
     protected function sortPivotDataByDate(array $pivotData): array
     {
         uksort($pivotData, function (string $a, string $b): int {
-            $dtA = \DateTime::createFromFormat('d.m.Y', $a);
-            $dtB = \DateTime::createFromFormat('d.m.Y', $b);
+            $dtA = DateTime::createFromFormat('d.m.Y', $a);
+            $dtB = DateTime::createFromFormat('d.m.Y', $b);
             if (! $dtA || ! $dtB) {
                 return strcmp($a, $b);
             }

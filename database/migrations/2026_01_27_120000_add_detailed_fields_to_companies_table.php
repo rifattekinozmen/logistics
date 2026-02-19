@@ -23,7 +23,7 @@ return new class extends Migration
             if (! Schema::hasColumn('companies', 'district_id')) {
                 $table->foreignId('district_id')->nullable();
             }
-            
+
             // İletişim bilgileri
             if (! Schema::hasColumn('companies', 'mobile_phone')) {
                 $table->string('mobile_phone', 20)->nullable();
@@ -40,7 +40,7 @@ return new class extends Migration
             if (! Schema::hasColumn('companies', 'website')) {
                 $table->string('website')->nullable();
             }
-            
+
             // Adres bilgileri
             if (! Schema::hasColumn('companies', 'address')) {
                 $table->text('address')->nullable();
@@ -51,7 +51,7 @@ return new class extends Migration
             if (! Schema::hasColumn('companies', 'headquarters_city')) {
                 $table->string('headquarters_city')->nullable();
             }
-            
+
             // Yetkili kişi bilgileri
             if (! Schema::hasColumn('companies', 'authorized_person_name')) {
                 $table->string('authorized_person_name')->nullable();
@@ -59,12 +59,12 @@ return new class extends Migration
             if (! Schema::hasColumn('companies', 'title')) {
                 $table->string('title')->nullable(); // Ünvan
             }
-            
+
             // Vergi dairesi ili
             if (! Schema::hasColumn('companies', 'tax_office_city_id')) {
                 $table->foreignId('tax_office_city_id')->nullable();
             }
-            
+
             // e-Fatura ve e-İrsaliye bilgileri
             if (! Schema::hasColumn('companies', 'e_invoice_pk_tag')) {
                 $table->string('e_invoice_pk_tag')->nullable();
@@ -78,7 +78,7 @@ return new class extends Migration
             if (! Schema::hasColumn('companies', 'e_waybill_gb_tag')) {
                 $table->string('e_waybill_gb_tag')->nullable();
             }
-            
+
             // Sermaye ve API
             if (! Schema::hasColumn('companies', 'capital_amount')) {
                 $table->decimal('capital_amount', 15, 2)->nullable();
@@ -172,7 +172,7 @@ return new class extends Migration
                 $table->dropForeign(['district_id']);
                 $table->dropForeign(['tax_office_city_id']);
             }
-            
+
             $table->dropColumn([
                 'country_id',
                 'city_id',

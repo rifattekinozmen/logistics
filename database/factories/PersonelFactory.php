@@ -27,7 +27,7 @@ class PersonelFactory extends Factory
         return [
             'ad_soyad' => $this->faker->name(),
             'tckn' => $this->faker->numerify('###########'),
-            'kimlik_seri_no' => 'A01-' . $this->faker->numerify('######'),
+            'kimlik_seri_no' => 'A01-'.$this->faker->numerify('######'),
             'email' => $this->faker->unique()->safeEmail(),
             'telefon' => $this->faker->numerify('5##########'),
             'mobil_telefon' => $this->faker->numerify('5##########'),

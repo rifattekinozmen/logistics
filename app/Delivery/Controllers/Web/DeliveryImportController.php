@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class DeliveryImportController extends Controller
 {
@@ -124,7 +125,7 @@ class DeliveryImportController extends Controller
                     'status' => 'completed',
                 ]);
                 $batch->refresh();
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $batch->update(['status' => 'failed']);
                 report($e);
             }
@@ -435,4 +436,3 @@ class DeliveryImportController extends Controller
             ->with('success', 'Teslimat raporu silindi.');
     }
 }
-

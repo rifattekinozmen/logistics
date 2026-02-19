@@ -2,6 +2,7 @@
 
 namespace App\Integration\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
@@ -10,7 +11,7 @@ class PythonBridgeService
 {
     /**
      * Python ara katmana veri gönder.
-     * 
+     *
      * Python SDK kısıtları için ara katman kullanılıyorsa bu servis kullanılır.
      */
     public function sendToPython(array $data, string $action = 'process'): array
@@ -24,15 +25,15 @@ class PythonBridgeService
                 'timestamp' => now()->toIso8601String(),
             ]);
 
-            if (!$response->successful()) {
-                throw new \Exception("Python bridge hatası: {$response->body()}");
+            if (! $response->successful()) {
+                throw new Exception("Python bridge hatası: {$response->body()}");
             }
 
             return [
                 'success' => true,
                 'response' => $response->json(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Python bridge hatası: {$e->getMessage()}", [
                 'action' => $action,
                 'data' => $data,

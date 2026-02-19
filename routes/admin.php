@@ -1,25 +1,25 @@
 <?php
 
+use App\Core\Services\ExportService;
 use App\Customer\Controllers\Web\CustomerController;
-use App\Document\Controllers\Web\DocumentController;
 use App\Delivery\Controllers\Web\DeliveryImportController;
+use App\Document\Controllers\Web\DocumentController;
+use App\Employee\Controllers\Web\AdvanceController;
 use App\Employee\Controllers\Web\EmployeeController;
+use App\Employee\Controllers\Web\LeaveController;
+use App\Employee\Controllers\Web\PayrollController;
+use App\Employee\Controllers\Web\PersonnelAttendanceController;
 use App\Finance\Controllers\Web\PaymentController;
+use App\Finance\Services\FinanceDashboardService;
+use App\FuelPrice\Controllers\Web\FuelPriceController;
+use App\Notification\Controllers\Web\NotificationController;
 use App\Order\Controllers\Web\OrderController;
-use App\Shipment\Controllers\Web\ShipmentController;
+use App\Order\Services\OperationsPerformanceService;
 use App\Shift\Controllers\Web\ShiftController;
+use App\Shipment\Controllers\Web\ShipmentController;
 use App\Vehicle\Controllers\Web\VehicleController;
 use App\Warehouse\Controllers\Web\WarehouseController;
 use App\WorkOrder\Controllers\Web\WorkOrderController;
-use App\FuelPrice\Controllers\Web\FuelPriceController;
-use App\Notification\Controllers\Web\NotificationController;
-use App\Employee\Controllers\Web\LeaveController;
-use App\Employee\Controllers\Web\AdvanceController;
-use App\Employee\Controllers\Web\PayrollController;
-use App\Employee\Controllers\Web\PersonnelAttendanceController;
-use App\Core\Services\ExportService;
-use App\Finance\Services\FinanceDashboardService;
-use App\Order\Services\OperationsPerformanceService;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->group(function () {
@@ -82,11 +82,11 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
 
                 return [
                     'id' => $log->id,
-                    'title' => ($tableLabels[$log->table_name] ?? ucfirst($log->table_name)) . ' ' . ($actionLabels[$log->action] ?? $log->action),
+                    'title' => ($tableLabels[$log->table_name] ?? ucfirst($log->table_name)).' '.($actionLabels[$log->action] ?? $log->action),
                     'description' => $log->user?->name ?? 'Sistem',
                     'time' => $log->created_at->diffForHumans(),
                     'icon' => $icons[$log->table_name] ?? 'notifications',
-                    'color' => match($log->action) {
+                    'color' => match ($log->action) {
                         'created' => 'success',
                         'updated' => 'info',
                         'deleted' => 'danger',

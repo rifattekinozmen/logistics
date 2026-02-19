@@ -73,17 +73,17 @@ class UserController extends Controller
             // Müşteri portalı rolleri ile sistem rolleri birlikte seçilemez kontrolü
             $customerRoleIds = CustomRole::whereIn('name', ['customer', 'customer_user', 'customer_viewer'])->pluck('id')->toArray();
             $systemRoleIds = CustomRole::whereNotIn('name', ['customer', 'customer_user', 'customer_viewer'])->pluck('id')->toArray();
-            
+
             $selectedRoles = $request->roles;
-            $hasCustomerRole = !empty(array_intersect($selectedRoles, $customerRoleIds));
-            $hasSystemRole = !empty(array_intersect($selectedRoles, $systemRoleIds));
-            
+            $hasCustomerRole = ! empty(array_intersect($selectedRoles, $customerRoleIds));
+            $hasSystemRole = ! empty(array_intersect($selectedRoles, $systemRoleIds));
+
             if ($hasCustomerRole && $hasSystemRole) {
                 return redirect()->back()
                     ->withInput()
                     ->withErrors(['roles' => 'Müşteri portalı rolleri ile sistem rolleri birlikte seçilemez.']);
             }
-            
+
             $user->roles()->sync($selectedRoles);
         }
 
@@ -135,17 +135,17 @@ class UserController extends Controller
             // Müşteri portalı rolleri ile sistem rolleri birlikte seçilemez kontrolü
             $customerRoleIds = CustomRole::whereIn('name', ['customer', 'customer_user', 'customer_viewer'])->pluck('id')->toArray();
             $systemRoleIds = CustomRole::whereNotIn('name', ['customer', 'customer_user', 'customer_viewer'])->pluck('id')->toArray();
-            
+
             $selectedRoles = $request->roles;
-            $hasCustomerRole = !empty(array_intersect($selectedRoles, $customerRoleIds));
-            $hasSystemRole = !empty(array_intersect($selectedRoles, $systemRoleIds));
-            
+            $hasCustomerRole = ! empty(array_intersect($selectedRoles, $customerRoleIds));
+            $hasSystemRole = ! empty(array_intersect($selectedRoles, $systemRoleIds));
+
             if ($hasCustomerRole && $hasSystemRole) {
                 return redirect()->back()
                     ->withInput()
                     ->withErrors(['roles' => 'Müşteri portalı rolleri ile sistem rolleri birlikte seçilemez.']);
             }
-            
+
             $user->roles()->sync($selectedRoles);
         } else {
             $user->roles()->detach();
@@ -172,12 +172,12 @@ class UserController extends Controller
     public function editRoles(User $user): View
     {
         $user->load(['roles.permissions']);
-        
+
         // Kullanıcının müşteri portalı rolü var mı kontrol et
-        $hasCustomerRole = $user->roles->contains(function($role) {
-            return in_array($role->name, ['customer', 'customer_user', 'customer_viewer']);
+        $hasCustomerRole = $user->roles->contains(function ($role) {
+            return in_array($role->name, ['customer', 'customer_user', 'customer_viewer'], true);
         });
-        
+
         // Müşteri kullanıcısıysa sadece müşteri portalı rolleri göster
         if ($hasCustomerRole) {
             $roles = CustomRole::whereIn('name', ['customer', 'customer_user', 'customer_viewer'])
@@ -206,14 +206,14 @@ class UserController extends Controller
         ]);
 
         $selectedRoles = $request->roles ?? [];
-        
+
         // Müşteri portalı rolleri ile sistem rolleri birlikte seçilemez kontrolü
         $customerRoleIds = CustomRole::whereIn('name', ['customer', 'customer_user', 'customer_viewer'])->pluck('id')->toArray();
         $systemRoleIds = CustomRole::whereNotIn('name', ['customer', 'customer_user', 'customer_viewer'])->pluck('id')->toArray();
-        
-        $hasCustomerRole = !empty(array_intersect($selectedRoles, $customerRoleIds));
-        $hasSystemRole = !empty(array_intersect($selectedRoles, $systemRoleIds));
-        
+
+        $hasCustomerRole = ! empty(array_intersect($selectedRoles, $customerRoleIds));
+        $hasSystemRole = ! empty(array_intersect($selectedRoles, $systemRoleIds));
+
         if ($hasCustomerRole && $hasSystemRole) {
             return redirect()->back()
                 ->withInput()

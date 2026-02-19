@@ -3,8 +3,8 @@
 namespace App\Employee\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\Payroll;
 use App\Models\Employee;
+use App\Models\Payroll;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,6 +47,7 @@ class PayrollController extends Controller
     public function create(): View
     {
         $employees = Employee::where('status', 1)->orderBy('first_name')->get();
+
         return view('admin.payrolls.create', compact('employees'));
     }
 
@@ -69,14 +70,14 @@ class PayrollController extends Controller
         ]);
 
         // Net maaşı hesapla
-        $gross = $validated['base_salary'] 
+        $gross = $validated['base_salary']
             + ($validated['overtime_amount'] ?? 0)
             + ($validated['bonus'] ?? 0);
-        
+
         $totalDeduction = ($validated['deduction'] ?? 0)
             + ($validated['tax'] ?? 0)
             + ($validated['social_security'] ?? 0);
-        
+
         $validated['net_salary'] = $gross - $totalDeduction;
         $validated['payroll_number'] = $this->generatePayrollNumber();
         $validated['created_by'] = Auth::id();

@@ -4,6 +4,7 @@ namespace App\Integration\Jobs;
 
 use App\Integration\Services\LogoIntegrationService;
 use App\Models\Company;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -38,7 +39,7 @@ class SendToLogoJob implements ShouldQueue
                 'company_id' => $this->company->id,
                 'logo_invoice_id' => $result['logo_invoice_id'] ?? null,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Logo'ya fatura gönderim hatası: {$e->getMessage()}", [
                 'company_id' => $this->company->id,
                 'invoice_data' => $this->invoiceData,

@@ -19,7 +19,7 @@ class NotificationController extends Controller
         $user = Auth::user();
         $company = $user->activeCompany();
 
-        if (!$company) {
+        if (! $company) {
             abort(403, 'Aktif bir firma seçmeden bildirimleri görüntüleyemezsiniz.');
         }
 
@@ -66,7 +66,7 @@ class NotificationController extends Controller
     public function show(Notification $notification): View
     {
         // Okundu işaretle
-        if (!$notification->is_read) {
+        if (! $notification->is_read) {
             $notification->update([
                 'is_read' => true,
                 'read_at' => now(),

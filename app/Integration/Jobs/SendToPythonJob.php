@@ -3,6 +3,7 @@
 namespace App\Integration\Jobs;
 
 use App\Integration\Services\PythonBridgeService;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -37,7 +38,7 @@ class SendToPythonJob implements ShouldQueue
                 'action' => $this->action,
                 'success' => $result['success'] ?? false,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Python'a veri gönderim hatası: {$e->getMessage()}", [
                 'action' => $this->action,
                 'data' => $this->data,

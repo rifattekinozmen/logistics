@@ -3,12 +3,13 @@
 namespace App\Excel\Services;
 
 use Carbon\Carbon;
+use Exception;
 
 class PeriodCalculationService
 {
     /**
      * Haftalık periyot tespiti.
-     * 
+     *
      * Verilen tarihten haftanın başlangıç ve bitiş tarihlerini döndürür.
      */
     public function getWeeklyPeriod(Carbon $date): array
@@ -51,7 +52,7 @@ class PeriodCalculationService
         $current = $startDate->copy();
 
         while ($current <= $endDate) {
-            $period = $periodType === 'weekly' 
+            $period = $periodType === 'weekly'
                 ? $this->getWeeklyPeriod($current)
                 : $this->getMonthlyPeriod($current);
 
@@ -71,14 +72,15 @@ class PeriodCalculationService
      */
     public function autoDetectPeriod(array $row, string $dateColumn = 'date'): ?array
     {
-        if (!isset($row[$dateColumn])) {
+        if (! isset($row[$dateColumn])) {
             return null;
         }
 
         try {
             $date = Carbon::parse($row[$dateColumn]);
+
             return $this->getWeeklyPeriod($date);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return null;
         }
     }

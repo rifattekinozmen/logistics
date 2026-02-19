@@ -3,12 +3,10 @@
 namespace App\AI\Services;
 
 use App\Models\Order;
-use App\Models\Shipment;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Operasyon analizi AI servisi.
- * 
+ *
  * Sipariş gecikmeleri, teslimat performansı, SLA takibi gibi konularda analiz yapar.
  */
 class AIOperationsService extends AIService
@@ -22,7 +20,7 @@ class AIOperationsService extends AIService
 
         // Geciken teslimatlar
         $delayedDeliveries = $this->analyzeDelayedDeliveries();
-        if (!empty($delayedDeliveries)) {
+        if (! empty($delayedDeliveries)) {
             $reports[] = $this->createReport(
                 'operations',
                 "{$delayedDeliveries['count']} adet teslimat gecikme riski taşıyor.",

@@ -32,7 +32,7 @@ class ProfileController extends Controller
         // Avatar yükleme
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
-            
+
             // Dosya geçerli mi kontrol et
             if ($file->isValid()) {
                 // Eski avatar'ı sil

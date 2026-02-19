@@ -11,13 +11,21 @@ class CompanyDigitalService extends Model
     use HasFactory;
 
     public const TYPE_E_INVOICE = 'e_invoice';
+
     public const TYPE_E_INVOICE_STORAGE = 'e_invoice_storage';
+
     public const TYPE_E_ARCHIVE = 'e_archive';
+
     public const TYPE_E_ARCHIVE_STORAGE = 'e_archive_storage';
+
     public const TYPE_E_WAYBILL = 'e_waybill';
+
     public const TYPE_E_WAYBILL_STORAGE = 'e_waybill_storage';
+
     public const TYPE_E_SMM = 'e_smm';
+
     public const TYPE_E_SMM_STORAGE = 'e_smm_storage';
+
     public const TYPE_E_LEDGER_STORAGE = 'e_ledger_storage';
 
     protected $fillable = [
@@ -67,4 +75,3 @@ class CompanyDigitalService extends Model
         };
     }
 }
-

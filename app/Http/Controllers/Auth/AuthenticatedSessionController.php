@@ -19,18 +19,18 @@ class AuthenticatedSessionController extends Controller
         // Eğer kullanıcı zaten giriş yapmışsa, rolüne göre yönlendir
         if (Auth::check()) {
             $user = Auth::user();
-            
+
             // Müşteri portalı rolleri kontrolü
             $hasCustomerRole = $user->hasRole('customer') || $user->hasRole('customer_user') || $user->hasRole('customer_viewer');
             $hasAdminRole = $user->hasRole('admin') || $user->hasRole('company_admin');
-            
-            if ($hasCustomerRole && !$hasAdminRole) {
+
+            if ($hasCustomerRole && ! $hasAdminRole) {
                 return redirect()->route('customer.dashboard');
             }
-            
+
             return redirect()->route('admin.dashboard');
         }
-        
+
         return view('auth.login');
     }
 
@@ -44,39 +44,43 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
-        
+
         // Kullanıcının rollerini kontrol et
         $hasCustomerRole = $user->hasRole('customer') || $user->hasRole('customer_user') || $user->hasRole('customer_viewer');
         $hasAdminRole = $user->hasRole('admin') || $user->hasRole('company_admin');
         $portal = $request->input('portal', null);
-        
+
         // Portal seçilmişse kontrol et
         if ($portal === 'admin') {
-            if (!$hasAdminRole) {
+            if (! $hasAdminRole) {
                 Auth::logout();
+
                 return back()->withErrors([
                     'email' => 'Admin paneline sadece yönetici kullanıcılar giriş yapabilir. Lütfen müşteri portalını kullanın.',
                 ])->withInput($request->only('email'));
             }
+
             return redirect()->intended(route('admin.dashboard'));
         }
-        
+
         if ($portal === 'customer') {
-            if (!$hasCustomerRole) {
+            if (! $hasCustomerRole) {
                 Auth::logout();
+
                 return back()->withErrors([
                     'email' => 'Müşteri portalına sadece müşteri kullanıcılar giriş yapabilir. Lütfen admin panelini kullanın.',
                 ])->withInput($request->only('email'));
             }
+
             return redirect()->intended(route('customer.dashboard'));
         }
 
         // Portal seçilmemişse, kullanıcının rollerine göre otomatik yönlendir
         // Önce müşteri portalı rolleri kontrol et (sadece müşteri rolü varsa)
-        if ($hasCustomerRole && !$hasAdminRole) {
+        if ($hasCustomerRole && ! $hasAdminRole) {
             return redirect()->intended(route('customer.dashboard'));
         }
-        
+
         // Admin rolü varsa admin dashboard'a yönlendir
         if ($hasAdminRole) {
             return redirect()->intended(route('admin.dashboard'));

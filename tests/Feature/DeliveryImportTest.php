@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\DeliveryImportBatch;
-
 it('kullanıcı teslimat import sayfasına erişebilir', function () {
     [$user] = createAdminUser();
     $this->actingAs($user);
@@ -29,7 +27,7 @@ it('kullanıcı Excel dosyası yükleyebilir', function () {
     // Basit CSV dosyası oluştur
     $csvContent = "teslimat_no,musteri_adi,teslimat_adresi\n";
     $csvContent .= "DEL001,Test Müşteri,Test Adresi\n";
-    
+
     $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('test.csv', $csvContent);
 
     $response = $this->post(route('admin.delivery-imports.store'), [

@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\FuelPrice;
-
 it('kullanıcı motorin fiyat listesine erişebilir', function () {
     [$user, $company] = createAdminUser();
     session(['active_company_id' => $company->id]);

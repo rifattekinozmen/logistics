@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
@@ -41,7 +40,7 @@ class StoreUserRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             $roles = $this->input('roles', []);
-            
+
             if (empty($roles)) {
                 return;
             }
@@ -50,14 +49,14 @@ class StoreUserRequest extends FormRequest
             $customerRoleIds = \App\Models\CustomRole::whereIn('name', ['customer', 'customer_user', 'customer_viewer'])
                 ->pluck('id')
                 ->toArray();
-            
+
             // Sistem rolleri
             $systemRoleIds = \App\Models\CustomRole::whereNotIn('name', ['customer', 'customer_user', 'customer_viewer'])
                 ->pluck('id')
                 ->toArray();
 
-            $hasCustomerRole = !empty(array_intersect($roles, $customerRoleIds));
-            $hasSystemRole = !empty(array_intersect($roles, $systemRoleIds));
+            $hasCustomerRole = ! empty(array_intersect($roles, $customerRoleIds));
+            $hasSystemRole = ! empty(array_intersect($roles, $systemRoleIds));
 
             if ($hasCustomerRole && $hasSystemRole) {
                 $validator->errors()->add('roles', 'Müşteri portalı rolleri ile sistem rolleri birlikte seçilemez.');

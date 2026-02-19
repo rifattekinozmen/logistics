@@ -2,17 +2,16 @@
 
 namespace App\Notification\Console\Commands;
 
-use App\Models\Document;
-use App\Models\Payment;
-use App\Models\Notification;
 use App\Models\Company;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
+use App\Models\Document;
+use App\Models\Notification;
+use App\Models\Payment;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 /**
  * Günlük bildirim gönderim komutu.
- * 
+ *
  * Belge süre bildirimleri, ödeme hatırlatmaları vb. gönderir.
  */
 class SendDailyNotifications extends Command
@@ -56,7 +55,7 @@ class SendDailyNotifications extends Command
     protected function checkDocumentExpiry(Company $company): void
     {
         $today = Carbon::today();
-        
+
         // 30 gün önce uyarı
         $expiringIn30Days = Document::where('valid_until', $today->copy()->addDays(30))
             ->whereNull('deleted_at')
@@ -101,7 +100,7 @@ class SendDailyNotifications extends Command
      */
     protected function createDocumentExpiryNotification(Company $company, $documents, int $days, string $severity): void
     {
-        $message = $days === -1 
+        $message = $days === -1
             ? "{$documents->count()} adet belgenin süresi geçmiş durumda."
             : "{$documents->count()} adet belge {$days} gün içinde sona erecek.";
 
@@ -164,10 +163,10 @@ class SendDailyNotifications extends Command
     protected function createPaymentReminderNotification(Company $company, $payments, int $days): void
     {
         $totalAmount = $payments->sum('amount');
-        
+
         $message = $days === -1
-            ? "Geciken ödemeler: " . number_format($totalAmount, 2) . " TL ({$payments->count()} adet)"
-            : "{$days} gün içinde vadesi gelecek ödemeler: " . number_format($totalAmount, 2) . " TL ({$payments->count()} adet)";
+            ? 'Geciken ödemeler: '.number_format($totalAmount, 2)." TL ({$payments->count()} adet)"
+            : "{$days} gün içinde vadesi gelecek ödemeler: ".number_format($totalAmount, 2)." TL ({$payments->count()} adet)";
 
         Notification::create([
             'notification_type' => 'payment_reminder',

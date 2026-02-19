@@ -38,6 +38,7 @@ class AdvanceController extends Controller
     public function create(): View
     {
         $employees = Employee::where('status', 1)->orderBy('first_name')->get();
+
         return view('admin.advances.create', compact('employees'));
     }
 

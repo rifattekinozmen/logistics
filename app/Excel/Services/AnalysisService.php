@@ -2,8 +2,6 @@
 
 namespace App\Excel\Services;
 
-use Illuminate\Support\Facades\DB;
-
 class AnalysisService
 {
     /**
@@ -15,8 +13,8 @@ class AnalysisService
 
         foreach ($data as $row) {
             $key = $this->buildGroupKey($row, $groupBy);
-            
-            if (!isset($grouped[$key])) {
+
+            if (! isset($grouped[$key])) {
                 $grouped[$key] = [
                     'count' => 0,
                     'total_amount' => 0,
@@ -41,6 +39,7 @@ class AnalysisService
         foreach ($groupBy as $field) {
             $parts[] = $row[$field] ?? 'unknown';
         }
+
         return implode('|', $parts);
     }
 

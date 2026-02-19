@@ -2,23 +2,22 @@
 
 namespace App\Excel\Jobs;
 
-use App\Excel\Services\ExcelImportService;
-use App\Excel\Services\PeriodCalculationService;
 use App\Excel\Services\AnalysisService;
 use App\Excel\Services\BillingService;
+use App\Excel\Services\ExcelImportService;
+use App\Excel\Services\PeriodCalculationService;
 use App\Models\Company;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Genel Excel işleme job'u.
- * 
+ *
  * Raw tablolara kayıt, normalize etme, periyot hesaplama, analiz ve faturalandırma datası üretme.
  */
 class ProcessExcelJob implements ShouldQueue
@@ -47,16 +46,17 @@ class ProcessExcelJob implements ShouldQueue
         try {
             // 1. Excel dosyasını parse et
             $rows = $excelService->parseFile($this->filePath, $this->disk);
-            
+
             if (empty($rows)) {
-                Log::warning("Excel dosyası boş veya parse edilemedi", [
+                Log::warning('Excel dosyası boş veya parse edilemedi', [
                     'file_path' => $this->filePath,
                 ]);
+
                 return;
             }
 
             // 2. Raw tablolara kaydet (şimdilik log olarak, ileride ayrı tablo oluşturulabilir)
-            Log::info("Excel raw data kaydedildi", [
+            Log::info('Excel raw data kaydedildi', [
                 'row_count' => count($rows),
                 'source_type' => $this->sourceType,
             ]);
@@ -66,7 +66,7 @@ class ProcessExcelJob implements ShouldQueue
             foreach ($rows as $index => $row) {
                 try {
                     $normalized = $excelService->normalizeRow($row);
-                    
+
                     // Periyot hesapla
                     $period = $periodService->autoDetectPeriod($normalized, 'date');
                     if ($period) {
@@ -76,8 +76,8 @@ class ProcessExcelJob implements ShouldQueue
                     }
 
                     $processedData[] = $normalized;
-                } catch (\Exception $e) {
-                    Log::warning("Satır normalize edilemedi", [
+                } catch (Exception $e) {
+                    Log::warning('Satır normalize edilemedi', [
                         'row_index' => $index,
                         'error' => $e->getMessage(),
                     ]);
@@ -94,20 +94,20 @@ class ProcessExcelJob implements ShouldQueue
                 $erpFormat = $billingService->formatForERP($billingData);
 
                 // ERP formatını logla (ileride ERP'ye gönderilecek)
-                Log::info("Faturalandırma datası üretildi", [
+                Log::info('Faturalandırma datası üretildi', [
                     'company_id' => $this->company->id,
                     'billing_items_count' => count($billingData),
                     'erp_format' => $erpFormat,
                 ]);
             }
 
-            Log::info("Excel işleme tamamlandı", [
+            Log::info('Excel işleme tamamlandı', [
                 'file_path' => $this->filePath,
                 'total_rows' => count($rows),
                 'processed_rows' => count($processedData),
                 'summary' => $summary,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Excel işleme hatası: {$e->getMessage()}", [
                 'file_path' => $this->filePath,
                 'exception' => $e,

@@ -37,7 +37,7 @@ return new class extends Migration
             if (! Schema::hasColumn('companies', 'stamp_path')) {
                 $table->string('stamp_path')->nullable();
             }
-            
+
             // is_active kolonu yoksa ekle
             if (! Schema::hasColumn('companies', 'is_active')) {
                 $table->boolean('is_active')->default(true);

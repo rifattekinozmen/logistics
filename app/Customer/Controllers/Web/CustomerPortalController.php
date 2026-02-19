@@ -2,15 +2,16 @@
 
 namespace App\Customer\Controllers\Web;
 
-use App\Http\Controllers\Controller;
-use App\Models\Order;
-use App\Models\Document;
-use App\Models\Customer;
-use App\Models\Payment;
-use App\Models\FavoriteAddress;
-use App\Models\OrderTemplate;
 use App\Core\Services\GeocodingService;
+use App\Http\Controllers\Controller;
+use App\Models\Customer;
+use App\Models\Document;
+use App\Models\FavoriteAddress;
+use App\Models\Order;
+use App\Models\OrderTemplate;
+use App\Models\Payment;
 use App\Order\Services\OrderService;
+use Hash;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use ZipArchive;
 
 class CustomerPortalController extends Controller
 {
@@ -32,15 +34,15 @@ class CustomerPortalController extends Controller
     public function dashboard(): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.dashboard')) {
+        if (! $user->hasPermission('customer.portal.dashboard')) {
             abort(403, 'Bu sayfaya erişim yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
@@ -108,15 +110,15 @@ class CustomerPortalController extends Controller
     public function orders(Request $request): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.orders.view')) {
+        if (! $user->hasPermission('customer.portal.orders.view')) {
             abort(403, 'Siparişleri görüntüleme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
@@ -141,7 +143,7 @@ class CustomerPortalController extends Controller
      */
     protected function exportOrdersToCsv($orders): StreamedResponse
     {
-        $filename = 'siparisler_' . now()->format('Y-m-d_His') . '.csv';
+        $filename = 'siparisler_'.now()->format('Y-m-d_His').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
@@ -152,10 +154,10 @@ class CustomerPortalController extends Controller
 
         $callback = function () use ($orders) {
             $file = fopen('php://output', 'w');
-            
+
             // BOM ekle (UTF-8 için)
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+
             // Başlık satırı
             fputcsv($file, [
                 'Sipariş No',
@@ -196,9 +198,9 @@ class CustomerPortalController extends Controller
     public function createOrder(): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.orders.create')) {
+        if (! $user->hasPermission('customer.portal.orders.create')) {
             abort(403, 'Sipariş oluşturma yetkiniz bulunmamaktadır.');
         }
 
@@ -211,15 +213,15 @@ class CustomerPortalController extends Controller
     public function storeOrder(Request $request): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.orders.create')) {
+        if (! $user->hasPermission('customer.portal.orders.create')) {
             abort(403, 'Sipariş oluşturma yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             return back()->withErrors(['customer' => 'Müşteri kaydı bulunamadı.']);
         }
 
@@ -247,16 +249,16 @@ class CustomerPortalController extends Controller
     public function showOrder(Order $order): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.orders.view')) {
+        if (! $user->hasPermission('customer.portal.orders.view')) {
             abort(403, 'Siparişleri görüntüleme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
         // Müşteri kontrolü
-        if (!$customer || $order->customer_id !== $customer->id) {
+        if (! $customer || $order->customer_id !== $customer->id) {
             abort(403, 'Bu siparişe erişim yetkiniz yok.');
         }
 
@@ -271,21 +273,21 @@ class CustomerPortalController extends Controller
     public function documents(Request $request): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.documents.view')) {
+        if (! $user->hasPermission('customer.portal.documents.view')) {
             abort(403, 'Belgeleri görüntüleme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
         // Müşteriye ait siparişlerin belgeleri
         $orderIds = Order::where('customer_id', $customer->id)->pluck('id');
-        
+
         $query = Document::where('documentable_type', Order::class)
             ->whereIn('documentable_id', $orderIds);
 
@@ -298,7 +300,7 @@ class CustomerPortalController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('category', 'like', "%{$search}%");
+                    ->orWhere('category', 'like', "%{$search}%");
             });
         }
 
@@ -336,14 +338,14 @@ class CustomerPortalController extends Controller
     protected function downloadMultipleDocuments(array $documentIds, Customer $customer): \Symfony\Component\HttpFoundation\StreamedResponse|RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.documents.download')) {
+        if (! $user->hasPermission('customer.portal.documents.download')) {
             abort(403, 'Belge indirme yetkiniz bulunmamaktadır.');
         }
 
         $orderIds = Order::where('customer_id', $customer->id)->pluck('id');
-        
+
         $documents = Document::where('documentable_type', Order::class)
             ->whereIn('documentable_id', $orderIds)
             ->whereIn('id', $documentIds)
@@ -354,16 +356,16 @@ class CustomerPortalController extends Controller
         }
 
         // ZIP dosyası oluştur
-        $zipFileName = 'belgeler_' . now()->format('Y-m-d_His') . '.zip';
-        $zipPath = storage_path('app/temp/' . $zipFileName);
+        $zipFileName = 'belgeler_'.now()->format('Y-m-d_His').'.zip';
+        $zipPath = storage_path('app/temp/'.$zipFileName);
 
         // Temp dizini yoksa oluştur
-        if (!file_exists(storage_path('app/temp'))) {
+        if (! file_exists(storage_path('app/temp'))) {
             mkdir(storage_path('app/temp'), 0755, true);
         }
 
-        $zip = new \ZipArchive();
-        if ($zip->open($zipPath, \ZipArchive::CREATE) !== true) {
+        $zip = new ZipArchive;
+        if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
             return back()->withErrors(['documents' => 'ZIP dosyası oluşturulamadı.']);
         }
 
@@ -385,27 +387,27 @@ class CustomerPortalController extends Controller
     public function downloadDocument(Document $document): \Symfony\Component\HttpFoundation\StreamedResponse|RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.documents.download')) {
+        if (! $user->hasPermission('customer.portal.documents.download')) {
             abort(403, 'Belge indirme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
         // Belge müşteriye ait mi kontrol et
         if ($document->documentable_type === Order::class) {
             $order = Order::find($document->documentable_id);
-            if (!$order || $order->customer_id !== $customer->id) {
+            if (! $order || $order->customer_id !== $customer->id) {
                 abort(403, 'Bu belgeye erişim yetkiniz yok.');
             }
         }
 
-        if (!Storage::disk('public')->exists($document->file_path)) {
+        if (! Storage::disk('public')->exists($document->file_path)) {
             return back()->withErrors(['document' => 'Belge dosyası bulunamadı.']);
         }
 
@@ -418,15 +420,15 @@ class CustomerPortalController extends Controller
     public function profile(): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.profile.view')) {
+        if (! $user->hasPermission('customer.portal.profile.view')) {
             abort(403, 'Profil görüntüleme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
@@ -439,15 +441,15 @@ class CustomerPortalController extends Controller
     public function updateProfile(Request $request): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.profile.update')) {
+        if (! $user->hasPermission('customer.portal.profile.update')) {
             abort(403, 'Profil güncelleme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             return back()->withErrors(['customer' => 'Müşteri kaydı bulunamadı.']);
         }
 
@@ -467,9 +469,9 @@ class CustomerPortalController extends Controller
     public function changePassword(Request $request): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.profile.update')) {
+        if (! $user->hasPermission('customer.portal.profile.update')) {
             abort(403, 'Profil güncelleme yetkiniz bulunmamaktadır.');
         }
 
@@ -484,13 +486,13 @@ class CustomerPortalController extends Controller
         ]);
 
         // Mevcut şifre kontrolü
-        if (!\Hash::check($validated['current_password'], $user->password)) {
+        if (! Hash::check($validated['current_password'], $user->password)) {
             return back()->withErrors(['current_password' => 'Mevcut şifre yanlış.']);
         }
 
         // Yeni şifreyi güncelle
         $user->update([
-            'password' => \Hash::make($validated['password']),
+            'password' => Hash::make($validated['password']),
         ]);
 
         return back()->with('success', 'Şifre başarıyla değiştirildi.');
@@ -502,15 +504,15 @@ class CustomerPortalController extends Controller
     public function payments(Request $request): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.payments.view')) {
+        if (! $user->hasPermission('customer.portal.payments.view')) {
             abort(403, 'Ödemeleri görüntüleme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
@@ -562,15 +564,15 @@ class CustomerPortalController extends Controller
     public function showPayment(Payment $payment): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.payments.view')) {
+        if (! $user->hasPermission('customer.portal.payments.view')) {
             abort(403, 'Ödemeleri görüntüleme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
@@ -588,21 +590,21 @@ class CustomerPortalController extends Controller
     public function invoices(Request $request): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.invoices.view')) {
+        if (! $user->hasPermission('customer.portal.invoices.view')) {
             abort(403, 'Faturaları görüntüleme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
         // Müşteriye ait siparişlerin belgeleri (fatura kategorisi)
         $orderIds = Order::where('customer_id', $customer->id)->pluck('id');
-        
+
         $query = Document::where('documentable_type', Order::class)
             ->whereIn('documentable_id', $orderIds)
             ->where('category', 'invoice');
@@ -622,27 +624,27 @@ class CustomerPortalController extends Controller
     public function downloadInvoice(Document $document): \Symfony\Component\HttpFoundation\StreamedResponse|RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.invoices.download')) {
+        if (! $user->hasPermission('customer.portal.invoices.download')) {
             abort(403, 'Fatura indirme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
         // Belge müşteriye ait mi kontrol et
         if ($document->documentable_type === Order::class) {
             $order = Order::find($document->documentable_id);
-            if (!$order || $order->customer_id !== $customer->id || $document->category !== 'invoice') {
+            if (! $order || $order->customer_id !== $customer->id || $document->category !== 'invoice') {
                 abort(403, 'Bu faturaya erişim yetkiniz yok.');
             }
         }
 
-        if (!Storage::disk('public')->exists($document->file_path)) {
+        if (! Storage::disk('public')->exists($document->file_path)) {
             return back()->withErrors(['document' => 'Fatura dosyası bulunamadı.']);
         }
 
@@ -655,9 +657,9 @@ class CustomerPortalController extends Controller
     public function notifications(Request $request): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.notifications.view')) {
+        if (! $user->hasPermission('customer.portal.notifications.view')) {
             abort(403, 'Bildirimleri görüntüleme yetkiniz bulunmamaktadır.');
         }
 
@@ -686,9 +688,9 @@ class CustomerPortalController extends Controller
     public function showNotification(\App\Models\Notification $notification): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.notifications.view')) {
+        if (! $user->hasPermission('customer.portal.notifications.view')) {
             abort(403, 'Bildirimleri görüntüleme yetkiniz bulunmamaktadır.');
         }
 
@@ -698,7 +700,7 @@ class CustomerPortalController extends Controller
         }
 
         // Okundu işaretle
-        if (!$notification->is_read) {
+        if (! $notification->is_read) {
             $notification->update([
                 'is_read' => true,
                 'read_at' => now(),
@@ -714,9 +716,9 @@ class CustomerPortalController extends Controller
     public function markNotificationAsRead(\App\Models\Notification $notification): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.notifications.view')) {
+        if (! $user->hasPermission('customer.portal.notifications.view')) {
             abort(403, 'Bildirimleri görüntüleme yetkiniz bulunmamaktadır.');
         }
 
@@ -739,9 +741,9 @@ class CustomerPortalController extends Controller
     public function markAllNotificationsAsRead(): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.notifications.view')) {
+        if (! $user->hasPermission('customer.portal.notifications.view')) {
             abort(403, 'Bildirimleri görüntüleme yetkiniz bulunmamaktadır.');
         }
 
@@ -761,15 +763,15 @@ class CustomerPortalController extends Controller
     public function cancelOrder(Request $request, Order $order): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.orders.cancel')) {
+        if (! $user->hasPermission('customer.portal.orders.cancel')) {
             abort(403, 'Sipariş iptal etme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             return back()->withErrors(['customer' => 'Müşteri kaydı bulunamadı.']);
         }
 
@@ -779,7 +781,7 @@ class CustomerPortalController extends Controller
         }
 
         // Sadece belirli durumlarda iptal edilebilir
-        if (!in_array($order->status, ['pending', 'assigned'])) {
+        if (! in_array($order->status, ['pending', 'assigned'], true)) {
             return back()->withErrors(['order' => 'Bu sipariş iptal edilemez. Sadece beklemede veya atanmış siparişler iptal edilebilir.']);
         }
 
@@ -789,7 +791,7 @@ class CustomerPortalController extends Controller
 
         $order->update([
             'status' => 'cancelled',
-            'notes' => ($order->notes ? $order->notes . "\n\n" : '') . 'İptal Nedeni: ' . ($validated['cancellation_reason'] ?? 'Müşteri talebi'),
+            'notes' => ($order->notes ? $order->notes."\n\n" : '').'İptal Nedeni: '.($validated['cancellation_reason'] ?? 'Müşteri talebi'),
         ]);
 
         return redirect()
@@ -803,15 +805,15 @@ class CustomerPortalController extends Controller
     public function favoriteAddresses(): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.favorite-addresses.manage')) {
+        if (! $user->hasPermission('customer.portal.favorite-addresses.manage')) {
             abort(403, 'Favori adresler yönetme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
@@ -829,15 +831,15 @@ class CustomerPortalController extends Controller
     public function storeFavoriteAddress(Request $request): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.favorite-addresses.manage')) {
+        if (! $user->hasPermission('customer.portal.favorite-addresses.manage')) {
             abort(403, 'Favori adresler yönetme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             return back()->withErrors(['customer' => 'Müşteri kaydı bulunamadı.']);
         }
 
@@ -863,15 +865,15 @@ class CustomerPortalController extends Controller
     public function deleteFavoriteAddress(FavoriteAddress $favoriteAddress): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.favorite-addresses.manage')) {
+        if (! $user->hasPermission('customer.portal.favorite-addresses.manage')) {
             abort(403, 'Favori adresler yönetme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer || $favoriteAddress->customer_id !== $customer->id) {
+        if (! $customer || $favoriteAddress->customer_id !== $customer->id) {
             abort(403, 'Bu adrese erişim yetkiniz yok.');
         }
 
@@ -910,15 +912,15 @@ class CustomerPortalController extends Controller
     public function orderTemplates(): View
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.order-templates.manage')) {
+        if (! $user->hasPermission('customer.portal.order-templates.manage')) {
             abort(403, 'Sipariş şablonları yönetme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
@@ -936,15 +938,15 @@ class CustomerPortalController extends Controller
     public function storeOrderTemplate(Request $request): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.order-templates.manage')) {
+        if (! $user->hasPermission('customer.portal.order-templates.manage')) {
             abort(403, 'Sipariş şablonları yönetme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer) {
+        if (! $customer) {
             return back()->withErrors(['customer' => 'Müşteri kaydı bulunamadı.']);
         }
 
@@ -969,15 +971,15 @@ class CustomerPortalController extends Controller
     public function createOrderFromTemplate(OrderTemplate $orderTemplate): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.orders.create')) {
+        if (! $user->hasPermission('customer.portal.orders.create')) {
             abort(403, 'Sipariş oluşturma yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer || $orderTemplate->customer_id !== $customer->id) {
+        if (! $customer || $orderTemplate->customer_id !== $customer->id) {
             abort(403, 'Bu şablona erişim yetkiniz yok.');
         }
 
@@ -1006,15 +1008,15 @@ class CustomerPortalController extends Controller
     public function deleteOrderTemplate(OrderTemplate $orderTemplate): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Permission kontrolü
-        if (!$user->hasPermission('customer.portal.order-templates.manage')) {
+        if (! $user->hasPermission('customer.portal.order-templates.manage')) {
             abort(403, 'Sipariş şablonları yönetme yetkiniz bulunmamaktadır.');
         }
 
         $customer = Customer::where('email', $user->email)->first();
 
-        if (!$customer || $orderTemplate->customer_id !== $customer->id) {
+        if (! $customer || $orderTemplate->customer_id !== $customer->id) {
             abort(403, 'Bu şablona erişim yetkiniz yok.');
         }
 

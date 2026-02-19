@@ -19,7 +19,7 @@ class FuelPriceController extends Controller
         $user = Auth::user();
         $company = $user->activeCompany();
 
-        if (!$company) {
+        if (! $company) {
             abort(403, 'Aktif bir firma seçmeden motorin fiyatlarını görüntüleyemezsiniz.');
         }
 
@@ -62,7 +62,7 @@ class FuelPriceController extends Controller
         $user = Auth::user();
         $company = $user->activeCompany();
 
-        if (!$company) {
+        if (! $company) {
             return back()->withErrors(['company' => 'Aktif bir firma seçmeden fiyat kaydedemezsiniz.']);
         }
 

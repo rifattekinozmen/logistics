@@ -6,7 +6,6 @@ use App\Models\Order;
 use App\Models\Shipment;
 use App\Models\Vehicle;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class OperationsPerformanceService
 {
@@ -17,19 +16,19 @@ class OperationsPerformanceService
     {
         $today = Carbon::today();
         $thisMonth = Carbon::now()->startOfMonth();
-        
+
         // Teslimat performans puanı
         $deliveryScore = $this->calculateDeliveryPerformanceScore();
-        
+
         // Geciken sipariş oranı
         $delayedOrderRate = $this->calculateDelayedOrderRate();
-        
+
         // Araç doluluk oranı
         $vehicleUtilization = $this->calculateVehicleUtilization();
-        
+
         // Ortalama teslimat süresi
         $avgDeliveryTime = $this->calculateAverageDeliveryTime();
-        
+
         return [
             'delivery_performance_score' => $deliveryScore,
             'delayed_order_rate' => $delayedOrderRate,
@@ -96,7 +95,7 @@ class OperationsPerformanceService
     protected function calculateVehicleUtilization(): array
     {
         $totalVehicles = Vehicle::where('status', 1)->count();
-        
+
         if ($totalVehicles === 0) {
             return [
                 'utilization_rate' => 0,

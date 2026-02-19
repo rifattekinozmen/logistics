@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Leave;
 use App\Models\Employee;
+use App\Models\Leave;
 
 it('kullanıcı izin listesine erişebilir', function () {
     [$user] = createAdminUser();

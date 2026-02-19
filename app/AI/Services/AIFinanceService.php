@@ -3,11 +3,10 @@
 namespace App\AI\Services;
 
 use App\Models\Payment;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Finansal analiz AI servisi.
- * 
+ *
  * Ödeme riskleri, nakit akışı, geciken ödemeler gibi konularda analiz yapar.
  */
 class AIFinanceService extends AIService
@@ -24,7 +23,7 @@ class AIFinanceService extends AIService
         if ($overduePayments['total_amount'] > 0) {
             $reports[] = $this->createReport(
                 'finance',
-                "Geciken ödemeler: " . number_format($overduePayments['total_amount'], 2) . " TL",
+                'Geciken ödemeler: '.number_format($overduePayments['total_amount'], 2).' TL',
                 $overduePayments['total_amount'] > 100000 ? 'high' : ($overduePayments['total_amount'] > 50000 ? 'medium' : 'low'),
                 $overduePayments
             );
@@ -35,7 +34,7 @@ class AIFinanceService extends AIService
         if ($upcomingPayments['total_amount'] > 0) {
             $reports[] = $this->createReport(
                 'finance',
-                "7 gün içinde " . number_format($upcomingPayments['total_amount'], 2) . " TL ödeme yapılacak.",
+                '7 gün içinde '.number_format($upcomingPayments['total_amount'], 2).' TL ödeme yapılacak.',
                 'low',
                 $upcomingPayments
             );
@@ -56,7 +55,7 @@ class AIFinanceService extends AIService
         return [
             'count' => $overdue->count(),
             'total_amount' => $overdue->sum('amount'),
-            'payments' => $overdue->map(fn($p) => [
+            'payments' => $overdue->map(fn ($p) => [
                 'id' => $p->id,
                 'amount' => $p->amount,
                 'due_date' => $p->due_date->format('Y-m-d'),

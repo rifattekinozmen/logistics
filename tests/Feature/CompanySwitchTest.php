@@ -27,15 +27,18 @@ it('kullanıcı yetkili olduğu firmayı seçebilir', function () {
 
 it('kullanıcı yetkisiz olduğu firmayı seçemez', function () {
     $user = User::factory()->create();
-    $company = Company::factory()->create();
+    $ownCompany = Company::factory()->create();
+    $otherCompany = Company::factory()->create();
+    $user->companies()->attach($ownCompany->id, ['role' => 'admin', 'is_default' => true]);
     $user->roles()->attach(
         CustomRole::firstOrCreate(['name' => 'admin'], ['description' => 'Sistem yöneticisi'])->id
     );
 
     $this->actingAs($user);
+    session(['active_company_id' => $ownCompany->id]);
 
     $response = $this->post(route('admin.companies.switch'), [
-        'company_id' => $company->id,
+        'company_id' => $otherCompany->id,
     ]);
 
     $response->assertForbidden();
@@ -80,9 +83,10 @@ it('aktif firma yoksa varsayılan firma seçilir', function () {
 
     $response = $this->get(route('admin.companies.settings', $company));
 
-    // Controller varsayılan firmaya yönlendirir (302); session set edilir
+    // ActiveCompany middleware varsayılan firmayı session'a set eder,
+    // ardından controller settings sayfasını görüntüler (200).
     expect(session('active_company_id'))->toBe($company->id);
-    $response->assertRedirect(route('admin.companies.settings', $company));
+    $response->assertOk();
 });
 
 it('firma ayarları sayfası sadece aktif firma için erişilebilir', function () {

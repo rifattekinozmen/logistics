@@ -3,6 +3,7 @@
 namespace App\Core\Services;
 
 use Illuminate\Http\Response;
+use SimpleXMLElement;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportService
@@ -53,7 +54,7 @@ class ExportService
         $filename = $this->sanitizeFilename($filename, 'xml');
         $tagNames = array_map(fn (string $h) => $this->xmlTagName($h), $headers);
 
-        $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><'.$rootElement.'/>');
+        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><'.$rootElement.'/>');
         $xml->addAttribute('encoding', 'UTF-8');
 
         foreach ($rows as $row) {

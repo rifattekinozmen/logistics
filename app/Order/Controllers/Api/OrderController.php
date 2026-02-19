@@ -11,8 +11,7 @@ class OrderController extends Controller
 {
     public function __construct(
         protected OrderService $orderService
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of orders.

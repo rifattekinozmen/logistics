@@ -32,7 +32,7 @@ class CreateAdminUser extends Command
         $adminRole = CustomRole::where('name', 'admin')->first();
         if ($adminRole) {
             $admin->roles()->attach($adminRole->id);
-            $this->info("Admin rolü atandı.");
+            $this->info('Admin rolü atandı.');
         } else {
             $this->warn("Admin rolü bulunamadı. Önce seeder'ı çalıştırın.");
         }

@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
+use Throwable;
 
 class PersonnelAttendanceController extends Controller
 {
@@ -110,7 +111,7 @@ class PersonnelAttendanceController extends Controller
             return response()->json(['success' => true]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Kaydetme hatası: '.$e->getMessage(),

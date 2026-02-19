@@ -25,7 +25,7 @@ return new class extends Migration
             return;
         }
 
-        Schema::table('personnel_attendance', function (Blueprint $table) use ($indexName) {
+        Schema::table('personnel_attendance', function (Blueprint $table) {
             $table->dropUnique(['employee_id', 'attendance_date']);
         });
     }
@@ -33,7 +33,7 @@ return new class extends Migration
     private function indexExists(string $table, string $indexName): bool
     {
         $result = DB::select(
-            "SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(?) AND name = ?",
+            'SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(?) AND name = ?',
             ['dbo.'.$table, $indexName]
         );
 

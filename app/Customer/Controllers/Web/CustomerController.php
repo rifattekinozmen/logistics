@@ -16,8 +16,7 @@ class CustomerController extends Controller
 {
     public function __construct(
         protected ExportService $exportService
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of customers.

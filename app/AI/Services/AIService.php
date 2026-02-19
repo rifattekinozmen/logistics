@@ -4,7 +4,7 @@ namespace App\AI\Services;
 
 /**
  * Base AI Service.
- * 
+ *
  * Tüm AI servisleri bu sınıftan türetilebilir.
  */
 abstract class AIService
@@ -19,7 +19,7 @@ abstract class AIService
      */
     protected function filterBySeverity(array $results, string $severity): array
     {
-        return array_filter($results, fn($result) => $result['severity'] === $severity);
+        return array_filter($results, fn ($result) => $result['severity'] === $severity);
     }
 
     /**

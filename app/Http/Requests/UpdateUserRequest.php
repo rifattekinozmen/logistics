@@ -44,7 +44,7 @@ class UpdateUserRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             $roles = $this->input('roles', []);
-            
+
             if (empty($roles)) {
                 return;
             }
@@ -53,14 +53,14 @@ class UpdateUserRequest extends FormRequest
             $customerRoleIds = \App\Models\CustomRole::whereIn('name', ['customer', 'customer_user', 'customer_viewer'])
                 ->pluck('id')
                 ->toArray();
-            
+
             // Sistem rolleri
             $systemRoleIds = \App\Models\CustomRole::whereNotIn('name', ['customer', 'customer_user', 'customer_viewer'])
                 ->pluck('id')
                 ->toArray();
 
-            $hasCustomerRole = !empty(array_intersect($roles, $customerRoleIds));
-            $hasSystemRole = !empty(array_intersect($roles, $systemRoleIds));
+            $hasCustomerRole = ! empty(array_intersect($roles, $customerRoleIds));
+            $hasSystemRole = ! empty(array_intersect($roles, $systemRoleIds));
 
             if ($hasCustomerRole && $hasSystemRole) {
                 $validator->errors()->add('roles', 'Müşteri portalı rolleri ile sistem rolleri birlikte seçilemez.');

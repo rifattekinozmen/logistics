@@ -7,7 +7,9 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
+use Schema;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class ActiveCompany
 {
@@ -15,7 +17,7 @@ class ActiveCompany
      * Handle an incoming request.
      * Aktif firmayı bir kez yükleyip view ile paylaşır; layout/sidebar tekrar sorgu atmaz.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -92,14 +94,14 @@ class ActiveCompany
     {
         try {
             $query = $user->companies();
-            if (\Schema::hasColumn('user_companies', 'is_active')) {
+            if (Schema::hasColumn('user_companies', 'is_active')) {
                 $query->wherePivot('is_active', true);
-            } elseif (\Schema::hasColumn('companies', 'status')) {
+            } elseif (Schema::hasColumn('companies', 'status')) {
                 $query->where('companies.status', 1);
             }
 
             return $query->get();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return $user->companies()->get();
         }
     }

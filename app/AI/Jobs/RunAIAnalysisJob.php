@@ -2,10 +2,11 @@
 
 namespace App\AI\Jobs;
 
-use App\AI\Services\AIOperationsService;
 use App\AI\Services\AIFinanceService;
+use App\AI\Services\AIOperationsService;
 use App\Models\AiReport;
 use App\Models\Company;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * AI analiz job'u.
- * 
+ *
  * Günlük cronjob ile çalışır ve tüm AI servislerini tetikler.
  */
 class RunAIAnalysisJob implements ShouldQueue
@@ -37,7 +38,7 @@ class RunAIAnalysisJob implements ShouldQueue
         AIFinanceService $financeService
     ): void {
         try {
-            $companies = $this->company 
+            $companies = $this->company
                 ? collect([$this->company])
                 : Company::where('is_active', true)->get();
 
@@ -75,7 +76,7 @@ class RunAIAnalysisJob implements ShouldQueue
                     ]);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("AI analiz job hatası: {$e->getMessage()}", [
                 'exception' => $e,
             ]);

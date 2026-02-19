@@ -2,11 +2,12 @@
 
 namespace App\Delivery\Services;
 
+use App\Models\Company;
+use App\Models\Customer;
 use App\Models\DeliveryNumber;
 use App\Models\Order;
-use App\Models\Customer;
-use App\Models\Company;
 use App\Order\Services\OrderService;
+use Exception;
 use Illuminate\Support\Str;
 
 class AutoOrderCreationService
@@ -50,7 +51,7 @@ class AutoOrderCreationService
             ]);
 
             return $order;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Hata durumunda teslimat numarasını error durumuna çek
             $deliveryNumber->update([
                 'status' => 'error',
@@ -96,7 +97,7 @@ class AutoOrderCreationService
         $prefix = $company->settings()
             ->where('setting_key', 'order_prefix')
             ->value('setting_value') ?? 'ORD';
-        
+
         do {
             $number = $prefix.'-'.date('Ymd').'-'.strtoupper(Str::random(4));
         } while (Order::where('order_number', $number)->exists());

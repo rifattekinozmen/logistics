@@ -27,7 +27,7 @@ class UpdateCompanyGeneralRequest extends FormRequest
             'name' => 'required|string|max:255',
             'short_name' => 'nullable|string|max:255',
             'title' => 'nullable|string|max:255',
-            
+
             // Vergi bilgileri
             'tax_number' => [
                 'required',
@@ -39,7 +39,7 @@ class UpdateCompanyGeneralRequest extends FormRequest
             'tax_office_city_id' => 'required|exists:cities,id',
             'mersis_no' => 'nullable|string|max:20',
             'trade_registry_no' => 'nullable|string|max:50',
-            
+
             // Lokasyon bilgileri
             'country_id' => 'required|exists:countries,id',
             'city_id' => 'required|exists:cities,id',
@@ -47,7 +47,7 @@ class UpdateCompanyGeneralRequest extends FormRequest
             'address' => 'required|string',
             'postal_code' => 'nullable|string|max:10',
             'headquarters_city' => 'required|string|max:255',
-            
+
             // İletişim bilgileri
             'mobile_phone' => 'required|string|max:20',
             'landline_phone' => 'nullable|string|max:20',
@@ -55,16 +55,16 @@ class UpdateCompanyGeneralRequest extends FormRequest
             'email' => 'nullable|email|max:255',
             'authorized_email' => 'required|email|max:255',
             'website' => 'nullable|url|max:255',
-            
+
             // Yetkili kişi
             'authorized_person_name' => 'required|string|max:255',
-            
+
             // e-Fatura ve e-İrsaliye
             'e_invoice_pk_tag' => 'nullable|string|max:255',
             'e_waybill_pk_tag' => 'nullable|string|max:255',
             'e_invoice_gb_tag' => 'nullable|string|max:255',
             'e_waybill_gb_tag' => 'nullable|string|max:255',
-            
+
             // Diğer
             'capital_amount' => 'nullable|numeric|min:0',
             'api_key' => 'nullable|string|max:255',

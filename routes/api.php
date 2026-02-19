@@ -10,21 +10,21 @@ use Illuminate\Support\Facades\Route;
 // Public API routes for location data
 Route::get('/cities', function (\Illuminate\Http\Request $request) {
     $query = \App\Models\City::where('is_active', true);
-    
+
     if ($request->has('country_id')) {
         $query->where('country_id', $request->country_id);
     }
-    
+
     return response()->json($query->orderBy('name_tr')->get(['id', 'name_tr', 'name_en']));
 });
 
 Route::get('/districts', function (\Illuminate\Http\Request $request) {
     $query = \App\Models\District::where('is_active', true);
-    
+
     if ($request->has('city_id')) {
         $query->where('city_id', $request->city_id);
     }
-    
+
     return response()->json($query->orderBy('name_tr')->get(['id', 'name_tr', 'name_en']));
 });
 

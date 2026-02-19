@@ -3,7 +3,6 @@
 namespace App\Core\Services;
 
 use App\Models\AuditLog;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 

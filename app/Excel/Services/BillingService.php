@@ -3,13 +3,12 @@
 namespace App\Excel\Services;
 
 use App\Models\Company;
-use Carbon\Carbon;
 
 class BillingService
 {
     /**
      * Faturalandırma datası üret.
-     * 
+     *
      * Analiz edilmiş verilerden faturalandırma için gerekli formatı oluşturur.
      */
     public function generateBillingData(array $analyzedData, Company $company): array
@@ -41,7 +40,7 @@ class BillingService
      */
     protected function calculateSubtotal(float $total, float $vatRate): float
     {
-        if ($vatRate == 0) {
+        if ($vatRate === 0) {
             return $total;
         }
 
@@ -53,11 +52,12 @@ class BillingService
      */
     protected function calculateVat(float $total, float $vatRate): float
     {
-        if ($vatRate == 0) {
+        if ($vatRate === 0) {
             return 0;
         }
 
         $subtotal = $this->calculateSubtotal($total, $vatRate);
+
         return round($total - $subtotal, 2);
     }
 
@@ -97,7 +97,7 @@ class BillingService
         $prefix = 'INV';
         $date = now()->format('Ymd');
         $random = strtoupper(substr(md5($item['period_key']), 0, 4));
-        
+
         return "{$prefix}-{$date}-{$random}";
     }
 }

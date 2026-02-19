@@ -1,50 +1,75 @@
-# Logistics Project – Dokümantasyon
+# Logistics Project – Documentation
 
-Bu klasör Logistics projesinin tüm teknik dokümantasyonunu içerir.
-
----
-
-## 📚 Doküman Listesi
-
-### 1. [Proje Genel Bakış](01-project-overview.md)
-Projenin genel tanımı, teknoloji stack'i, modül yapısı, mimari yaklaşım ve rol yönetimi.
-
-### 2. [Database Schema](02-database-schema.md)
-MSSQL uyumlu veritabanı şeması. Tüm tablolar, ilişkiler, indexler ve performans notları.
-
-### 3. [Geliştirme Rehberi](03-development-guide.md)
-Laravel modül yapısı, geliştirme best practices, TODO listesi, cronjob & otomasyon, AI modülü ve teknik detaylar.
-
-### 4. [Modül Dokümantasyonu](04-modules-documentation.md)
-Tüm modüllerin detaylı dokümantasyonu: Depo & Stok, Motorin Fiyat, Teslimat Otomasyonu, Vardiya, Mobil, Araç Ekspertiz, İş Emirleri, Lokasyon, Aktivite, Puantaj, Bildirim, AI ve diğer modüller.
-
-### 5. [Sayfa Akışı & UX](05-ux-page-flow.md)
-Rol bazlı sayfa akışları, UX prensipleri, performans odaklı geçişler ve mobile uyumluluk.
-
-### 6. [Firma Ayarları & Firma Değiştir](06-company-settings-and-switch.md)
-Multi-company mimari, DB schema, UI/UX akışı, Laravel teknik implementasyonu, performans ve güvenlik notları.
-
-### 7. [Hizmet Sözleşmesi](07-service-agreement.md)
-Lojistik Yönetim Sistemi için hazırlanmış SaaS odaklı hizmet sözleşmesi. Müşteri hak ve yükümlülükleri, kullanım şartları, ücretlendirme, gizlilik ve kişisel verilerin işlenmesi.
+Technical documentation for the Logistics ERP + CRM + Fleet Management system.
+**Stack:** PHP 8.2 / Laravel 12 / MSSQL / Bootstrap 5 + Tailwind CSS v4
 
 ---
 
-## 🚀 Hızlı Başlangıç
+## AI Workflow Brain
 
-1. **Yeni başlıyorsanız:** [Proje Genel Bakış](01-project-overview.md) ile başlayın
-2. **Geliştirme yapacaksanız:** [Geliştirme Rehberi](03-development-guide.md) ile devam edin
-3. **Veritabanı çalışacaksanız:** [Database Schema](02-database-schema.md) referans alın
-4. **Modül detayları:** [Modül Dokümantasyonu](04-modules-documentation.md) inceleyin
-5. **UI/UX tasarımı:** [Sayfa Akışı & UX](05-ux-page-flow.md) ile başlayın
-6. **Multi-company yapısı:** [Firma Ayarları & Firma Değiştir](06-company-settings-and-switch.md) ile başlayın
-7. **Hukuki dokümanlar:** [Hizmet Sözleşmesi](07-service-agreement.md) ile başlayın
+The `.ai/` folder is the AI workflow system. Load these before starting any coding session:
 
----
-
-## 📝 Doküman Güncelleme
-
-Bu dokümanlar proje geliştikçe güncellenmelidir. Önemli değişikliklerde ilgili dokümanları güncellemeyi unutmayın.
+| File | Purpose |
+|---|---|
+| [`.ai/session.md`](../.ai/session.md) | Current dev status, active modules, pending work |
+| [`.ai/project-map.md`](../.ai/project-map.md) | Architecture reference — models, controllers, services, routes |
+| [`.ai/rules/`](../.ai/rules/) | Behavioral constraints (core, MSSQL, context) |
+| [`.ai/skills/`](../.ai/skills/) | Task-specific guides (refactor, migrations, Blade, queries) |
+| [`.ai/subagents/`](../.ai/subagents/) | Domain agent definitions (backend, database, UI, docs, performance) |
+| [`.ai/workflows/auto-run.md`](../.ai/workflows/auto-run.md) | When to execute vs confirm |
+| [`.ai/decisions/architecture.md`](../.ai/decisions/architecture.md) | Architecture Decision Log (7 ADRs) |
 
 ---
 
-**Son Güncelleme:** 2026-01-27
+## Architecture
+
+| Document | Contents |
+|---|---|
+| [Project Overview](architecture/01-project-overview.md) | Tech stack, module structure, roles, roadmap |
+| [Database Schema](architecture/02-database-schema.md) | All tables, columns, indexes, MSSQL notes |
+| [Company Settings & Switch](architecture/06-company-settings-and-switch.md) | Multi-tenant DB schema, UI flow, Laravel implementation |
+
+---
+
+## Workflows & Guides
+
+| Document | Contents |
+|---|---|
+| [Development Guide](workflows/03-development-guide.md) | Module conventions, service pattern, queue, AI module, TODO list |
+| [UX Page Flow](workflows/05-ux-page-flow.md) | Role-based page flows, UX principles |
+
+---
+
+## Modules
+
+| Document | Contents |
+|---|---|
+| [Modules Documentation](modules/04-modules-documentation.md) | All 15+ modules: Warehouse, FuelPrice, Delivery, Shift, Mobile, Vehicle, WorkOrder, Location, Attendance, Notification, AI, Excel |
+
+---
+
+## Legal
+
+| Document | Contents |
+|---|---|
+| [Service Agreement](legal/07-service-agreement.md) | SaaS service agreement, customer rights, pricing, KVKK / privacy |
+
+---
+
+## Sessions
+
+`docs/sessions/` — archived session summaries, created by docs-agent after completing significant features.
+
+---
+
+## Reference
+
+| Document | Contents |
+|---|---|
+| [Delivery Report Pivot & Invoice Lines](reference/delivery-report-pivot-and-invoice-lines.md) | Pivot table design, invoice line mapping, implementation roadmap |
+| [Cemiloglu Pivot Reference](reference/cemiloglu-pivot-reference.md) | Source pivot logic for BOŞ-DOLU/DOLU-DOLU calculations |
+| [Customer Portal Access](reference/customer-portal-access.md) | How to set up customer portal users |
+
+---
+
+**Last updated:** 2026-02-19

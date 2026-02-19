@@ -8,7 +8,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::get('/dashboard', [CustomerPortalController::class, 'dashboard'])
         ->middleware('permission:customer.portal.dashboard')
         ->name('dashboard');
-    
+
     // Siparişler
     Route::get('/orders', [CustomerPortalController::class, 'orders'])
         ->middleware('permission:customer.portal.orders.view')
@@ -25,7 +25,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::post('/orders/{order}/cancel', [CustomerPortalController::class, 'cancelOrder'])
         ->middleware('permission:customer.portal.orders.cancel')
         ->name('orders.cancel');
-    
+
     // Belgeler
     Route::get('/documents', [CustomerPortalController::class, 'documents'])
         ->middleware('permission:customer.portal.documents.view')
@@ -33,7 +33,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::get('/documents/{document}/download', [CustomerPortalController::class, 'downloadDocument'])
         ->middleware('permission:customer.portal.documents.download')
         ->name('documents.download');
-    
+
     // Profil
     Route::get('/profile', [CustomerPortalController::class, 'profile'])
         ->middleware('permission:customer.portal.profile.view')
@@ -44,7 +44,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::post('/profile/change-password', [CustomerPortalController::class, 'changePassword'])
         ->middleware('permission:customer.portal.profile.update')
         ->name('profile.change-password');
-    
+
     // Ödemeler
     Route::get('/payments', [CustomerPortalController::class, 'payments'])
         ->middleware('permission:customer.portal.payments.view')
@@ -52,7 +52,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::get('/payments/{payment}', [CustomerPortalController::class, 'showPayment'])
         ->middleware('permission:customer.portal.payments.view')
         ->name('payments.show');
-    
+
     // Faturalar
     Route::get('/invoices', [CustomerPortalController::class, 'invoices'])
         ->middleware('permission:customer.portal.invoices.view')
@@ -60,7 +60,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::get('/invoices/{document}/download', [CustomerPortalController::class, 'downloadInvoice'])
         ->middleware('permission:customer.portal.invoices.download')
         ->name('invoices.download');
-    
+
     // Bildirimler
     Route::get('/notifications', [CustomerPortalController::class, 'notifications'])
         ->middleware('permission:customer.portal.notifications.view')
@@ -74,7 +74,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::post('/notifications/mark-all-read', [CustomerPortalController::class, 'markAllNotificationsAsRead'])
         ->middleware('permission:customer.portal.notifications.view')
         ->name('notifications.mark-all-read');
-    
+
     // Favori Adresler
     Route::get('/favorite-addresses', [CustomerPortalController::class, 'favoriteAddresses'])
         ->middleware('permission:customer.portal.favorite-addresses.manage')
@@ -88,7 +88,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::get('/favorite-addresses/geocode', [CustomerPortalController::class, 'geocodeAddress'])
         ->middleware('permission:customer.portal.favorite-addresses.manage')
         ->name('favorite-addresses.geocode');
-    
+
     // Sipariş Şablonları
     Route::get('/order-templates', [CustomerPortalController::class, 'orderTemplates'])
         ->middleware('permission:customer.portal.order-templates.manage')

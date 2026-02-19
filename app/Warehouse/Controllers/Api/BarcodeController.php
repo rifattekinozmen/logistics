@@ -7,7 +7,6 @@ use App\Models\InventoryItem;
 use App\Models\InventoryStock;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class BarcodeController extends Controller
 {
@@ -23,7 +22,7 @@ class BarcodeController extends Controller
 
         $item = InventoryItem::where('barcode', $validated['barcode'])->first();
 
-        if (!$item) {
+        if (! $item) {
             return response()->json([
                 'success' => false,
                 'message' => 'Barkod bulunamadı.',
@@ -67,7 +66,7 @@ class BarcodeController extends Controller
 
         $item = InventoryItem::where('barcode', $validated['barcode'])->first();
 
-        if (!$item) {
+        if (! $item) {
             return response()->json([
                 'success' => false,
                 'message' => 'Barkod bulunamadı.',
@@ -111,7 +110,7 @@ class BarcodeController extends Controller
 
         $item = InventoryItem::where('barcode', $validated['barcode'])->first();
 
-        if (!$item) {
+        if (! $item) {
             return response()->json([
                 'success' => false,
                 'message' => 'Barkod bulunamadı.',
@@ -120,10 +119,10 @@ class BarcodeController extends Controller
 
         $stock = InventoryStock::where('warehouse_id', $validated['warehouse_id'])
             ->where('item_id', $item->id)
-            ->when($validated['location_id'], fn($q) => $q->where('location_id', $validated['location_id']))
+            ->when($validated['location_id'], fn ($q) => $q->where('location_id', $validated['location_id']))
             ->first();
 
-        if (!$stock || $stock->quantity < $validated['quantity']) {
+        if (! $stock || $stock->quantity < $validated['quantity']) {
             return response()->json([
                 'success' => false,
                 'message' => 'Yetersiz stok.',

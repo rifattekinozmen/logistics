@@ -11,8 +11,7 @@ class VehicleController extends Controller
 {
     public function __construct(
         protected VehicleService $vehicleService
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of vehicles.

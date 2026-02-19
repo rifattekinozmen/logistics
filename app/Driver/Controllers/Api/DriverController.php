@@ -4,11 +4,11 @@ namespace App\Driver\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Shipment;
-use App\Models\Order;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Log;
 
 class DriverController extends Controller
 {
@@ -20,7 +20,7 @@ class DriverController extends Controller
         $user = Auth::user();
         $employee = $user->employee;
 
-        if (!$employee) {
+        if (! $employee) {
             return response()->json([
                 'success' => false,
                 'message' => 'Personel kaydı bulunamadı.',
@@ -64,7 +64,7 @@ class DriverController extends Controller
         $user = Auth::user();
         $employee = $user->employee;
 
-        if (!$employee || $shipment->driver_id !== $employee->id) {
+        if (! $employee || $shipment->driver_id !== $employee->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Bu sevkiyata erişim yetkiniz yok.',
@@ -82,7 +82,7 @@ class DriverController extends Controller
         ]);
 
         // Duruma göre tarih güncelle
-        if ($validated['status'] === 'loaded' && !$shipment->pickup_date) {
+        if ($validated['status'] === 'loaded' && ! $shipment->pickup_date) {
             $shipment->update(['pickup_date' => now()]);
         }
 
@@ -109,7 +109,7 @@ class DriverController extends Controller
         $user = Auth::user();
         $employee = $user->employee;
 
-        if (!$employee || $shipment->driver_id !== $employee->id) {
+        if (! $employee || $shipment->driver_id !== $employee->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Bu sevkiyata erişim yetkiniz yok.',
@@ -127,7 +127,7 @@ class DriverController extends Controller
         // Document modeline kaydet
         $document = $shipment->order->documents()->create([
             'category' => 'pod',
-            'name' => 'POD - ' . $shipment->order->order_number,
+            'name' => 'POD - '.$shipment->order->order_number,
             'file_path' => $path,
             'file_size' => $file->getSize(),
             'mime_type' => $file->getMimeType(),
@@ -163,7 +163,7 @@ class DriverController extends Controller
         $user = Auth::user();
         $employee = $user->employee;
 
-        if (!$employee) {
+        if (! $employee) {
             return response()->json([
                 'success' => false,
                 'message' => 'Personel kaydı bulunamadı.',
@@ -172,7 +172,7 @@ class DriverController extends Controller
 
         // Şimdilik sadece log olarak kaydediyoruz
         // İleride ayrı bir driver_locations tablosu oluşturulabilir
-        \Log::info('Driver location update', [
+        Log::info('Driver location update', [
             'driver_id' => $employee->id,
             'shipment_id' => $validated['shipment_id'] ?? null,
             'latitude' => $validated['latitude'],

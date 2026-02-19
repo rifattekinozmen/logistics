@@ -2,30 +2,31 @@
 
 namespace App\Excel\Services;
 
-use Illuminate\Support\Facades\Storage;
+use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ExcelImportService
 {
     /**
      * Excel dosyasını parse et ve array olarak döndür.
-     * 
+     *
      * Not: Şimdilik basit CSV parsing. İleride Maatwebsite/Laravel-Excel paketi eklenebilir.
      */
     public function parseFile(string $filePath, string $disk = 'private'): array
     {
         $fullPath = Storage::disk($disk)->path($filePath);
-        
-        if (!file_exists($fullPath)) {
-            throw new \Exception("Dosya bulunamadı: {$filePath}");
+
+        if (! file_exists($fullPath)) {
+            throw new Exception("Dosya bulunamadı: {$filePath}");
         }
 
         $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
-        
-        return match($extension) {
+
+        return match ($extension) {
             'csv' => $this->parseCsv($fullPath),
             'xlsx', 'xls' => $this->parseExcel($fullPath),
-            default => throw new \Exception("Desteklenmeyen dosya formatı: {$extension}"),
+            default => throw new Exception("Desteklenmeyen dosya formatı: {$extension}"),
         };
     }
 
@@ -36,33 +37,35 @@ class ExcelImportService
     {
         $rows = [];
         $handle = fopen($filePath, 'r');
-        
+
         if ($handle === false) {
-            throw new \Exception("CSV dosyası açılamadı: {$filePath}");
+            throw new Exception("CSV dosyası açılamadı: {$filePath}");
         }
 
         // İlk satırı header olarak al
         $headers = fgetcsv($handle);
-        
+
         if ($headers === false) {
             fclose($handle);
+
             return [];
         }
 
         // Header'ları normalize et (trim, lowercase)
-        $headers = array_map(function($header) {
+        $headers = array_map(function ($header) {
             return trim(strtolower($header));
         }, $headers);
 
         $rowNumber = 1;
         while (($data = fgetcsv($handle)) !== false) {
             $rowNumber++;
-            
+
             if (count($data) !== count($headers)) {
                 Log::warning("Satır {$rowNumber}: Header sayısı ile veri sayısı eşleşmiyor", [
                     'headers_count' => count($headers),
                     'data_count' => count($data),
                 ]);
+
                 continue;
             }
 
@@ -70,6 +73,7 @@ class ExcelImportService
         }
 
         fclose($handle);
+
         return $rows;
     }
 
@@ -109,7 +113,7 @@ class ExcelImportService
         $fullPath = Storage::disk($disk)->path($filePath);
 
         if (! file_exists($fullPath)) {
-            throw new \Exception("Dosya bulunamadı: {$filePath}");
+            throw new Exception("Dosya bulunamadı: {$filePath}");
         }
 
         $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
@@ -117,7 +121,7 @@ class ExcelImportService
         return match ($extension) {
             'csv' => $this->readCsvWithHeaders($fullPath),
             'xlsx', 'xls' => $this->readXlsxWithHeaders($fullPath),
-            default => throw new \Exception("Desteklenmeyen dosya formatı: {$extension}"),
+            default => throw new Exception("Desteklenmeyen dosya formatı: {$extension}"),
         };
     }
 
@@ -125,7 +129,7 @@ class ExcelImportService
     {
         $handle = fopen($filePath, 'r');
         if ($handle === false) {
-            throw new \Exception("CSV dosyası açılamadı: {$filePath}");
+            throw new Exception("CSV dosyası açılamadı: {$filePath}");
         }
 
         $headers = fgetcsv($handle);
@@ -193,8 +197,8 @@ class ExcelImportService
     protected function ensurePhpSpreadsheetInstalled(): void
     {
         if (! class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
-            throw new \Exception(
-                'Excel (.xlsx) dosyalarını okuyabilmek için PhpSpreadsheet paketi gereklidir. ' .
+            throw new Exception(
+                'Excel (.xlsx) dosyalarını okuyabilmek için PhpSpreadsheet paketi gereklidir. '.
                 'Proje klasöründe (logistics) terminalde şu komutu çalıştırın: composer require phpoffice/phpspreadsheet'
             );
         }
@@ -206,7 +210,7 @@ class ExcelImportService
     public function normalizeRow(array $row, array $requiredFields = []): array
     {
         $normalized = [];
-        
+
         foreach ($row as $key => $value) {
             $normalized[trim(strtolower($key))] = trim($value);
         }
@@ -214,7 +218,7 @@ class ExcelImportService
         // Gerekli alanları kontrol et
         foreach ($requiredFields as $field) {
             if (empty($normalized[$field])) {
-                throw new \Exception("Gerekli alan eksik: {$field}");
+                throw new Exception("Gerekli alan eksik: {$field}");
             }
         }
 

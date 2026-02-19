@@ -11,7 +11,7 @@ class RoleMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
@@ -20,7 +20,7 @@ class RoleMiddleware
         }
 
         $user = $request->user();
-        
+
         // Admin rolü her şeye erişebilsin
         if (method_exists($user, 'hasRole') && $user->hasRole('admin')) {
             return $next($request);

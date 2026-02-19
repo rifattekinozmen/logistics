@@ -3,6 +3,7 @@
 namespace App\Integration\Services;
 
 use App\Models\Company;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -23,8 +24,8 @@ class LogoIntegrationService
                 ->where('setting_key', 'logo_api_key')
                 ->value('setting_value') ?? config('services.logo.api_key');
 
-            if (!$endpoint || !$apiKey) {
-                throw new \Exception('Logo API yapılandırması eksik.');
+            if (! $endpoint || ! $apiKey) {
+                throw new Exception('Logo API yapılandırması eksik.');
             }
 
             // Logo formatına dönüştür
@@ -36,8 +37,8 @@ class LogoIntegrationService
                 'Content-Type' => 'application/json',
             ])->post($endpoint, $logoFormat);
 
-            if (!$response->successful()) {
-                throw new \Exception("Logo API hatası: {$response->body()}");
+            if (! $response->successful()) {
+                throw new Exception("Logo API hatası: {$response->body()}");
             }
 
             return [
@@ -45,7 +46,7 @@ class LogoIntegrationService
                 'logo_invoice_id' => $response->json('invoice_id'),
                 'response' => $response->json(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Logo entegrasyon hatası: {$e->getMessage()}", [
                 'company_id' => $company->id,
                 'invoice_data' => $invoiceData,

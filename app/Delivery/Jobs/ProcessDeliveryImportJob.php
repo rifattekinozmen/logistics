@@ -3,14 +3,15 @@
 namespace App\Delivery\Jobs;
 
 use App\Delivery\Services\DeliveryReportImportService;
-use App\Models\DeliveryImportBatch;
 use App\Models\Company;
+use App\Models\DeliveryImportBatch;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class ProcessDeliveryImportJob implements ShouldQueue
 {
@@ -51,7 +52,7 @@ class ProcessDeliveryImportJob implements ShouldQueue
                     'errors' => $result['errors'],
                 ]);
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->batch->update(['status' => 'failed']);
 
             Log::error("Teslimat raporu import hatası: {$e->getMessage()}", [

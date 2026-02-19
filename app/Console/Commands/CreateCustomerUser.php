@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Models\User;
 use App\Models\Customer;
 use App\Models\CustomRole;
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 
@@ -40,8 +40,8 @@ class CreateCustomerUser extends Command
 
         // Kullanıcı zaten var mı kontrol et
         $user = User::where('email', $email)->first();
-        
-        if (!$user) {
+
+        if (! $user) {
             // Şifre oluştur
             if (empty($password)) {
                 $password = \Illuminate\Support\Str::random(12);
@@ -65,10 +65,11 @@ class CreateCustomerUser extends Command
         // Müşteri rolünü belirle
         $roleName = $this->option('role');
         $allowedRoles = ['customer', 'customer_user', 'customer_viewer'];
-        
-        if (!in_array($roleName, $allowedRoles)) {
+
+        if (! in_array($roleName, $allowedRoles, true)) {
             $this->error("Geçersiz rol: {$roleName}");
-            $this->info("Geçerli roller: " . implode(', ', $allowedRoles));
+            $this->info('Geçerli roller: '.implode(', ', $allowedRoles));
+
             return Command::FAILURE;
         }
 
@@ -94,7 +95,7 @@ class CreateCustomerUser extends Command
         }
 
         // Kullanıcıya yeni rolü ata
-        if (!$user->roles()->where('name', $roleName)->exists()) {
+        if (! $user->roles()->where('name', $roleName)->exists()) {
             $user->roles()->attach($customerRole->id);
             $this->info("✅ {$roleName} rolü atandı ({$roleDescriptions[$roleName]}).");
         } else {
@@ -106,7 +107,7 @@ class CreateCustomerUser extends Command
         if (empty($taxNumber)) {
             // Benzersiz bir tax number oluştur
             do {
-                $taxNumber = 'T' . str_pad(rand(10000000, 99999999), 8, '0', STR_PAD_LEFT);
+                $taxNumber = 'T'.str_pad(rand(10000000, 99999999), 8, '0', STR_PAD_LEFT);
             } while (Customer::where('tax_number', $taxNumber)->exists());
         }
 
@@ -132,12 +133,12 @@ class CreateCustomerUser extends Command
         }
 
         $this->newLine();
-        $this->info("✅ Müşteri portalı kullanıcısı hazır!");
+        $this->info('✅ Müşteri portalı kullanıcısı hazır!');
         $this->info("📧 Email: {$email}");
         if (empty($this->option('password'))) {
             $this->warn("🔑 Şifre: {$password}");
         }
-        $this->info("🌐 Giriş URL: " . route('login'));
+        $this->info('🌐 Giriş URL: '.route('login'));
         $this->newLine();
         $this->info("💡 Not: Kullanıcı {$roleName} rolüne sahip ve bu role ait permission'lara erişebilir.");
 

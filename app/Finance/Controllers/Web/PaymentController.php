@@ -14,8 +14,7 @@ class PaymentController extends Controller
 {
     public function __construct(
         protected ExportService $exportService
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of payments.
@@ -68,6 +67,7 @@ class PaymentController extends Controller
         $query->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status));
         $query->when($filters['due_date_from'] ?? null, fn ($q, $date) => $q->whereDate('due_date', '>=', $date));
         $query->when($filters['due_date_to'] ?? null, fn ($q, $date) => $q->whereDate('due_date', '<=', $date));
+
         return $query->orderBy('due_date', 'asc');
     }
 

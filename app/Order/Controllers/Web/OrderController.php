@@ -15,6 +15,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class OrderController extends Controller
 {
@@ -22,8 +23,7 @@ class OrderController extends Controller
         protected OrderService $orderService,
         protected ExportService $exportService,
         protected ExcelImportService $excelImportService
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of orders.
@@ -128,7 +128,7 @@ class OrderController extends Controller
         try {
             $path = $request->file('file')->store('order-imports', 'private');
             $rows = $this->excelImportService->parseFile($path, 'private');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return back()->withErrors(['file' => 'Dosya okunamadı: '.$e->getMessage()]);
         }
 
@@ -147,11 +147,13 @@ class OrderController extends Controller
             if ($customerId < 1) {
                 $errors[] = "Satır {$rowNumber}: Geçerli müşteri_id gerekli.";
                 $failed++;
+
                 continue;
             }
             if (! Customer::where('id', $customerId)->where('status', 1)->exists()) {
                 $errors[] = "Satır {$rowNumber}: Müşteri bulunamadı (ID: {$customerId}).";
                 $failed++;
+
                 continue;
             }
 
@@ -160,6 +162,7 @@ class OrderController extends Controller
             if ($pickup === '' || $delivery === '') {
                 $errors[] = "Satır {$rowNumber}: Alış ve teslimat adresi zorunludur.";
                 $failed++;
+
                 continue;
             }
 
@@ -168,7 +171,7 @@ class OrderController extends Controller
             if ($dateStr !== '') {
                 try {
                     $plannedDelivery = \Carbon\Carbon::parse($dateStr);
-                } catch (\Throwable) {
+                } catch (Throwable) {
                     // Tarih parse edilemezse null bırak
                 }
             }
@@ -197,7 +200,7 @@ class OrderController extends Controller
                     ], $request->user());
                 });
                 $success++;
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $errors[] = "Satır {$rowNumber}: ".$e->getMessage();
                 $failed++;
             }

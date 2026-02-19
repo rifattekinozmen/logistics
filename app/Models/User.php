@@ -128,7 +128,6 @@ class User extends Authenticatable
      *
      * @param  string  $permissionCode  İzin kodu
      * @param  bool  $customerPortalOnly  Sadece müşteri portalı rolleri için kontrol et
-     * @return bool
      */
     public function hasPermission(string $permissionCode, bool $customerPortalOnly = false): bool
     {

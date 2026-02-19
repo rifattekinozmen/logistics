@@ -14,8 +14,7 @@ class WarehouseController extends Controller
 {
     public function __construct(
         protected ExportService $exportService
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of warehouses.
@@ -132,7 +131,7 @@ class WarehouseController extends Controller
         $validated = $request->validate([
             'branch_id' => 'nullable|exists:branches,id',
             'name' => 'required|string|max:255',
-            'code' => 'nullable|string|max:50|unique:warehouses,code,' . $warehouse->id,
+            'code' => 'nullable|string|max:50|unique:warehouses,code,'.$warehouse->id,
             'address' => 'nullable|string|max:1000',
             'status' => 'required|integer|in:0,1',
         ]);

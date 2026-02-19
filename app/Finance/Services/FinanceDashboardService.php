@@ -2,10 +2,9 @@
 
 namespace App\Finance\Services;
 
-use App\Models\Payment;
 use App\Models\Company;
+use App\Models\Payment;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class FinanceDashboardService
 {
@@ -15,14 +14,14 @@ class FinanceDashboardService
     public function getDashboardData(?Company $company = null): array
     {
         $query = Payment::query();
-        
+
         if ($company) {
             // Payment modelinde company_id yoksa, related_type/related_id üzerinden filtrele
             // Şimdilik tüm ödemeleri alıyoruz, ileride company scope eklenebilir
         }
 
         $today = Carbon::today();
-        
+
         // Geciken ödemeler
         $overduePayments = $query->clone()
             ->where('status', 0) // Bekliyor
@@ -59,7 +58,7 @@ class FinanceDashboardService
             'overdue' => [
                 'count' => $overduePayments->count(),
                 'total_amount' => $overduePayments->sum('amount'),
-                'payments' => $overduePayments->take(5)->map(fn($p) => [
+                'payments' => $overduePayments->take(5)->map(fn ($p) => [
                     'id' => $p->id,
                     'amount' => $p->amount,
                     'due_date' => $p->due_date->format('d.m.Y'),
@@ -91,9 +90,9 @@ class FinanceDashboardService
     public function getCashFlowSummary(?Company $company = null, int $months = 6): array
     {
         $query = Payment::query();
-        
+
         $startDate = Carbon::now()->subMonths($months)->startOfMonth();
-        
+
         $payments = $query->where('due_date', '>=', $startDate)
             ->get()
             ->groupBy(function ($payment) {

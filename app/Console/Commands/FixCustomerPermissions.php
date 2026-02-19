@@ -51,7 +51,7 @@ class FixCustomerPermissions extends Command
         }
 
         // Permission'lar eksikse seed et
-        $needsSeed = $customerRoles->some(fn($role) => $role->permissions()->count() === 0);
+        $needsSeed = $customerRoles->some(fn ($role) => $role->permissions()->count() === 0);
         if ($needsSeed) {
             $this->info('RolePermissionSeeder çalıştırılıyor...');
             $this->call('db:seed', ['--class' => 'RolePermissionSeeder', '--no-interaction' => true]);
@@ -92,13 +92,13 @@ class FixCustomerPermissions extends Command
                     $fixed++;
                 }
             } else {
-                $this->line("✓ {$user->email} - Roller: " . implode(', ', $userRoles));
+                $this->line("✓ {$user->email} - Roller: ".implode(', ', $userRoles));
                 $alreadyOk++;
             }
         }
 
         $this->newLine();
-        $this->info("✅ İşlem tamamlandı!");
+        $this->info('✅ İşlem tamamlandı!');
         $this->info("   - Düzeltilen: {$fixed}");
         $this->info("   - Zaten uygun: {$alreadyOk}");
 

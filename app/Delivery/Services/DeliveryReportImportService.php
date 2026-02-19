@@ -5,7 +5,12 @@ namespace App\Delivery\Services;
 use App\Excel\Services\ExcelImportService;
 use App\Models\DeliveryImportBatch;
 use App\Models\DeliveryReportRow;
+use DateTime;
+use DateTimeInterface;
+use DateTimeZone;
+use Exception;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class DeliveryReportImportService
 {
@@ -23,7 +28,7 @@ class DeliveryReportImportService
         $path = Storage::disk('private')->path($batch->file_path);
 
         if (! file_exists($path)) {
-            throw new \Exception("Dosya bulunamadı: {$batch->file_path}");
+            throw new Exception("Dosya bulunamadı: {$batch->file_path}");
         }
 
         $expectedHeaders = $this->getExpectedHeadersForBatch($batch);
@@ -50,7 +55,7 @@ class DeliveryReportImportService
                     'row_data' => $rowData,
                 ]);
                 $saved++;
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $errors[$index + 2] = $e->getMessage();
             }
         }
@@ -260,7 +265,7 @@ class DeliveryReportImportService
             $num = (float) $value;
             $prev = \PhpOffice\PhpSpreadsheet\Shared\Date::getExcelCalendar();
             $lastDt = null;
-            $tz = new \DateTimeZone('Europe/Istanbul');
+            $tz = new DateTimeZone('Europe/Istanbul');
             try {
                 foreach ([\PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_WINDOWS_1900, \PhpOffice\PhpSpreadsheet\Shared\Date::CALENDAR_MAC_1904] as $cal) {
                     \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($cal);
@@ -292,7 +297,7 @@ class DeliveryReportImportService
 
                     return $hasTime ? $lastDt->format('d.m.Y g:i:s A') : $lastDt->format('d.m.Y');
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($prev);
             }
         }
@@ -314,7 +319,7 @@ class DeliveryReportImportService
                 }
             } catch (\Carbon\Exceptions\InvalidFormatException $e) {
                 continue;
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 continue;
             }
         }
@@ -329,7 +334,7 @@ class DeliveryReportImportService
             $hasTime = $parsed->format('His') !== '000000';
 
             return $hasTime ? $parsed->format('d.m.Y g:i:s A') : $parsed->format('d.m.Y');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return (string) $value;
         }
     }
@@ -451,7 +456,7 @@ class DeliveryReportImportService
         if (str_contains($str, '/')) {
             $formatsSlashFirst = ['n/j/Y', 'm/d/Y', 'n/j/Y H:i:s', 'm/d/Y H:i:s', 'j/n/Y', 'd/m/Y'];
             foreach ($formatsSlashFirst as $fmt) {
-                $dt = @\DateTime::createFromFormat($fmt, $str);
+                $dt = @DateTime::createFromFormat($fmt, $str);
                 if ($dt !== false) {
                     $hasTime = (int) $dt->format('His') !== 0;
 
@@ -460,7 +465,7 @@ class DeliveryReportImportService
             }
         }
         foreach ($formats as $fmt) {
-            $dt = @\DateTime::createFromFormat($fmt, $str);
+            $dt = @DateTime::createFromFormat($fmt, $str);
             if ($dt !== false) {
                 $hasTime = (int) $dt->format('His') !== 0;
 
@@ -500,9 +505,9 @@ class DeliveryReportImportService
      * Excel seri numarasını DateTime'a çevirir; takvim yanlışsa 1904 dener.
      * Türkiye saat dilimi (Europe/Istanbul) kullanılır; tarih kayması önlenir.
      */
-    private function excelSerialToDateTime(float $numericValue, int $excelCalendar): ?\DateTimeInterface
+    private function excelSerialToDateTime(float $numericValue, int $excelCalendar): ?DateTimeInterface
     {
-        $timezone = new \DateTimeZone('Europe/Istanbul');
+        $timezone = new DateTimeZone('Europe/Istanbul');
         $prev = \PhpOffice\PhpSpreadsheet\Shared\Date::getExcelCalendar();
         \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($excelCalendar);
         try {
@@ -515,7 +520,7 @@ class DeliveryReportImportService
             }
 
             return $dt;
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return null;
         } finally {
             \PhpOffice\PhpSpreadsheet\Shared\Date::setExcelCalendar($prev);

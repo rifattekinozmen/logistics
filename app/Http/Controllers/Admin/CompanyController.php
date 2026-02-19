@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateCompanyGeneralRequest;
 use App\Models\Company;
 use App\Models\CompanyDigitalService;
+use BadMethodCallException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -122,11 +123,11 @@ class CompanyController extends Controller
         $user = Auth::user();
         $company->users()->attach($user->id, [
             'role' => 'admin',
-            'is_default' => !$user->companies()->exists(), // İlk firma ise default yap
+            'is_default' => ! $user->companies()->exists(), // İlk firma ise default yap
         ]);
 
         // Eğer kullanıcının aktif firması yoksa, yeni oluşturulan firmayı aktif yap
-        if (!session('active_company_id')) {
+        if (! session('active_company_id')) {
             session(['active_company_id' => $company->id]);
         }
 
@@ -141,13 +142,13 @@ class CompanyController extends Controller
     public function select(): View|RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Aktif firma kontrolü
         $activeCompany = $user->activeCompany();
         if ($activeCompany) {
             return redirect()->route('admin.companies.settings', $activeCompany);
         }
-        
+
         $companies = $user->companies()->where(function ($query) {
             if (Schema::hasColumn('companies', 'is_active')) {
                 $query->where('is_active', true);
@@ -182,7 +183,7 @@ class CompanyController extends Controller
         // Cache temizle (tags desteklenmiyorsa direkt flush kullan)
         try {
             Cache::tags(["company:{$company->id}"])->flush();
-        } catch (\BadMethodCallException $e) {
+        } catch (BadMethodCallException $e) {
             // Cache store tagging desteklemiyorsa, sadece flush yap
             Cache::flush();
         }
@@ -205,15 +206,16 @@ class CompanyController extends Controller
     public function settings(Company $company): View|RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Aktif firma kontrolü - sadece aktif firmanın ayarlarını gösterebilir
         $activeCompanyId = session('active_company_id');
-        if (!$activeCompanyId || $activeCompanyId != $company->id) {
+        if (! $activeCompanyId || $activeCompanyId !== $company->id) {
             // Aktif firma yoksa veya farklı bir firma seçilmişse, aktif firmaya yönlendir
             $activeCompany = $user->activeCompany();
             if ($activeCompany) {
                 return redirect()->route('admin.companies.settings', $activeCompany);
             }
+
             return redirect()->route('admin.companies.select');
         }
 
@@ -224,7 +226,7 @@ class CompanyController extends Controller
 
         $addresses = $company->addresses()->orderBy('is_default', 'desc')->get();
         $settings = $company->settings()->get()->keyBy('setting_key');
-        
+
         // Ülke, il ve ilçe verilerini yükle
         $countries = \App\Models\Country::where('is_active', true)->orderBy('name_tr')->get();
         $cities = \App\Models\City::where('is_active', true)
@@ -311,7 +313,7 @@ class CompanyController extends Controller
         // Cache temizle
         try {
             Cache::tags(["company:{$company->id}"])->flush();
-        } catch (\BadMethodCallException $e) {
+        } catch (BadMethodCallException $e) {
             Cache::forget("company:{$company->id}");
         }
 
@@ -364,11 +366,11 @@ class CompanyController extends Controller
 
             // Model'i fresh olarak yeniden yükle
             $company->refresh();
-            
+
             // Cache temizle (tags desteklenmiyorsa direkt flush kullan)
             try {
                 Cache::tags(["company:{$company->id}"])->flush();
-            } catch (\BadMethodCallException $e) {
+            } catch (BadMethodCallException $e) {
                 // Cache store tagging desteklemiyorsa, sadece ilgili key'leri temizle
                 Cache::forget("company:{$company->id}");
             }
@@ -418,7 +420,7 @@ class CompanyController extends Controller
         // Cache temizle
         try {
             Cache::tags(["company:{$company->id}"])->flush();
-        } catch (\BadMethodCallException $e) {
+        } catch (BadMethodCallException $e) {
             Cache::forget("company:{$company->id}");
         }
 
@@ -462,11 +464,11 @@ class CompanyController extends Controller
 
             // Model'i fresh olarak yeniden yükle
             $company->refresh();
-            
+
             // Cache temizle (tags desteklenmiyorsa direkt flush kullan)
             try {
                 Cache::tags(["company:{$company->id}"])->flush();
-            } catch (\BadMethodCallException $e) {
+            } catch (BadMethodCallException $e) {
                 Cache::forget("company:{$company->id}");
             }
         }
@@ -504,7 +506,7 @@ class CompanyController extends Controller
         // Cache temizle (tags desteklenmiyorsa direkt forget kullan)
         try {
             Cache::tags(["company:{$company->id}"])->forget('settings');
-        } catch (\BadMethodCallException $e) {
+        } catch (BadMethodCallException $e) {
             // Cache store tagging desteklemiyorsa, direkt forget yap
             Cache::forget("company:{$company->id}:settings");
         }

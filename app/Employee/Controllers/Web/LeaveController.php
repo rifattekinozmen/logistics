@@ -3,8 +3,8 @@
 namespace App\Employee\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\Leave;
 use App\Models\Employee;
+use App\Models\Leave;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,6 +38,7 @@ class LeaveController extends Controller
     public function create(): View
     {
         $employees = Employee::where('status', 1)->orderBy('first_name')->get();
+
         return view('admin.leaves.create', compact('employees'));
     }
 

@@ -18,8 +18,7 @@ class EmployeeController extends Controller
     public function __construct(
         protected EmployeeService $employeeService,
         protected ExportService $exportService
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of employees.

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         $driver = \Illuminate\Support\Facades\DB::getDriverName();
-        
+
         if ($driver === 'sqlsrv') {
             // SQL Server için doğrudan SQL komutları kullan
             if (! Schema::hasColumn('users', 'username')) {
