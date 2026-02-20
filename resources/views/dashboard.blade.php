@@ -74,7 +74,7 @@
                     <div class="bg-primary rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 40px; height: 40px;">
                         <span class="material-symbols-outlined" style="font-size: 1.25rem;">local_shipping</span>
                     </div>
-                    <div class="grow">
+                    <div class="flex-grow-1">
                         <p class="small fw-bold text-dark mb-0">Yeni sevkiyat oluşturuldu</p>
                         <p class="small text-secondary mb-0">2 dakika önce</p>
                     </div>
@@ -83,7 +83,7 @@
                     <div class="bg-info rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 40px; height: 40px;">
                         <span class="material-symbols-outlined" style="font-size: 1.25rem;">inventory</span>
                     </div>
-                    <div class="grow">
+                    <div class="flex-grow-1">
                         <p class="small fw-bold text-dark mb-0">Stok güncellemesi yapıldı</p>
                         <p class="small text-secondary mb-0">15 dakika önce</p>
                     </div>
@@ -92,7 +92,7 @@
                     <div class="bg-warning rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 40px; height: 40px;">
                         <span class="material-symbols-outlined" style="font-size: 1.25rem;">assignment</span>
                     </div>
-                    <div class="grow">
+                    <div class="flex-grow-1">
                         <p class="small fw-bold text-dark mb-0">Yeni sipariş alındı</p>
                         <p class="small text-secondary mb-0">1 saat önce</p>
                     </div>
@@ -101,7 +101,7 @@
                     <div class="bg-success rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 40px; height: 40px;">
                         <span class="material-symbols-outlined" style="font-size: 1.25rem;">person_add</span>
                     </div>
-                    <div class="grow">
+                    <div class="flex-grow-1">
                         <p class="small fw-bold text-dark mb-0">Yeni müşteri kaydı</p>
                         <p class="small text-secondary mb-0">2 saat önce</p>
                     </div>
@@ -114,41 +114,41 @@
         <div class="bg-white rounded-3xl shadow-sm border p-4">
             <h3 class="h3 fw-bold text-dark mb-4">Hızlı Erişim</h3>
             <div class="d-flex flex-column gap-3">
-                <a href="{{ route('identity.form') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none bg-primary-200 border-primary-200 transition-all hover:shadow-sm hover:bg-primary hover:text-white">
+                <a href="{{ route('identity.form') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none bg-primary-200 border-primary-200 transition-all quick-access-link quick-access-primary">
                     <div class="bg-primary rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 40px; height: 40px;">
                         <span class="material-symbols-outlined">verified_user</span>
                     </div>
-                    <div class="grow">
+                    <div class="flex-grow-1">
                         <p class="small fw-bold text-dark mb-0">Kimlik Doğrulama</p>
                         <p class="small text-secondary mb-0">MERNİS entegrasyonu</p>
                     </div>
                     <span class="material-symbols-outlined text-secondary">arrow_forward</span>
                 </a>
-                <a href="#" class="d-flex align-items-center gap-3 p-3 rounded-2xl bg-info-200 border-info-200 text-decoration-none transition-all hover:shadow-sm hover:bg-info hover:text-white">
+                <a href="#" class="d-flex align-items-center gap-3 p-3 rounded-2xl bg-info-200 border-info-200 text-decoration-none transition-all quick-access-link quick-access-info">
                     <div class="bg-info rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 40px; height: 40px;">
                         <span class="material-symbols-outlined">local_shipping</span>
                     </div>
-                    <div class="grow">
+                    <div class="flex-grow-1">
                         <p class="small fw-bold text-dark mb-0">Sevkiyat Yönetimi</p>
                         <p class="small text-secondary mb-0">Sevkiyatları görüntüle</p>
                     </div>
                     <span class="material-symbols-outlined text-secondary">arrow_forward</span>
                 </a>
-                <a href="#" class="d-flex align-items-center gap-3 p-3 rounded-2xl bg-warning-200 border-warning-200 text-decoration-none transition-all hover:shadow-sm hover:bg-warning hover:text-white">
+                <a href="#" class="d-flex align-items-center gap-3 p-3 rounded-2xl bg-warning-200 border-warning-200 text-decoration-none transition-all quick-access-link quick-access-warning">
                     <div class="bg-warning rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 40px; height: 40px;">
                         <span class="material-symbols-outlined">warehouse</span>
                     </div>
-                    <div class="grow">
+                    <div class="flex-grow-1">
                         <p class="small fw-bold text-dark mb-0">Depo Yönetimi</p>
                         <p class="small text-secondary mb-0">Stokları yönet</p>
                     </div>
                     <span class="material-symbols-outlined text-secondary">arrow_forward</span>
                 </a>
-                <a href="#" class="d-flex align-items-center gap-3 p-3 rounded-2xl bg-success-200 border-success-200 text-decoration-none transition-all hover:shadow-sm hover:bg-success hover:text-white">
+                <a href="#" class="d-flex align-items-center gap-3 p-3 rounded-2xl bg-success-200 border-success-200 text-decoration-none transition-all quick-access-link quick-access-success">
                     <div class="bg-success rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 40px; height: 40px;">
                         <span class="material-symbols-outlined">assignment</span>
                     </div>
-                    <div class="grow">
+                    <div class="flex-grow-1">
                         <p class="small fw-bold text-dark mb-0">Sipariş Yönetimi</p>
                         <p class="small text-secondary mb-0">Siparişleri görüntüle</p>
                     </div>

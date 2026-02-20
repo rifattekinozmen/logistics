@@ -92,7 +92,7 @@
                                     <p class="small text-secondary mb-0">{{ Str::limit($order->delivery_address, 40) }}</p>
                                 </div>
                                 <span class="badge bg-{{ match($order->status) { 'delivered' => 'success', 'in_transit' => 'primary', 'assigned' => 'info', default => 'warning' } }}-200 text-{{ match($order->status) { 'delivered' => 'success', 'in_transit' => 'primary', 'assigned' => 'info', default => 'warning' } }} rounded-pill px-3 py-2">
-                                    {{ ucfirst($order->status) }}
+                                    {{ $order->status_label }}
                                 </span>
                             </div>
                         </div>

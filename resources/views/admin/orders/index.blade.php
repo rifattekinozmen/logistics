@@ -47,9 +47,12 @@
             <select name="status" class="form-select">
                 <option value="">Tümü</option>
                 <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Beklemede</option>
+                <option value="planned" {{ request('status') === 'planned' ? 'selected' : '' }}>Planlandı</option>
                 <option value="assigned" {{ request('status') === 'assigned' ? 'selected' : '' }}>Atandı</option>
+                <option value="loaded" {{ request('status') === 'loaded' ? 'selected' : '' }}>Yüklendi</option>
                 <option value="in_transit" {{ request('status') === 'in_transit' ? 'selected' : '' }}>Yolda</option>
                 <option value="delivered" {{ request('status') === 'delivered' ? 'selected' : '' }}>Teslim Edildi</option>
+                <option value="invoiced" {{ request('status') === 'invoiced' ? 'selected' : '' }}>Faturalandı</option>
                 <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>İptal</option>
             </select>
         </div>
@@ -93,32 +96,27 @@
                     <td class="align-middle">
                         @php
                             $statusColors = [
-                                'pending' => 'warning',
-                                'assigned' => 'info',
+                                'pending'    => 'warning',
+                                'planned'    => 'info',
+                                'assigned'   => 'info',
+                                'loaded'     => 'primary',
                                 'in_transit' => 'primary',
-                                'delivered' => 'success',
-                                'cancelled' => 'danger',
+                                'delivered'  => 'success',
+                                'invoiced'   => 'success',
+                                'cancelled'  => 'danger',
                             ];
                             $softColors = [
                                 'warning' => 'warning-200',
-                                'info' => 'info-200',
+                                'info'    => 'info-200',
                                 'primary' => 'primary-200',
                                 'success' => 'success-200',
-                                'danger' => 'danger-200',
-                            ];
-                            $statusLabels = [
-                                'pending' => 'Beklemede',
-                                'assigned' => 'Atandı',
-                                'in_transit' => 'Yolda',
-                                'delivered' => 'Teslim Edildi',
-                                'cancelled' => 'İptal',
+                                'danger'  => 'danger-200',
                             ];
                             $color = $statusColors[$order->status] ?? 'secondary';
                             $softColor = $softColors[$color] ?? 'secondary-200';
-                            $label = $statusLabels[$order->status] ?? $order->status;
                         @endphp
                         <span class="badge bg-{{ $softColor }} text-{{ $color }} px-3 py-2 rounded-pill fw-semibold">
-                            {{ $label }}
+                            {{ $order->status_label }}
                         </span>
                     </td>
                     <td class="align-middle">

@@ -23,6 +23,7 @@ class DeliveryImportBatch extends Model
         'status',
         'invoice_status',
         'petrokok_route_preference',
+        'klinker_daily_overrides',
         'imported_by',
     ];
 
@@ -44,6 +45,7 @@ class DeliveryImportBatch extends Model
             'successful_rows' => 'integer',
             'failed_rows' => 'integer',
             'import_errors' => 'array',
+            'klinker_daily_overrides' => 'array',
         ];
     }
 

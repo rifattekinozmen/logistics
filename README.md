@@ -19,12 +19,17 @@ PHP 8.2, Laravel 12, Bootstrap 5 ve Pest ile geliştirilmiş kurumsal lojistik y
 - **İnsan Kaynakları** — Personel, izin, avans, bordro, puantaj
 - **Depo Yönetimi** — Barkod okuma, stok giriş/çıkış, envanter
 - **Müşteri Portalı** — Self-servis sipariş, belge ve ödeme takibi
-- **Şoför Mobil API** — Gerçek zamanlı gönderi takibi, POD yükleme, konum güncellemesi
+- **Şoför Mobil API v1 & v2** — Gerçek zamanlı gönderi takibi, POD yükleme, konum güncellemesi, dashboard
 - **Finans** — Ödeme takibi, bordro yönetimi, dashboard analitik
-- **AI Entegrasyonu** — Finans ve operasyon analiz raporları
-- **Dış Entegrasyonlar** — LOGO ve Python backend entegrasyonu
+- **Advanced Analytics Dashboard** — Finansal metrikler, operasyonel KPI'lar, filo performansı, Chart.js görselleştirme
+- **AI Entegrasyonu** — Finans ve operasyon analiz raporları, HR performans analizi, filo bakım tahmini
+- **SAP Integration** — OData servis entegrasyonu, CDS View consumption, Event Mesh, document flow tracking
+- **E-Fatura/E-Arşiv** — UBL-TR XML generation, GIB entegrasyonu, otomatik fatura gönderimi
+- **Real-Time Features** — WebSocket (laravel-websockets), push notifications, live dashboard updates
+- **LOGO ERP Integration** — Fatura export, müşteri senkronizasyonu, muhasebe verileri
 - **Denetim İzi** — Tüm değişiklikler için tam audit log
-- **Bildirim Paneli** — Sistem geneli bildirim yönetimi
+- **Bildirim Paneli** — Sistem geneli bildirim yönetimi, push notifications
+- **Security & Compliance** — KVKK/GDPR uyumluluğu, veri şifreleme, güvenlik header'ları
 
 ## Teknoloji Yığını
 
@@ -59,6 +64,59 @@ npm run build
 
 # Sunucuyu başlat
 composer run dev
+
+# WebSocket sunucusu (opsiyonel, ayrı terminal)
+php artisan websockets:serve
+```
+
+### Entegrasyon Ayarları
+
+#### SAP OData Entegrasyonu
+
+`.env` dosyasında SAP bağlantı bilgilerini yapılandırın:
+
+```env
+SAP_ODATA_URL=https://your-sap-system:port/sap/opu/odata/sap
+SAP_USERNAME=your_username
+SAP_PASSWORD=your_password
+SAP_SYNC_ENABLED=true
+SAP_AUTO_SYNC=false
+```
+
+#### E-Fatura/GIB Entegrasyonu
+
+`.env` dosyasında GIB bağlantı bilgilerini yapılandırın:
+
+```env
+EINVOICE_ENABLED=true
+EINVOICE_GIB_URL=https://efaturatest.gbonline.com.tr/services
+EINVOICE_GIB_USERNAME=your_username
+EINVOICE_GIB_PASSWORD=your_password
+EINVOICE_AUTO_GENERATE=false
+EINVOICE_AUTO_SEND=false
+```
+
+#### WebSocket & Real-Time Features
+
+`.env` dosyasında broadcasting ayarlarını yapılandırın:
+
+```env
+BROADCAST_CONNECTION=pusher
+PUSHER_APP_ID=logistics-app
+PUSHER_APP_KEY=logistics-app-key
+PUSHER_APP_SECRET=logistics-app-secret
+PUSHER_HOST=127.0.0.1
+PUSHER_PORT=6001
+```
+
+#### LOGO ERP Entegrasyonu
+
+`.env` dosyasında LOGO API bilgilerini yapılandırın:
+
+```env
+LOGO_API_URL=https://your-logo-api-url
+LOGO_API_TOKEN=your_api_token
+LOGO_AUTO_SYNC=false
 ```
 
 ## Geliştirme
@@ -83,25 +141,34 @@ Uygulama domain-driven, modüler bir mimari kullanır:
 
 ```
 app/
-├── AI/            # Yapay zeka analiz servisleri
-├── Customer/      # Müşteri yönetimi ve portal
-├── Delivery/      # Teslimat ve Excel import
-├── Document/      # Belge yönetimi
-├── Driver/        # Şoför mobil API
-├── Employee/      # İK: personel, izin, avans, bordro
-├── Excel/         # Excel işleme servisleri
-├── Finance/       # Finans ve ödeme
-├── FuelPrice/     # Yakıt fiyat takibi
-├── Integration/   # LOGO ve Python entegrasyonu
-├── Notification/  # Bildirim sistemi
-├── Order/         # Sipariş yönetimi
-├── Shipment/      # Gönderi takibi
-├── Shift/         # Vardiya planlama
-├── Vehicle/       # Araç ve filo yönetimi
-├── Warehouse/     # Depo ve stok
-├── WorkOrder/     # İş emirleri
-├── Core/          # Paylaşılan altyapı (middleware, scope, servisler)
-└── Http/          # HTTP katmanı (Admin ve Auth controller'lar)
+├── AI/              # Yapay zeka analiz servisleri (HR, Fleet, Document)
+├── Analytics/       # Advanced analytics dashboard servisleri
+├── BusinessPartner/ # SAP Business Partner yönetimi
+├── Customer/        # Müşteri yönetimi ve portal
+├── Delivery/        # Teslimat ve Excel import
+├── Document/        # Belge yönetimi
+├── DocumentFlow/    # SAP document flow tracking
+├── Driver/          # Şoför mobil API (v1 & v2)
+├── EInvoice/        # E-Fatura/E-Arşiv modülü (XML, GIB)
+├── Employee/        # İK: personel, izin, avans, bordro
+├── Events/          # Broadcast event'leri (WebSocket)
+├── Excel/           # Excel işleme servisleri
+├── Finance/         # Finans ve ödeme
+├── FuelPrice/       # Yakıt fiyat takibi
+├── Integration/     # LOGO ve Python entegrasyonu
+├── Jobs/            # Queue job'ları (SAP, E-Invoice)
+├── Notification/    # Bildirim sistemi
+├── Notifications/   # Notification class'ları (Push)
+├── Order/           # Sipariş yönetimi
+├── Pricing/         # Dinamik fiyatlandırma
+├── Sap/             # SAP OData, CDS, Event Mesh entegrasyonu
+├── Shipment/        # Gönderi takibi
+├── Shift/           # Vardiya planlama
+├── Vehicle/         # Araç ve filo yönetimi
+├── Warehouse/       # Depo ve stok
+├── WorkOrder/       # İş emirleri
+├── Core/            # Paylaşılan altyapı (middleware, scope, servisler)
+└── Http/            # HTTP katmanı (Admin ve Auth controller'lar)
 ```
 
 ## Route Grupları

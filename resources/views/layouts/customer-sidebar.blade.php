@@ -11,7 +11,7 @@
         </div>
 
         <!-- Navigation -->
-        <nav class="grow p-2 overflow-y-auto custom-scrollbar">
+        <nav class="flex-grow-1 p-2 overflow-y-auto custom-scrollbar">
             <ul class="list-unstyled mb-0">
                 @php
                     $sidebarUser = Auth::user();
@@ -106,7 +106,7 @@
                         <span class="material-symbols-outlined" style="font-size: 20px;">person</span>
                     </div>
                 @endif
-                <div class="grow min-w-0">
+                <div class="flex-grow-1" style="min-width: 0;">
                     <p class="small fw-bold text-dark mb-0" style="font-size: 13px;">{{ Auth::user()->name ?? 'Kullanıcı' }}</p>
                     <p class="small text-secondary mb-0" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ Auth::user()->email ?? '' }}</p>
                 </div>

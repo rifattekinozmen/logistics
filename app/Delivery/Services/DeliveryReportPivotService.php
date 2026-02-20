@@ -80,7 +80,16 @@ class DeliveryReportPivotService
      * Malzeme Pivot Tablosu (Cemiloglu uyumlu): Tarih x Malzeme.
      * Hücre = Geçerli Miktar (ilk). BOŞ-DOLU / DOLU-DOLU Klinker-Cüruf-Petrokok formülü ile hesaplanır.
      *
-     * @return array{dates: array<string>, materials: array<array{key: string, label: string}>, rows: array, totals_row: array}
+     * BOŞ-DOLU/DOLU-DOLU Hesaplama Mantığı:
+     * - Adım 1: Klinker ↔ Cüruf D-D (İsdemir rotası)
+     * - Adım 2: Kalan Klinker ↔ Petrokok D-D (Ekinciler rotası, tedarikçi bazlı)
+     * - Adım 3: Artanlar B-D olarak işaretlenir
+     *
+     * Malzemeler firma/tesis bazında ayrıştırılır (ÜY Tanım kullanılarak).
+     * Petrokok rota tercihi (ekinciler/isdemir) batch üzerinden belirlenir.
+     *
+     * @param  DeliveryImportBatch  $batch  Teslimat import batch'i
+     * @return array{dates: array<int, string>, materials: array<int, array{key: string, label: string}>, rows: array<int, array{tarih: string, material_totals: array<string, float>, material_counts: array<string, int>, row_total: float, row_total_count: int, boş_dolu: float, dolu_dolu: float, malzeme_kisa_metni: string}>, totals_row: array{material_totals: array<string, float>, material_counts: array<string, int>, row_total: float, row_total_count: int, boş_dolu: float, dolu_dolu: float}, fatura_rota_gruplari: array<int, array{route_key: string, route_label: string, kalemler: array, route_toplam: float}>, fatura_toplam: float, firma_fatura_gruplari: array<int, array{label: string, rota_gruplari: array, toplam: float}>}
      */
     public function buildMaterialPivot(DeliveryImportBatch $batch): array
     {
@@ -114,6 +123,23 @@ class DeliveryReportPivotService
          */
         $petrokokRoutePref = $batch->petrokok_route_preference ?? 'ekinciler';
         $petrokokRouteKey = $petrokokRoutePref === 'isdemir' ? 'curuf_route' : 'petrokok_route';
+
+        /*
+         * Günlük Klinker override değerleri: kullanıcı tarafından kantar sisteminden manuel girilir.
+         * Format: ["dd.mm.yyyy" => float] – SAP ile kantar sistemi arasındaki tarihleme farkını
+         * düzeltmek için Klinker miktarı günlük bazda override edilir.
+         *
+         * @var array<string, float> $klinkerOverrides
+         */
+        $klinkerOverrides = [];
+        $rawOverrides = $batch->klinker_daily_overrides ?? [];
+        if (is_array($rawOverrides)) {
+            foreach ($rawOverrides as $dateKey => $val) {
+                if (is_numeric($val) && (float) $val > 0) {
+                    $klinkerOverrides[(string) $dateKey] = (float) $val;
+                }
+            }
+        }
 
         $rows = $batch->reportRows()->orderBy('row_index')->get();
         $pivotData = [];
@@ -236,19 +262,65 @@ class DeliveryReportPivotService
             $this->applyMaterialMatchingLogic($pivotData[$date], $satirToplami);
 
             /*
+             * Günlük Klinker override: kantar sistemi ile SAP tarihleme farkını düzeltir.
+             * Kullanıcı formül tablosundaki kantar değerini girmişse, SAP'dan gelen idx16 yerine
+             * o değer kullanılır. Böylece günlük BD/DD hesabı kantar bazlı yapılır.
+             */
+            if (isset($klinkerOverrides[$date]) && $klinkerQuantity > 0.001) {
+                $klinkerQuantity = $klinkerOverrides[$date];
+                /* Varyant oranları korunarak toplam override miktarına ölçeklenir */
+                $originalKlinkerTotal = array_sum($klinkerVariants);
+                if ($originalKlinkerTotal > 0.001) {
+                    foreach ($klinkerVariants as $kKey => $kQty) {
+                        $klinkerVariants[$kKey] = $klinkerQuantity * ($kQty / $originalKlinkerTotal);
+                    }
+                }
+            }
+
+            /*
              * Ardışık D-D eşleşme mantığı (Cemiloglu):
              * Klinker önce Cüruf ile, kalan Klinker sonra Petrokok ile D-D yapar.
-             * Böylece Klinker birden fazla partner ile eşleşebilir ve artığı minimize edilir.
+             * Petrokok tedarikçileri (SÜPER, BULK vb.) kendi oranlarında ayrı ayrı Klinker ile eşleşir.
+             * Bu sayede hangi tedarikçinin ne kadar DD/BD yaptığı doğru hesaplanır.
              *
              * Adım 1: Klinker ↔ Cüruf D-D
-             * Adım 2: Kalan Klinker ↔ Petrokok D-D
+             * Adım 2: Kalan Klinker, Petrokok tedarikçileriyle oransal olarak D-D yapar.
+             *         Her tedarikçi için DD = min(KalanKlinker × (TedarikciPayı/PetrokokToplam), TedarikciMiktarı)
              * Artanlar B-D olarak sayılır.
              */
             $ddKlinkerCuruf = min($klinkerQuantity, $curufQuantity);
             $remainingKlinkerAfterCuruf = $klinkerQuantity - $ddKlinkerCuruf;
             $remainingCuruf = $curufQuantity - $ddKlinkerCuruf;
 
-            $ddKlinkerPetrokok = min($remainingKlinkerAfterCuruf, $petrokokQuantity);
+            /*
+             * Petrokok tedarikçi bazlı DD hesabı:
+             * Her tedarikçinin Klinker'a düşen payı (oran × kalan Klinker) ile kendi miktarından
+             * küçük olan kadar DD yapılır. Klinker artığı toplanarak toplam B-D Klinker bulunur.
+             */
+            /** @var array<string, float> Petrokok tedarikçi key → DD miktarı */
+            $petrokokVarDD = [];
+            /** @var array<string, float> Petrokok tedarikçi key → BD miktarı */
+            $petrokokVarBD = [];
+            $totalPetrokokDD = 0;
+
+            if ($petrokokQuantity > 0.001 && $remainingKlinkerAfterCuruf > 0.001) {
+                foreach ($petrokokVariants as $pKey => $pQty) {
+                    /* Klinker'ın bu tedarikçiye düşen payı = oransal */
+                    $klinkerShare = $remainingKlinkerAfterCuruf * ($pQty / $petrokokQuantity);
+                    $pDD = min($klinkerShare, $pQty);
+                    $pBD = $pQty - $pDD;
+                    $petrokokVarDD[$pKey] = $pDD;
+                    $petrokokVarBD[$pKey] = $pBD;
+                    $totalPetrokokDD += $pDD;
+                }
+            } else {
+                foreach ($petrokokVariants as $pKey => $pQty) {
+                    $petrokokVarDD[$pKey] = 0;
+                    $petrokokVarBD[$pKey] = $pQty;
+                }
+            }
+
+            $ddKlinkerPetrokok = $totalPetrokokDD;
             $remainingKlinker = $remainingKlinkerAfterCuruf - $ddKlinkerPetrokok;
             $remainingPetrokok = $petrokokQuantity - $ddKlinkerPetrokok;
 
@@ -337,21 +409,20 @@ class DeliveryReportPivotService
                 }
             }
 
-            /* Adım 2: Kalan Klinker ↔ Petrokok D-D */
+            /* Adım 2: Kalan Klinker ↔ Petrokok D-D (tedarikçi bazlı, petrokokVarDD kullanılır) */
             if ($ddKlinkerPetrokok > 0.001) {
-                $halfDdPetrokok = $ddKlinkerPetrokok;
                 foreach ($klinkerVariants as $kKey => $kQty) {
-                    $share = $klinkerQuantity > 0.001 ? $halfDdPetrokok * ($kQty / $klinkerQuantity) : 0;
+                    $share = $klinkerQuantity > 0.001 ? $ddKlinkerPetrokok * ($kQty / $klinkerQuantity) : 0;
                     if ($share > 0.001) {
                         $faturaTotals[$petrokokRouteKey][$kKey] = $faturaTotals[$petrokokRouteKey][$kKey] ?? ['d_d' => 0, 'b_d' => 0];
                         $faturaTotals[$petrokokRouteKey][$kKey]['d_d'] += $share;
                     }
                 }
-                foreach ($petrokokVariants as $pKey => $pQty) {
-                    $pShare = $petrokokQuantity > 0.001 ? $halfDdPetrokok * ($pQty / $petrokokQuantity) : 0;
-                    if ($pShare > 0.001) {
+                /* Her Petrokok tedarikçisinin gerçek DD miktarı petrokokVarDD'den alınır */
+                foreach ($petrokokVarDD as $pKey => $pDD) {
+                    if ($pDD > 0.001) {
                         $faturaTotals[$petrokokRouteKey][$pKey] = $faturaTotals[$petrokokRouteKey][$pKey] ?? ['d_d' => 0, 'b_d' => 0];
-                        $faturaTotals[$petrokokRouteKey][$pKey]['d_d'] += $pShare;
+                        $faturaTotals[$petrokokRouteKey][$pKey]['d_d'] += $pDD;
                     }
                 }
             }
@@ -376,14 +447,11 @@ class DeliveryReportPivotService
                     }
                 }
             }
-            /* B-D: Petrokok artanı → petrokok_route */
-            if ($petrokokBd > 0.001 && $petrokokVariants !== []) {
-                foreach ($petrokokVariants as $pKey => $pQty) {
-                    $pShare = $petrokokQuantity > 0.001 ? $petrokokBd * ($pQty / $petrokokQuantity) : 0;
-                    if ($pShare > 0.001) {
-                        $faturaTotals[$petrokokRouteKey][$pKey] = $faturaTotals[$petrokokRouteKey][$pKey] ?? ['d_d' => 0, 'b_d' => 0];
-                        $faturaTotals[$petrokokRouteKey][$pKey]['b_d'] += $pShare;
-                    }
+            /* B-D: Petrokok artanı → petrokok_route (tedarikçi bazlı gerçek BD, petrokokVarBD'den) */
+            foreach ($petrokokVarBD as $pKey => $pBD) {
+                if ($pBD > 0.001) {
+                    $faturaTotals[$petrokokRouteKey][$pKey] = $faturaTotals[$petrokokRouteKey][$pKey] ?? ['d_d' => 0, 'b_d' => 0];
+                    $faturaTotals[$petrokokRouteKey][$pKey]['b_d'] += $pBD;
                 }
             }
 
@@ -630,11 +698,17 @@ class DeliveryReportPivotService
      * Her firma grubu kendi satırlarıyla bağımsız D-D/B-D eşleştirme yapar.
      * Toplam malzeme miktarları firma bazında korunur.
      *
-     * Grup 1 (BRC): firma_adi = "BRC"
-     * Grup 2 (Diğer): firma_adi = "A.Ş.", "GÜNEY", "TAŞERON" vb.
+     * Firma Grupları:
+     * - Grup 1 (BRC): firma_adi = "BRC"
+     * - Grup 2 (Diğer): firma_adi = "A.Ş.", "GÜNEY", "TAŞERON" vb.
      *
-     * @param  array<int, array>  $faturaRotaGruplari  1. tablonun rota grupları (routeConfigs almak için)
-     * @return array<int, array{label: string, rota_gruplari: array, toplam: float}>
+     * Her grup için tarih bazlı Klinker-Cüruf-Petrokok eşleştirmesi yapılır.
+     * İsdemir DD hesabı için Cüruf olan günlerde Klinker eşleşir.
+     *
+     * @param  DeliveryImportBatch  $batch  Teslimat import batch'i
+     * @param  array<string, mixed>  $config  Rapor tipi config
+     * @param  array<int, array<string, mixed>>  $faturaRotaGruplari  1. tablonun rota grupları (routeConfigs referansı için)
+     * @return array<int, array{label: string, rota_gruplari: array<int, array{route_key: string, route_label: string, kalemler: array, route_toplam: float}>, toplam: float}> Firma bazlı fatura grupları
      */
     protected function buildFirmaBasedInvoiceTables(DeliveryImportBatch $batch, array $config, array $faturaRotaGruplari = []): array
     {
@@ -1176,6 +1250,10 @@ class DeliveryReportPivotService
 
     /**
      * Miktar değerini sayıya çevirir (virgül/nokta destekli).
+     * Türkçe sayı formatını (1.234,56) destekler.
+     *
+     * @param  mixed  $value  Ham miktar değeri (string veya number)
+     * @return float|null Parse edilmiş miktar veya null (geçersiz değer için)
      */
     protected function extractQuantity(mixed $value): ?float
     {
@@ -1194,6 +1272,16 @@ class DeliveryReportPivotService
     /**
      * Tarih değerini pivot için normalize eder (d.m.Y). Gruplama her zaman tarihe göre yapılır.
      * Excel seri, d.m.Y, d.m.Y H:i, Y-m-d vb. desteklenir; tarih+saat verilirse sadece tarih kısmı alınır.
+     *
+     * Desteklenen formatlar:
+     * - Excel seri numarası (44562.0)
+     * - d.m.Y, d.m.Y H:i:s
+     * - Y-m-d, Y-m-d H:i:s
+     * - m/d/Y, d/m/Y
+     * - Carbon parse fallback
+     *
+     * @param  mixed  $value  Ham tarih değeri
+     * @return string Normalize edilmiş tarih (d.m.Y formatında) veya boş string
      */
     protected function normalizeDateForPivot(mixed $value): string
     {
@@ -1310,8 +1398,12 @@ class DeliveryReportPivotService
      * Batch'ten pivot özet tablosu üretir.
      * Config'teki pivot_dimensions ile gruplar, pivot_metrics ile toplar/sayar.
      *
-     * @param  array<string>|null  $groupByDimensionKeys  Hangi boyutlara göre gruplanacak (null = hepsi)
-     * @return array<int, array<string, mixed>>
+     * Örnek kullanım: Malzeme koduna göre gruplama ve miktar toplama.
+     * Config'den alınan pivot_dimensions ve pivot_metrics kullanılır.
+     *
+     * @param  DeliveryImportBatch  $batch  Teslimat import batch'i
+     * @param  array<int, string>|null  $groupByDimensionKeys  Hangi boyutlara göre gruplanacak (null = config'deki tüm dimension'lar)
+     * @return array<int, array<string, mixed>> Pivot tablosu satırları
      */
     public function buildPivot(DeliveryImportBatch $batch, ?array $groupByDimensionKeys = null): array
     {
@@ -1393,7 +1485,12 @@ class DeliveryReportPivotService
      * Batch'ten fatura kalemleri listesi üretir.
      * invoice_line_mapping ile row_data'dan alanlar alınır; istenirse irsaliye_no + malzeme_kodu ile gruplanıp miktar toplanır.
      *
-     * @return array<int, array<string, mixed>>
+     * Config'deki invoice_line_mapping (irsaliye_no, malzeme_kodu, miktar, vb.) kullanılarak
+     * her satırdan fatura kalemi oluşturulur.
+     *
+     * @param  DeliveryImportBatch  $batch  Teslimat import batch'i
+     * @param  bool  $groupByIrsaliyeAndMaterial  İrsaliye numarası ve malzeme koduna göre gruplama yapılsın mı
+     * @return array<int, array<string, mixed>> Fatura kalemleri listesi
      */
     public function buildInvoiceLines(DeliveryImportBatch $batch, bool $groupByIrsaliyeAndMaterial = true): array
     {

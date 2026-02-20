@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\DocumentFlow\Models\DocumentFlow;
+use App\Pricing\Models\PricingCondition;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +18,7 @@ class Order extends Model
     protected $fillable = [
         'customer_id',
         'order_number',
+        'sap_order_number',
         'status',
         'pickup_address',
         'delivery_address',
@@ -23,11 +26,15 @@ class Order extends Model
         'planned_delivery_date',
         'actual_pickup_date',
         'delivered_at',
+        'planned_at',
+        'invoiced_at',
         'total_weight',
         'total_volume',
         'is_dangerous',
         'notes',
         'created_by',
+        'freight_price',
+        'pricing_condition_id',
     ];
 
     protected function casts(): array
@@ -37,10 +44,31 @@ class Order extends Model
             'planned_delivery_date' => 'datetime',
             'actual_pickup_date' => 'datetime',
             'delivered_at' => 'datetime',
+            'planned_at' => 'datetime',
+            'invoiced_at' => 'datetime',
             'total_weight' => 'decimal:2',
             'total_volume' => 'decimal:2',
             'is_dangerous' => 'boolean',
+            'freight_price' => 'decimal:2',
         ];
+    }
+
+    /**
+     * Durumun Türkçe etiketini döner.
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->status) {
+            'pending' => 'Beklemede',
+            'planned' => 'Planlandı',
+            'assigned' => 'Atandı',
+            'loaded' => 'Yüklendi',
+            'in_transit' => 'Yolda',
+            'delivered' => 'Teslim Edildi',
+            'invoiced' => 'Faturalandı',
+            'cancelled' => 'İptal',
+            default => ucfirst($this->status),
+        };
     }
 
     /**
@@ -81,5 +109,19 @@ class Order extends Model
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'documentable');
+    }
+
+    public function pricingCondition(): BelongsTo
+    {
+        return $this->belongsTo(PricingCondition::class);
+    }
+
+    /**
+     * Bu siparişin başlattığı doküman akışı adımları.
+     */
+    public function documentFlows(): HasMany
+    {
+        return $this->hasMany(DocumentFlow::class, 'source_id')
+            ->where('source_type', self::class);
     }
 }

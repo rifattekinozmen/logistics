@@ -75,10 +75,10 @@
                                         notifications
                                 @endswitch
                             </span>
-                        </div>
                     </div>
-                    <div class="grow min-w-0">
-                        <div class="d-flex align-items-start justify-content-between mb-1">
+                </div>
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <div class="d-flex align-items-start justify-content-between mb-1">
                             <h5 class="fw-bold text-dark mb-0 {{ !$notification->is_read ? '' : 'text-secondary' }}">
                                 {{ $notification->title }}
                             </h5>

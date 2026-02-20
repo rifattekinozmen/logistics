@@ -21,10 +21,10 @@
                 @else
                 <div class="rounded-3xl border d-flex align-items-center justify-content-center bg-white text-secondary" style="width: 64px; height: 64px;">
                     <span class="material-symbols-outlined" style="font-size: 28px;">business</span>
-                </div>
-                @endif
-                <div class="grow">
-                    <h4 class="h5 fw-bold text-dark mb-1">{{ $company->name }}</h4>
+            </div>
+            @endif
+            <div class="flex-grow-1">
+                <h4 class="h5 fw-bold text-dark mb-1">{{ $company->name }}</h4>
                     @if($company->short_name)
                     <p class="small text-secondary mb-0">{{ $company->short_name }}</p>
                     @endif

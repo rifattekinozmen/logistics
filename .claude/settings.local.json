@@ -4,7 +4,15 @@
       "Bash(ls:*)",
       "mcp__laravel-boost__application-info",
       "Bash(dir:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(php artisan migrate:*)",
+      "Bash(php artisan make:test:*)",
+      "Bash(php artisan test:*)",
+      "Bash(vendor/bin/pint:*)",
+      "mcp__laravel-boost__get-absolute-url",
+      "mcp__laravel-boost__tinker",
+      "mcp__laravel-boost__database-schema",
+      "mcp__laravel-boost__last-error"
     ]
   }
 }

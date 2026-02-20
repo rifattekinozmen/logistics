@@ -28,7 +28,7 @@
                 <dt class="col-sm-4">Durum</dt>
                 <dd class="col-sm-8">
                     <span class="badge bg-{{ match($order->status) { 'delivered' => 'success', 'in_transit' => 'primary', 'assigned' => 'info', default => 'warning' } }}-200 text-{{ match($order->status) { 'delivered' => 'success', 'in_transit' => 'primary', 'assigned' => 'info', default => 'warning' } }} rounded-pill px-3 py-2">
-                        {{ ucfirst($order->status) }}
+                        {{ $order->status_label }}
                     </span>
                 </dd>
 
@@ -114,7 +114,7 @@
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <p class="fw-bold mb-0">Sevkiyat #{{ $shipment->id }}</p>
                             <span class="badge bg-{{ match($shipment->status) { 'delivered' => 'success', 'in_transit' => 'primary', 'assigned' => 'info', default => 'warning' } }}-200 text-{{ match($shipment->status) { 'delivered' => 'success', 'in_transit' => 'primary', 'assigned' => 'info', default => 'warning' } }} rounded-pill px-3 py-1">
-                                {{ ucfirst($shipment->status) }}
+                                {{ $shipment->status_label }}
                             </span>
                         </div>
                         @if($shipment->vehicle)

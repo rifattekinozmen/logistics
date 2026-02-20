@@ -13,7 +13,70 @@ use Log;
 class DriverController extends Controller
 {
     /**
-     * Şoföre atanmış sevkiyatları listele.
+     * @OA\Get(
+     *     path="/api/driver/shipments",
+     *     summary="Şoföre atanmış sevkiyatları listele",
+     *     description="Giriş yapmış şoförün atanmış olduğu sevkiyatları getirir",
+     *     operationId="getDriverShipments",
+     *     tags={"Driver"},
+     *     security={{"sanctum": {}}},
+     *
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Sevkiyat durumu filtresi",
+     *         required=false,
+     *
+     *         @OA\Schema(
+     *             type="string",
+     *             enum={"pending", "assigned", "loaded", "in_transit", "delivered", "cancelled"}
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Başarılı",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *
+     *                 @OA\Items(
+     *
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="order_number", type="string", example="ORD-12345678"),
+     *                     @OA\Property(property="customer_name", type="string", example="ABC Lojistik A.Ş."),
+     *                     @OA\Property(property="pickup_address", type="string", example="İstanbul, Türkiye"),
+     *                     @OA\Property(property="delivery_address", type="string", example="Ankara, Türkiye"),
+     *                     @OA\Property(property="status", type="string", example="in_transit"),
+     *                     @OA\Property(property="vehicle_plate", type="string", example="34 ABC 123"),
+     *                     @OA\Property(property="pickup_date", type="string", format="date-time", example="2026-02-20T10:30:00+03:00"),
+     *                     @OA\Property(property="delivery_date", type="string", format="date-time", nullable=true),
+     *                     @OA\Property(property="created_at", type="string", format="date-time")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Personel kaydı bulunamadı",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Personel kaydı bulunamadı.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Yetkisiz erişim"
+     *     )
+     * )
      */
     public function shipments(Request $request): JsonResponse
     {
@@ -57,7 +120,76 @@ class DriverController extends Controller
     }
 
     /**
-     * Sevkiyat durumunu güncelle.
+     * @OA\Put(
+     *     path="/api/driver/shipments/{shipment}/status",
+     *     summary="Sevkiyat durumunu güncelle",
+     *     description="Şoförün atandığı sevkiyatın durumunu günceller",
+     *     operationId="updateDriverShipmentStatus",
+     *     tags={"Driver"},
+     *     security={{"sanctum": {}}},
+     *
+     *     @OA\Parameter(
+     *         name="shipment",
+     *         in="path",
+     *         description="Sevkiyat ID",
+     *         required=true,
+     *
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"status"},
+     *
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="string",
+     *                 enum={"assigned", "loaded", "in_transit", "delivered"},
+     *                 example="in_transit"
+     *             ),
+     *             @OA\Property(
+     *                 property="notes",
+     *                 type="string",
+     *                 maxLength=1000,
+     *                 example="Yükleme tamamlandı, yola çıkıldı"
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Başarılı",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Sevkiyat durumu güncellendi."),
+     *             @OA\Property(
+     *                 property="data",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="status", type="string", example="in_transit")
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Yetkisiz erişim",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Bu sevkiyata erişim yetkiniz yok.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Doğrulama hatası"
+     *     )
+     * )
      */
     public function updateShipmentStatus(Request $request, Shipment $shipment): JsonResponse
     {

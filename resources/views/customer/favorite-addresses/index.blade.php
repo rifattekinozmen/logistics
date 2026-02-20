@@ -40,7 +40,7 @@ window.FAVORITE_ADDRESSES_MAP_DATA = @json($addressesWithCoords->map(function ($
         <div class="col-md-6">
             <div class="bg-white rounded-3xl shadow-sm border p-4">
                 <div class="d-flex align-items-start justify-content-between mb-3">
-                    <div class="grow">
+                    <div class="flex-grow-1">
                         <h5 class="fw-bold text-dark mb-1">{{ $address->name }}</h5>
                         <span class="badge bg-primary-200 text-primary rounded-pill px-3 py-1">
                             {{ match($address->type) { 'pickup' => 'Alış', 'delivery' => 'Teslimat', 'both' => 'Her İkisi', default => $address->type } }}
@@ -141,7 +141,7 @@ window.FAVORITE_ADDRESSES_MAP_DATA = @json($addressesWithCoords->map(function ($
                     <div class="mb-3">
                         <label for="address" class="form-label fw-semibold text-dark">Adres <span class="text-danger">*</span></label>
                         <div class="d-flex gap-2 mb-2">
-                            <textarea name="address" id="address" class="form-control grow" rows="3" required></textarea>
+                            <textarea name="address" id="address" class="form-control flex-grow-1" rows="3" required></textarea>
                             <button type="button" id="btnGeocode" class="btn btn-outline-primary align-self-start" title="Adresten enlem/boylam getir">
                                 <span class="material-symbols-outlined">my_location</span>
                             </button>

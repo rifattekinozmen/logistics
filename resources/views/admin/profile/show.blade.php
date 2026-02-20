@@ -78,10 +78,10 @@
                                     <div class="rounded-3xl border d-flex align-items-center justify-content-center bg-white text-secondary" style="width: 80px; height: 80px;">
                                         <span class="material-symbols-outlined" style="font-size: 32px;">person</span>
                                     </div>
-                                @endif
-                            </div>
-                            <div class="grow">
-                                <input type="file" name="avatar" accept="image/*" class="form-control border-primary-200 focus:border-primary focus:ring-primary @error('avatar') is-invalid border-danger @enderror">
+                            @endif
+                        </div>
+                        <div class="flex-grow-1">
+                            <input type="file" name="avatar" accept="image/*" class="form-control border-primary-200 @error('avatar') is-invalid border-danger @enderror">
                                 <small class="text-secondary">JPEG, PNG, JPG veya GIF (Max: 2MB)</small>
                                 @error('avatar')
                                 <div class="invalid-feedback">{{ $message }}</div>

@@ -111,6 +111,13 @@ body {
     text-rendering: auto;
 }
 
+/* Material Symbols: ikon yüklenene kadar layout kayması önlenir */
+.material-symbols-outlined {
+    font-display: block;
+    min-width: 1em;
+    min-height: 1em;
+}
+
 /* Geri Dön butonu: ikon ile metin aynı hizada ve eşit boyutta */
 .btn.d-inline-flex .material-symbols-outlined,
 a.d-inline-flex .material-symbols-outlined {
@@ -913,6 +920,11 @@ aside.sidebar-light nav a {
     color: #334155 !important;
 }
 
+aside.sidebar-light nav a.sidebar-link:not(.bg-primary):hover {
+    background-color: var(--bs-primary-200) !important;
+    color: var(--bs-primary) !important;
+}
+
 aside.sidebar-light nav a:hover {
     background-color: var(--bs-primary-200) !important;
     color: var(--bs-primary) !important;
@@ -975,11 +987,8 @@ aside.sidebar-light .custom-scrollbar::-webkit-scrollbar-track {
 /* Sidebar responsive */
 .sidebar-content {
     margin-left: 280px;
-    min-width: 0; /* flex içinde dar ekranda taşmayı önler */
-}
-
-.sidebar-content main {
-    min-width: 0; /* içerik sabit genişlikte olsa bile sayfa daralabilsin */
+    min-width: 0;
+    width: 100%;
 }
 
 /* Sidebar overlay for mobile */
@@ -1094,6 +1103,73 @@ aside.sidebar-light .custom-scrollbar::-webkit-scrollbar-track {
 }
 .navbar-breadcrumb .breadcrumb-item.active {
     color: var(--bs-primary);
+}
+
+/* Navbar button hover effects */
+.navbar-btn-hover:hover {
+    background-color: #ffffff !important;
+}
+
+.navbar-user-btn:hover {
+    opacity: 0.8;
+}
+
+/* Dropdown item hover effects */
+.dropdown-item-hover:hover {
+    background-color: var(--bs-primary-200) !important;
+}
+
+.dropdown-item-hover-success:hover {
+    background-color: var(--bs-success-200) !important;
+}
+
+.dropdown-item-hover-danger:hover {
+    background-color: var(--bs-danger-200) !important;
+}
+
+/* Quick access link hover effects */
+.quick-access-link:hover {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.quick-access-primary:hover {
+    background-color: var(--bs-primary) !important;
+    color: #ffffff !important;
+}
+
+.quick-access-primary:hover .text-dark,
+.quick-access-primary:hover .text-secondary {
+    color: #ffffff !important;
+}
+
+.quick-access-info:hover {
+    background-color: var(--bs-info) !important;
+    color: #ffffff !important;
+}
+
+.quick-access-info:hover .text-dark,
+.quick-access-info:hover .text-secondary {
+    color: #ffffff !important;
+}
+
+.quick-access-warning:hover {
+    background-color: var(--bs-gray-blue) !important;
+    color: #ffffff !important;
+}
+
+.quick-access-warning:hover .text-dark,
+.quick-access-warning:hover .text-secondary {
+    color: #ffffff !important;
+}
+
+.quick-access-success:hover {
+    background-color: var(--bs-success) !important;
+    color: #ffffff !important;
+}
+
+.quick-access-success:hover .text-dark,
+.quick-access-success:hover .text-secondary {
+    color: #ffffff !important;
 }
 
 /* Personel sayfaları – Cemiloğlu açık mavi palet, kimlik portalı tarzı */

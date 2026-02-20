@@ -2,6 +2,7 @@
 
 namespace App\Order\Services;
 
+use App\DocumentFlow\Services\DocumentFlowService;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -9,6 +10,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class OrderService
 {
+    public function __construct(protected DocumentFlowService $documentFlowService) {}
+
     /**
      * Create a new order.
      */
@@ -17,7 +20,10 @@ class OrderService
         $data['created_by'] = $user?->id;
         $data['order_number'] = $this->generateOrderNumber();
 
-        return Order::create($data);
+        $order = Order::create($data);
+        $this->documentFlowService->initializeOrderChain($order);
+
+        return $order;
     }
 
     /**
@@ -35,7 +41,7 @@ class OrderService
      */
     public function getPaginated(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
-        $query = Order::query()->with(['customer', 'creator']);
+        $query = Order::query()->with(['customer', 'creator', 'pickupLocation', 'deliveryLocation']);
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -61,7 +67,7 @@ class OrderService
      */
     public function getForExport(array $filters = []): Collection
     {
-        $query = Order::query()->with(['customer', 'creator']);
+        $query = Order::query()->with(['customer', 'creator', 'pickupLocation', 'deliveryLocation']);
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);

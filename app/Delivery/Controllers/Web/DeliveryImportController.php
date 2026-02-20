@@ -27,7 +27,7 @@ class DeliveryImportController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = DeliveryImportBatch::query()->latest();
+        $query = DeliveryImportBatch::query()->with(['importer'])->latest();
 
         $status = $request->string('status')->trim()->toString();
         if ($status !== '' && in_array($status, ['pending', 'processing', 'completed', 'failed'], true)) {
@@ -323,6 +323,30 @@ class DeliveryImportController extends Controller
             'dayCount' => $dayCount,
             'dateRangeText' => $dateRangeText,
         ]);
+    }
+
+    /**
+     * Günlük Klinker override değerlerini kaydet.
+     * Kullanıcı kantar sistemindeki günlük Klinker miktarlarını girerek SAP-kantar farkını düzeltir.
+     */
+    public function updateKlinkerOverrides(Request $request, DeliveryImportBatch $batch): RedirectResponse
+    {
+        $valid = $request->validate([
+            'overrides' => 'nullable|array',
+            'overrides.*' => 'nullable|numeric|min:0',
+        ]);
+
+        $overrides = [];
+        foreach ($valid['overrides'] ?? [] as $date => $val) {
+            if ($val !== null && $val !== '' && (float) $val > 0) {
+                $overrides[$date] = (float) $val;
+            }
+        }
+
+        $batch->update(['klinker_daily_overrides' => $overrides ?: null]);
+
+        return redirect()->route('admin.delivery-imports.veri-analiz-raporu', $batch)
+            ->with('success', 'Günlük Klinker değerleri güncellendi.');
     }
 
     /**

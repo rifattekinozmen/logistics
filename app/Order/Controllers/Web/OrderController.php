@@ -6,9 +6,12 @@ use App\Core\Services\ExportService;
 use App\Excel\Services\ExcelImportService;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\Order;
 use App\Order\Requests\StoreOrderRequest;
 use App\Order\Requests\UpdateOrderRequest;
 use App\Order\Services\OrderService;
+use App\Order\Services\OrderStatusTransitionService;
+use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -22,7 +25,8 @@ class OrderController extends Controller
     public function __construct(
         protected OrderService $orderService,
         protected ExportService $exportService,
-        protected ExcelImportService $excelImportService
+        protected ExcelImportService $excelImportService,
+        protected OrderStatusTransitionService $transitionService
     ) {}
 
     /**
@@ -245,7 +249,7 @@ class OrderController extends Controller
      */
     public function show(int $id): View
     {
-        $order = \App\Models\Order::with(['customer', 'shipments', 'creator'])->findOrFail($id);
+        $order = \App\Models\Order::with(['customer', 'shipments.vehicle', 'shipments.driver', 'creator'])->findOrFail($id);
 
         return view('admin.orders.show', compact('order'));
     }
@@ -278,10 +282,32 @@ class OrderController extends Controller
      */
     public function destroy(int $id): RedirectResponse
     {
-        $order = \App\Models\Order::findOrFail($id);
+        $order = Order::findOrFail($id);
         $order->delete();
 
         return redirect()->route('admin.orders.index')
             ->with('success', 'Sipariş başarıyla silindi.');
+    }
+
+    /**
+     * SAP uyumlu durum geçişi gerçekleştirir.
+     */
+    public function transition(Request $request, Order $order): RedirectResponse
+    {
+        $request->validate([
+            'status' => 'required|string|in:pending,planned,assigned,loaded,in_transit,delivered,invoiced,cancelled',
+        ], [
+            'status.required' => 'Yeni durum seçimi zorunludur.',
+            'status.in' => 'Geçersiz durum seçimi.',
+        ]);
+
+        try {
+            $this->transitionService->transition($order, $request->input('status'), $request->user());
+        } catch (DomainException $e) {
+            return back()->withErrors(['transition' => $e->getMessage()]);
+        }
+
+        return redirect()->route('admin.orders.show', $order)
+            ->with('success', 'Sipariş durumu güncellendi: '.$order->fresh()->status_label);
     }
 }

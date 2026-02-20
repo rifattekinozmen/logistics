@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\BusinessPartner\Models\BusinessPartner;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,6 +15,7 @@ class Customer extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'business_partner_id',
         'name',
         'tax_number',
         'phone',
@@ -26,6 +29,11 @@ class Customer extends Model
         return [
             'status' => 'integer',
         ];
+    }
+
+    public function businessPartner(): BelongsTo
+    {
+        return $this->belongsTo(BusinessPartner::class);
     }
 
     /**

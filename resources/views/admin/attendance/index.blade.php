@@ -316,7 +316,7 @@ window.__ATTENDANCE_CONFIG__ = {!! $configJson ?? '{}' !!};
 .controls-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 .controls-inner { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-end; }
 .control-group { display: flex; flex-direction: column; gap: 0.5rem; min-width: 140px; }
-.control-group.grow { flex: 1; min-width: 200px; }
+.control-group.flex-grow-1 { flex: 1; min-width: 200px; }
 .control-label { font-size: 0.875rem; font-weight: 500; color: var(--text-muted); margin: 0; display: flex; align-items: center; }
 .control-input-wrap { display: flex; align-items: center; gap: 0.5rem; position: relative; }
 .control-input { padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem; color: var(--text-dark); width: 100%; max-width: 200px; }

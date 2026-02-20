@@ -45,7 +45,7 @@
                 <dt class="col-sm-4">Durum</dt>
                 <dd class="col-sm-8">
                     <span class="badge bg-{{ match($workOrder->status) { 'completed' => 'success', 'in_progress' => 'primary', default => 'warning' } }}-200 text-{{ match($workOrder->status) { 'completed' => 'success', 'in_progress' => 'primary', default => 'warning' } }} rounded-pill px-3 py-2">
-                        {{ ucfirst($workOrder->status) }}
+                        {{ $workOrder->status_label }}
                     </span>
                 </dd>
 

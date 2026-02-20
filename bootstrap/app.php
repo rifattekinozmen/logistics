@@ -24,6 +24,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \App\Core\Middleware\PermissionMiddleware::class,
             'active.company' => \App\Http\Middleware\ActiveCompany::class,
         ]);
+
+        // API rate limiting (60 requests per minute)
+        $middleware->throttleApi('60,1');
+
+        // Security headers middleware
+        $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

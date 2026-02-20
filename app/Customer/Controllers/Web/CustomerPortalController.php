@@ -47,14 +47,16 @@ class CustomerPortalController extends Controller
         }
 
         // Aktif siparişler
-        $activeOrders = Order::where('customer_id', $customer->id)
+        $activeOrders = Order::with(['customer', 'pickupLocation', 'deliveryLocation'])
+            ->where('customer_id', $customer->id)
             ->whereNotIn('status', ['delivered', 'cancelled'])
             ->latest()
             ->limit(5)
             ->get();
 
         // Son teslim edilenler
-        $recentDelivered = Order::where('customer_id', $customer->id)
+        $recentDelivered = Order::with(['customer', 'pickupLocation', 'deliveryLocation'])
+            ->where('customer_id', $customer->id)
             ->where('status', 'delivered')
             ->latest('delivered_at')
             ->limit(5)
@@ -122,7 +124,8 @@ class CustomerPortalController extends Controller
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
-        $query = Order::where('customer_id', $customer->id);
+        $query = Order::with(['customer', 'pickupLocation', 'deliveryLocation'])
+            ->where('customer_id', $customer->id);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);

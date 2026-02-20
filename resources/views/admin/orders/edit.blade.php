@@ -28,11 +28,14 @@
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Durum <span class="text-danger">*</span></label>
                 <select name="status" class="form-select @error('status') is-invalid @enderror" required>
-                    <option value="pending" {{ old('status', $order->status) === 'pending' ? 'selected' : '' }}>Beklemede</option>
-                    <option value="assigned" {{ old('status', $order->status) === 'assigned' ? 'selected' : '' }}>Atandı</option>
+                    <option value="pending"    {{ old('status', $order->status) === 'pending'    ? 'selected' : '' }}>Beklemede</option>
+                    <option value="planned"    {{ old('status', $order->status) === 'planned'    ? 'selected' : '' }}>Planlandı</option>
+                    <option value="assigned"   {{ old('status', $order->status) === 'assigned'   ? 'selected' : '' }}>Atandı</option>
+                    <option value="loaded"     {{ old('status', $order->status) === 'loaded'     ? 'selected' : '' }}>Yüklendi</option>
                     <option value="in_transit" {{ old('status', $order->status) === 'in_transit' ? 'selected' : '' }}>Yolda</option>
-                    <option value="delivered" {{ old('status', $order->status) === 'delivered' ? 'selected' : '' }}>Teslim Edildi</option>
-                    <option value="cancelled" {{ old('status', $order->status) === 'cancelled' ? 'selected' : '' }}>İptal</option>
+                    <option value="delivered"  {{ old('status', $order->status) === 'delivered'  ? 'selected' : '' }}>Teslim Edildi</option>
+                    <option value="invoiced"   {{ old('status', $order->status) === 'invoiced'   ? 'selected' : '' }}>Faturalandı</option>
+                    <option value="cancelled"  {{ old('status', $order->status) === 'cancelled'  ? 'selected' : '' }}>İptal</option>
                 </select>
                 @error('status')
                 <div class="invalid-feedback">{{ $message }}</div>

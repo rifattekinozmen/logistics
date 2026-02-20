@@ -1,9 +1,12 @@
 <?php
 
+use App\Analytics\Controllers\Web\AnalyticsController;
+use App\BusinessPartner\Controllers\Web\BusinessPartnerController;
 use App\Core\Services\ExportService;
 use App\Customer\Controllers\Web\CustomerController;
 use App\Delivery\Controllers\Web\DeliveryImportController;
 use App\Document\Controllers\Web\DocumentController;
+use App\DocumentFlow\Controllers\Web\DocumentFlowController;
 use App\Employee\Controllers\Web\AdvanceController;
 use App\Employee\Controllers\Web\EmployeeController;
 use App\Employee\Controllers\Web\LeaveController;
@@ -15,40 +18,83 @@ use App\FuelPrice\Controllers\Web\FuelPriceController;
 use App\Notification\Controllers\Web\NotificationController;
 use App\Order\Controllers\Web\OrderController;
 use App\Order\Services\OperationsPerformanceService;
+use App\Pricing\Controllers\Web\PricingConditionController;
 use App\Shift\Controllers\Web\ShiftController;
 use App\Shipment\Controllers\Web\ShipmentController;
 use App\Vehicle\Controllers\Web\VehicleController;
 use App\Warehouse\Controllers\Web\WarehouseController;
 use App\WorkOrder\Controllers\Web\WorkOrderController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () {
-        $customersThisMonth = \App\Models\Customer::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count();
-        $customersLastMonth = \App\Models\Customer::whereMonth('created_at', now()->subMonth()->month)
-            ->whereYear('created_at', now()->subMonth()->year)
-            ->count();
+        // Müşteri büyüme istatistiği
+        $now = now();
+        $thisMonth = $now->month;
+        $thisYear = $now->year;
+        $lastMonthDate = $now->copy()->subMonth();
+        $lastMonth = $lastMonthDate->month;
+        $lastMonthYear = $lastMonthDate->year;
+
+        $customerMonthlyStats = DB::table('customers')
+            ->selectRaw('
+                COUNT(CASE WHEN MONTH(created_at) = ? AND YEAR(created_at) = ? THEN 1 END) as this_month,
+                COUNT(CASE WHEN MONTH(created_at) = ? AND YEAR(created_at) = ? THEN 1 END) as last_month
+            ', [$thisMonth, $thisYear, $lastMonth, $lastMonthYear])
+            ->first();
+
+        $customersThisMonth = (int) ($customerMonthlyStats->this_month ?? 0);
+        $customersLastMonth = (int) ($customerMonthlyStats->last_month ?? 0);
         $customersChangePercent = $customersLastMonth > 0
             ? round((($customersThisMonth - $customersLastMonth) / $customersLastMonth) * 100)
             : ($customersThisMonth > 0 ? 100 : 0);
 
+        // Order istatistiklerini tek sorguda topla
+        $orderStats = DB::table('orders')->selectRaw("
+            COUNT(CASE WHEN status != 'cancelled' THEN 1 END) as orders_count,
+            COUNT(CASE WHEN status = 'pending' THEN 1 END) as orders_pending,
+            COUNT(CASE WHEN status = 'delivered' THEN 1 END) as orders_delivered,
+            COUNT(CASE WHEN status = 'invoiced' THEN 1 END) as invoiced_orders
+        ")->first();
+
+        // Shipment istatistiklerini tek sorguda topla
+        $shipmentStats = DB::table('shipments')->selectRaw("
+            COUNT(*) as total,
+            COUNT(CASE WHEN status IN ('pending', 'in_transit') THEN 1 END) as active
+        ")->first();
+
         $stats = [
-            'orders_count' => \App\Models\Order::where('status', '!=', 'cancelled')->count(),
-            'orders_pending' => \App\Models\Order::where('status', 'pending')->count(),
-            'orders_delivered' => \App\Models\Order::where('status', 'delivered')->count(),
-            'shipments_count' => \App\Models\Shipment::count(),
-            'shipments_active' => \App\Models\Shipment::whereIn('status', ['pending', 'in_transit'])->count(),
+            'orders_count' => (int) ($orderStats->orders_count ?? 0),
+            'orders_pending' => (int) ($orderStats->orders_pending ?? 0),
+            'orders_delivered' => (int) ($orderStats->orders_delivered ?? 0),
+            'invoiced_orders' => (int) ($orderStats->invoiced_orders ?? 0),
+            'shipments_count' => (int) ($shipmentStats->total ?? 0),
+            'shipments_active' => (int) ($shipmentStats->active ?? 0),
             'vehicles_count' => \App\Models\Vehicle::where('status', 1)->count(),
             'vehicles_active' => \App\Models\Vehicle::where('status', 1)
-                ->whereNotIn('id', \App\Models\Shipment::whereIn('status', ['pending', 'in_transit'])->pluck('vehicle_id')->filter()->toArray())
+                ->whereNotIn('id', \App\Models\Shipment::whereIn('status', ['pending', 'in_transit'])->select('vehicle_id'))
                 ->count(),
             'employees_count' => \App\Models\Employee::where('status', 1)->count(),
             'customers_count' => \App\Models\Customer::where('status', 1)->count(),
             'customers_change_percent' => $customersChangePercent,
             'warehouses_count' => \App\Models\Warehouse::count(),
         ];
+
+        // SAP istatistiklerini tek sorguda topla
+        $sapStats = DB::table('sap_documents')->selectRaw("
+            COUNT(CASE WHEN sync_status = 'pending' THEN 1 END) as pending,
+            COUNT(CASE WHEN sync_status = 'synced' THEN 1 END) as synced,
+            COUNT(CASE WHEN sync_status = 'error' THEN 1 END) as errors
+        ")->first();
+
+        $bpCount = \App\BusinessPartner\Models\BusinessPartner::where('status', 1)->count();
+
+        $activePricing = \App\Pricing\Models\PricingCondition::where('status', 1)
+            ->where(function ($q) {
+                $q->whereNull('valid_to')->orWhere('valid_to', '>=', now());
+            })
+            ->count();
 
         // Son aktiviteleri çek
         $recentActivities = \App\Models\AuditLog::with('user')
@@ -116,7 +162,10 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
             'recentActivities',
             'aiReports',
             'financeData',
-            'operationsData'
+            'operationsData',
+            'sapStats',
+            'bpCount',
+            'activePricing',
         ));
     })->name('dashboard');
 
@@ -157,6 +206,16 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     Route::middleware('permission:order.view')->get('orders/import-template', [OrderController::class, 'importTemplate'])->name('orders.import-template');
     Route::middleware('permission:order.view')->post('orders/import', [OrderController::class, 'importStore'])->name('orders.import.store');
     Route::middleware('permission:order.view')->resource('orders', OrderController::class);
+    // SAP uyumlu durum geçişi
+    Route::middleware('permission:order.view')->post('orders/{order}/transition', [OrderController::class, 'transition'])->name('orders.transition');
+    // Doküman Akışı
+    Route::middleware('permission:order.view')->get('orders/{order}/document-flow', [DocumentFlowController::class, 'show'])->name('orders.document-flow');
+
+    // Business Partners (SAP BP uyumu)
+    Route::middleware('permission:customer.view')->resource('business-partners', BusinessPartnerController::class);
+
+    // Pricing Conditions (SAP navlun fiyatlandırma)
+    Route::middleware('permission:order.view')->resource('pricing-conditions', PricingConditionController::class)->except(['show']);
 
     // Customers
     Route::middleware('permission:customer.view')->group(function () {
@@ -179,6 +238,7 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         Route::get('/{batch}/veri-analiz-raporu', [DeliveryImportController::class, 'veriAnalizRaporu'])->name('veri-analiz-raporu');
         Route::patch('/{batch}/invoice-status', [DeliveryImportController::class, 'updateInvoiceStatus'])->name('invoice-status.update');
         Route::patch('/{batch}/petrokok-route', [DeliveryImportController::class, 'updatePetrokokRoute'])->name('petrokok-route.update');
+        Route::patch('/{batch}/klinker-overrides', [DeliveryImportController::class, 'updateKlinkerOverrides'])->name('klinker-overrides.update');
         Route::get('/{batch}/export', [DeliveryImportController::class, 'export'])->name('export');
         Route::get('/{batch}/download-original', [DeliveryImportController::class, 'downloadOriginal'])->name('download-original');
         Route::post('/{batch}/reprocess', [DeliveryImportController::class, 'reprocess'])->name('reprocess');
@@ -283,5 +343,12 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         Route::post('/{company}/addresses', [\App\Http\Controllers\Admin\CompanyController::class, 'storeAddress'])->name('addresses.store');
         Route::put('/{company}/addresses/{addressId}', [\App\Http\Controllers\Admin\CompanyController::class, 'updateAddress'])->name('addresses.update');
         Route::delete('/{company}/addresses/{addressId}', [\App\Http\Controllers\Admin\CompanyController::class, 'deleteAddress'])->name('addresses.delete');
+    });
+
+    // Analytics
+    Route::prefix('analytics')->name('analytics.')->group(function () {
+        Route::get('/finance', [AnalyticsController::class, 'finance'])->name('finance');
+        Route::get('/operations', [AnalyticsController::class, 'operations'])->name('operations');
+        Route::get('/fleet', [AnalyticsController::class, 'fleet'])->name('fleet');
     });
 });

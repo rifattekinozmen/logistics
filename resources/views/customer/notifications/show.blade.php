@@ -46,10 +46,10 @@
                             @default
                                 notifications
                         @endmatch
-                    </span>
-                </div>
-                <div class="grow">
-                    <h3 class="h4 fw-bold text-dark mb-2">{{ $notification->title }}</h3>
+                </span>
+            </div>
+            <div class="flex-grow-1">
+                <h3 class="h4 fw-bold text-dark mb-2">{{ $notification->title }}</h3>
                     <div class="d-flex align-items-center gap-3 mb-2">
                         <span class="badge bg-{{ match($notification->status) { 'sent' => 'success', 'failed' => 'danger', default => 'warning' } }}-200 text-{{ match($notification->status) { 'sent' => 'success', 'failed' => 'danger', default => 'warning' } }} rounded-pill px-3 py-2">
                             {{ match($notification->status) { 'sent' => 'Gönderildi', 'failed' => 'Başarısız', default => 'Bekliyor' } }}

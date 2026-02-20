@@ -14,7 +14,7 @@ class UpdateOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|string|in:pending,assigned,in_transit,delivered,cancelled',
+            'status' => 'required|string|in:pending,planned,assigned,loaded,in_transit,delivered,invoiced,cancelled',
             'pickup_address' => 'required|string|max:1000',
             'delivery_address' => 'required|string|max:1000',
             'planned_pickup_date' => 'nullable|date',

@@ -34,27 +34,28 @@
                     <div>
                         @php
                             $statusColors = [
-                                'pending' => 'warning',
-                                'assigned' => 'info',
+                                'pending'    => 'warning',
+                                'planned'    => 'info',
+                                'assigned'   => 'info',
+                                'loaded'     => 'primary',
                                 'in_transit' => 'primary',
-                                'delivered' => 'success',
-                                'cancelled' => 'danger',
-                            ];
-                            $statusLabels = [
-                                'pending' => 'Beklemede',
-                                'assigned' => 'Atandı',
-                                'in_transit' => 'Yolda',
-                                'delivered' => 'Teslim Edildi',
-                                'cancelled' => 'İptal',
+                                'delivered'  => 'success',
+                                'invoiced'   => 'success',
+                                'cancelled'  => 'danger',
                             ];
                             $color = $statusColors[$order->status] ?? 'secondary';
-                            $label = $statusLabels[$order->status] ?? $order->status;
                         @endphp
                         <span class="badge bg-{{ $color }} bg-opacity-10 text-{{ $color }} px-3 py-2 rounded-pill">
-                            {{ $label }}
+                            {{ $order->status_label }}
                         </span>
                     </div>
                 </div>
+                @if($order->sap_order_number)
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">SAP Sipariş No</label>
+                    <p class="fw-bold text-dark mb-0 font-monospace">{{ $order->sap_order_number }}</p>
+                </div>
+                @endif
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Müşteri</label>
                     <p class="fw-bold text-dark mb-0">{{ $order->customer->name ?? '-' }}</p>
@@ -119,12 +120,16 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-sm border p-4">
+        <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
             <h3 class="h4 fw-bold text-dark mb-4">Hızlı İşlemler</h3>
             <div class="d-flex flex-column gap-2">
                 <a href="{{ route('admin.orders.edit', $order->id) }}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2">
                     <span class="material-symbols-outlined">edit</span>
                     Düzenle
+                </a>
+                <a href="{{ route('admin.orders.document-flow', $order->id) }}" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center gap-2">
+                    <span class="material-symbols-outlined">account_tree</span>
+                    Doküman Akışı
                 </a>
                 <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Bu siparişi silmek istediğinize emin misiniz?');">
                     @csrf
@@ -136,6 +141,86 @@
                 </form>
             </div>
         </div>
+
+        {{-- SAP Durum Geçişi --}}
+        @php
+            $transitionService = app(\App\Order\Services\OrderStatusTransitionService::class);
+            $nextStatuses = $transitionService->allowedNextStatuses($order->status);
+            $nextStatusLabels = [
+                'planned'    => ['label' => 'Planla', 'icon' => 'schedule', 'color' => 'info'],
+                'assigned'   => ['label' => 'Ata',    'icon' => 'local_shipping', 'color' => 'primary'],
+                'loaded'     => ['label' => 'Yükle',  'icon' => 'inventory_2', 'color' => 'primary'],
+                'in_transit' => ['label' => 'Yola Çıkar', 'icon' => 'directions_car', 'color' => 'primary'],
+                'delivered'  => ['label' => 'Teslim Et', 'icon' => 'check_circle', 'color' => 'success'],
+                'invoiced'   => ['label' => 'Faturalandır', 'icon' => 'receipt', 'color' => 'success'],
+                'cancelled'  => ['label' => 'İptal Et', 'icon' => 'cancel', 'color' => 'danger'],
+            ];
+        @endphp
+        @if(count($nextStatuses) > 0)
+        <div class="bg-white rounded-3xl shadow-sm border p-4">
+            <h3 class="h6 fw-bold text-dark mb-3">Durum Geçişi</h3>
+            @error('transition')
+                <div class="alert alert-danger py-2 mb-3">{{ $message }}</div>
+            @enderror
+            <div class="d-flex flex-column gap-2">
+                @foreach($nextStatuses as $nextStatus)
+                    @php $meta = $nextStatusLabels[$nextStatus] ?? ['label' => $nextStatus, 'icon' => 'arrow_forward', 'color' => 'secondary']; @endphp
+                    <form action="{{ route('admin.orders.transition', $order->id) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="status" value="{{ $nextStatus }}">
+                        <button type="submit" class="btn btn-outline-{{ $meta['color'] }} w-100 d-flex align-items-center justify-content-center gap-2"
+                            onclick="return confirm('{{ $meta['label'] }} işlemini onaylıyor musunuz?')">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $meta['icon'] }}</span>
+                            {{ $meta['label'] }}
+                        </button>
+                    </form>
+                @endforeach
+            </div>
+        </div>
+        @endif
     </div>
 </div>
+
+{{-- SAP Zaman Çizelgesi --}}
+@if($order->planned_at || $order->invoiced_at)
+<div class="bg-white rounded-3xl shadow-sm border p-4 mt-4">
+    <h3 class="h5 fw-bold text-dark mb-4">SAP Durum Zaman Çizelgesi</h3>
+    <div class="d-flex gap-4 flex-wrap">
+        <div class="text-center">
+            <div class="rounded-circle bg-success-200 d-inline-flex align-items-center justify-content-center mb-2" style="width:40px;height:40px">
+                <span class="material-symbols-outlined text-success" style="font-size:1.2rem">add_circle</span>
+            </div>
+            <div class="small fw-semibold">Oluşturuldu</div>
+            <div class="text-secondary" style="font-size:0.75rem">{{ $order->created_at->format('d.m.Y') }}</div>
+        </div>
+        @if($order->planned_at)
+        <div class="text-center">
+            <div class="rounded-circle bg-info-200 d-inline-flex align-items-center justify-content-center mb-2" style="width:40px;height:40px">
+                <span class="material-symbols-outlined text-info" style="font-size:1.2rem">schedule</span>
+            </div>
+            <div class="small fw-semibold">Planlandı</div>
+            <div class="text-secondary" style="font-size:0.75rem">{{ $order->planned_at->format('d.m.Y') }}</div>
+        </div>
+        @endif
+        @if($order->delivered_at)
+        <div class="text-center">
+            <div class="rounded-circle bg-success-200 d-inline-flex align-items-center justify-content-center mb-2" style="width:40px;height:40px">
+                <span class="material-symbols-outlined text-success" style="font-size:1.2rem">check_circle</span>
+            </div>
+            <div class="small fw-semibold">Teslim Edildi</div>
+            <div class="text-secondary" style="font-size:0.75rem">{{ $order->delivered_at->format('d.m.Y') }}</div>
+        </div>
+        @endif
+        @if($order->invoiced_at)
+        <div class="text-center">
+            <div class="rounded-circle bg-success-200 d-inline-flex align-items-center justify-content-center mb-2" style="width:40px;height:40px">
+                <span class="material-symbols-outlined text-success" style="font-size:1.2rem">receipt</span>
+            </div>
+            <div class="small fw-semibold">Faturalandı</div>
+            <div class="text-secondary" style="font-size:0.75rem">{{ $order->invoiced_at->format('d.m.Y') }}</div>
+        </div>
+        @endif
+    </div>
+</div>
+@endif
 @endsection

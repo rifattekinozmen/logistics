@@ -13,7 +13,7 @@
     </div>
 @endif
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-    <div class="min-w-0 grow">
+    <div class="flex-grow-1" style="min-width: 0;">
         <h2 class="h3 fw-bold text-dark mb-1">Teslimat Raporu Detayı</h2>
         @if($reportTypeLabel ?? null)
             <p class="text-secondary mb-0">
@@ -137,7 +137,7 @@
 <form method="GET" action="{{ route('admin.delivery-imports.show', $batch) }}" class="mb-3 d-flex flex-wrap align-items-center gap-2">
     <input type="hidden" name="sort" value="{{ request('sort', '') }}">
     <input type="hidden" name="direction" value="{{ request('direction', 'asc') }}">
-    <div class="input-group grow" style="max-width: 320px;">
+    <div class="input-group flex-grow-1" style="max-width: 320px;">
         <input type="search" name="search" value="{{ request('search') }}" class="form-control" placeholder="Tabloda ara…" aria-label="Ara">
         <button type="submit" class="btn btn-outline-primary">Ara</button>
         @if(request('search'))

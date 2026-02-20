@@ -18,7 +18,7 @@ class OrderFactory extends Factory
         return [
             'customer_id' => Customer::factory(),
             'order_number' => 'ORD-'.$this->faker->unique()->numerify('########'),
-            'status' => $this->faker->randomElement(['pending', 'assigned', 'in_transit', 'delivered', 'cancelled']),
+            'status' => $this->faker->randomElement(['pending', 'planned', 'assigned', 'loaded', 'in_transit', 'delivered', 'invoiced', 'cancelled']),
             'pickup_address' => $this->faker->address(),
             'delivery_address' => $this->faker->address(),
             'planned_pickup_date' => $this->faker->dateTimeBetween('now', '+7 days'),

@@ -44,6 +44,18 @@ class WorkOrder extends Model
         ];
     }
 
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->status) {
+            'pending' => 'Onay Bekliyor',
+            'approved' => 'Onaylandı',
+            'in_progress' => 'Devam Ediyor',
+            'completed' => 'Tamamlandı',
+            'cancelled' => 'İptal',
+            default => ucfirst($this->status),
+        };
+    }
+
     /**
      * Get the vehicle that owns the work order.
      */

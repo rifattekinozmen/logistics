@@ -193,7 +193,7 @@
                             <div class="personel-photo-placeholder shrink-0" style="width: 72px; height: 72px;">
                                 <span class="material-symbols-outlined" style="font-size: 32px;">person</span>
                             </div>
-                            <div class="grow">
+                            <div class="flex-grow-1">
                                 <div class="personel-id-row mb-1">
                                     <span class="personel-id-label">T.C. KİMLİK NO</span>
                                     <span class="personel-id-value" id="preview-tckn">—</span>

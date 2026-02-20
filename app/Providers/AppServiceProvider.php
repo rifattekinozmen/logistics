@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 
@@ -43,6 +44,22 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.navbar', function ($view): void {
             $view->with('navBreadcrumbs', $this->buildAdminBreadcrumbs());
+        });
+
+        View::composer('layouts.sidebar', function ($view): void {
+            if (auth()->check()) {
+                $userId = auth()->id();
+                $unreadCount = Cache::remember(
+                    'sidebar_unread_'.$userId,
+                    60,
+                    fn () => \App\Models\Notification::where('user_id', $userId)
+                        ->where('is_read', false)
+                        ->count()
+                );
+                $view->with('unreadCount', $unreadCount);
+            } else {
+                $view->with('unreadCount', 0);
+            }
         });
     }
 

@@ -139,6 +139,104 @@
     </div>
 </div>
 
+{{-- Günlük Klinker Düzeltme Paneli --}}
+@php
+    $klinkerRows = array_filter($pivot['rows'] ?? [], function($r) {
+        foreach (array_keys($r['material_totals'] ?? []) as $mk) {
+            if (stripos($mk, 'KLINKER') !== false) return true;
+        }
+        return false;
+    });
+    $hasKlinker = count($klinkerRows) > 0;
+    $currentOverrides = $batch->klinker_daily_overrides ?? [];
+@endphp
+
+@if($hasKlinker)
+<div class="mt-4">
+    <details class="border rounded-3 bg-white shadow-sm" {{ !empty($currentOverrides) ? 'open' : '' }}>
+        <summary class="px-3 py-2 fw-semibold text-secondary d-flex align-items-center gap-2" style="cursor:pointer; list-style:none; user-select:none; font-size:0.85rem;">
+            <span class="material-symbols-outlined" style="font-size:1.1rem; color:#6f42c1;">edit_note</span>
+            Günlük Klinker Düzeltme
+            @if(!empty($currentOverrides))
+                <span class="badge bg-purple-100 text-purple ms-1" style="background:#f3e8ff; color:#6f42c1; font-size:0.7rem;">Aktif</span>
+            @endif
+            <span class="ms-auto text-secondary fw-normal" style="font-size:0.75rem;">Kantar sistemi ile SAP tarihleme farkını düzelt</span>
+        </summary>
+        <div class="px-3 pb-3 pt-1">
+            <p class="text-secondary small mb-2">
+                SAP'daki günlük Klinker miktarı ile kantar sistemi arasında fark varsa, her gün için kantar değerini girin.
+                Boş bırakılan günler SAP değeriyle hesaplanır.
+            </p>
+            <form method="POST" action="{{ route('admin.delivery-imports.klinker-overrides.update', $batch) }}">
+                @csrf
+                @method('PATCH')
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-2" style="font-size:0.82rem; max-width:480px;">
+                        <thead>
+                            <tr style="background:#f3e8ff;">
+                                <th class="text-secondary fw-semibold py-1 px-2">Tarih</th>
+                                <th class="text-secondary fw-semibold py-1 px-2">SAP (Geçerli Miktar)</th>
+                                <th class="text-secondary fw-semibold py-1 px-2">Kantar (Manuel)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($pivot['rows'] ?? [] as $pRow)
+                            @php
+                                $dayKl = 0;
+                                foreach ($pRow['material_totals'] ?? [] as $mk => $mQty) {
+                                    if (stripos($mk, 'KLINKER') !== false) $dayKl += $mQty;
+                                }
+                                if ($dayKl <= 0) continue;
+                                $dateKey = $pRow['tarih'];
+                                $overrideVal = $currentOverrides[$dateKey] ?? '';
+                            @endphp
+                            <tr>
+                                <td class="fw-semibold align-middle px-2 py-1">{{ $dateKey }}</td>
+                                <td class="align-middle px-2 py-1 text-secondary">{{ number_format($dayKl, 2, ',', '.') }}</td>
+                                <td class="align-middle px-2 py-1">
+                                    <input
+                                        type="number"
+                                        name="overrides[{{ $dateKey }}]"
+                                        value="{{ $overrideVal !== '' ? number_format((float)$overrideVal, 2, '.', '') : '' }}"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="{{ number_format($dayKl, 2, '.', '') }}"
+                                        class="form-control form-control-sm"
+                                        style="width:110px; font-size:0.82rem;"
+                                    >
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <button type="submit" class="btn btn-sm btn-outline-purple d-inline-flex align-items-center gap-1" style="border-color:#6f42c1; color:#6f42c1; font-size:0.82rem;">
+                        <span class="material-symbols-outlined" style="font-size:1rem;">save</span>
+                        Kaydet &amp; Hesapla
+                    </button>
+                    @if(!empty($currentOverrides))
+                    <a href="#" onclick="clearOverrides(event)" class="text-danger small">Düzeltmeleri Sıfırla</a>
+                    <form id="clearOverridesForm" method="POST" action="{{ route('admin.delivery-imports.klinker-overrides.update', $batch) }}" class="d-none">
+                        @csrf
+                        @method('PATCH')
+                    </form>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </details>
+</div>
+<script>
+function clearOverrides(e) {
+    e.preventDefault();
+    if (confirm('Tüm Klinker düzeltmelerini sıfırlamak istediğinize emin misiniz?')) {
+        document.getElementById('clearOverridesForm').submit();
+    }
+}
+</script>
+@endif
+
 @if(!empty($pivot['fatura_rota_gruplari'] ?? []))
 <style>
     .fatura-table { border-collapse: separate; border-spacing: 0; }

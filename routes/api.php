@@ -1,6 +1,8 @@
 <?php
 
+use App\Customer\Controllers\Api\V2\CustomerMobileController;
 use App\Driver\Controllers\Api\DriverController;
+use App\Driver\Controllers\Api\V2\DriverV2Controller;
 use App\Employee\Controllers\Api\EmployeeController;
 use App\Order\Controllers\Api\OrderController;
 use App\Vehicle\Controllers\Api\VehicleController;
@@ -51,5 +53,20 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         Route::post('/barcode/scan', [BarcodeController::class, 'scan'])->name('barcode.scan');
         Route::post('/barcode/stock-in', [BarcodeController::class, 'stockIn'])->name('barcode.stock-in');
         Route::post('/barcode/stock-out', [BarcodeController::class, 'stockOut'])->name('barcode.stock-out');
+    });
+});
+
+// API v2 - Enhanced mobile endpoints
+Route::prefix('v2')->middleware(['auth:sanctum'])->group(function () {
+    // Driver API v2
+    Route::prefix('driver')->name('v2.driver.')->group(function () {
+        Route::get('/dashboard', [DriverV2Controller::class, 'dashboard'])->name('dashboard');
+        Route::post('/checkin', [DriverV2Controller::class, 'checkIn'])->name('checkin');
+    });
+
+    // Customer Mobile API v2
+    Route::prefix('customer')->name('v2.customer.')->group(function () {
+        Route::get('/orders/tracking', [CustomerMobileController::class, 'tracking'])->name('orders.tracking');
+        Route::post('/orders/quick-create', [CustomerMobileController::class, 'quickCreate'])->name('orders.quick-create');
     });
 });

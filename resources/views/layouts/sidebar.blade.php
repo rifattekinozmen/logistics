@@ -16,10 +16,10 @@
         </div>
 
         <!-- Navigation -->
-        <nav class="grow p-2 overflow-y-auto custom-scrollbar">
+        <nav class="flex-grow-1 p-2 overflow-y-auto custom-scrollbar">
             <ul class="list-unstyled mb-0">
                 <li class="mb-2">
-                    <a href="{{ route('admin.dashboard') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.dashboard') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.dashboard') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.dashboard') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">dashboard</span>
                         <span class="fw-semibold" style="font-size: 14px;">Dashboard</span>
                     </a>
@@ -35,7 +35,7 @@
                 </li>
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('customer.view'))
                 <li class="mb-1">
-                    <a href="{{ route('admin.customers.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.customers.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.customers.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.customers.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">people</span>
                         <span class="fw-semibold" style="font-size: 14px;">Müşteriler</span>
                     </a>
@@ -43,9 +43,25 @@
                 @endif
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('order.view'))
                 <li class="mb-1">
-                    <a href="{{ route('admin.orders.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.orders.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.orders.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.orders.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">shopping_cart</span>
                         <span class="fw-semibold" style="font-size: 14px;">Siparişler</span>
+                    </a>
+                </li>
+                @endif
+                @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('customer.view'))
+                <li class="mb-1">
+                    <a href="{{ route('admin.business-partners.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.business-partners.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">handshake</span>
+                        <span class="fw-semibold" style="font-size: 14px;">İş Ortakları</span>
+                    </a>
+                </li>
+                @endif
+                @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('order.view'))
+                <li class="mb-1">
+                    <a href="{{ route('admin.pricing-conditions.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.pricing-conditions.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">price_check</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Fiyatlandırma</span>
                     </a>
                 </li>
                 @endif
@@ -56,7 +72,7 @@
                 </li>
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('warehouse.view'))
                 <li class="mb-1">
-                    <a href="{{ route('admin.warehouses.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.warehouses.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.warehouses.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.warehouses.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">warehouse</span>
                         <span class="fw-semibold" style="font-size: 14px;">Depo & Stok</span>
                     </a>
@@ -64,14 +80,14 @@
                 @endif
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('shipment.view'))
                 <li class="mb-1">
-                    <a href="{{ route('admin.shipments.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.shipments.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.shipments.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.shipments.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">inventory_2</span>
                         <span class="fw-semibold" style="font-size: 14px;">Sevkiyatlar</span>
                     </a>
                 </li>
                 @endif
                 <li class="mb-1">
-                    <a href="{{ route('admin.delivery-imports.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.delivery-imports.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.delivery-imports.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.delivery-imports.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">upload_file</span>
                         <span class="fw-semibold" style="font-size: 14px;">Teslimat Raporları</span>
                     </a>
@@ -83,21 +99,21 @@
                 </li>
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('vehicle.view'))
                 <li class="mb-1">
-                    <a href="{{ route('admin.vehicles.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.vehicles.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.vehicles.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.vehicles.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">local_shipping</span>
                         <span class="fw-semibold" style="font-size: 14px;">Araçlar</span>
                     </a>
                 </li>
                 @endif
                 <li class="mb-1">
-                    <a href="{{ route('admin.work-orders.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.work-orders.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.work-orders.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.work-orders.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">build</span>
                         <span class="fw-semibold" style="font-size: 14px;">İş Emirleri & Bakım</span>
                     </a>
                 </li>
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('fuel_price.view'))
                 <li class="mb-1">
-                    <a href="{{ route('admin.fuel-prices.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.fuel-prices.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.fuel-prices.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.fuel-prices.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">local_gas_station</span>
                         <span class="fw-semibold" style="font-size: 14px;">Motorin Fiyat</span>
                     </a>
@@ -110,38 +126,38 @@
                 </li>
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('employee.view'))
                 <li class="mb-1">
-                    <a href="{{ route('personel.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('personel.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('personel.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('personel.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">groups</span>
                         <span class="fw-semibold" style="font-size: 14px;">Personel</span>
                     </a>
                 </li>
                 @endif
                 <li class="mb-1">
-                    <a href="{{ route('admin.shifts.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.shifts.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.shifts.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.shifts.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">schedule</span>
                         <span class="fw-semibold" style="font-size: 14px;">Vardiyalar</span>
                     </a>
                 </li>
                 <li class="mb-1">
-                    <a href="{{ route('admin.leaves.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.leaves.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.leaves.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.leaves.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">event_available</span>
                         <span class="fw-semibold" style="font-size: 14px;">İzinler</span>
                     </a>
                 </li>
                 <li class="mb-1">
-                    <a href="{{ route('admin.personnel_attendance.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.personnel_attendance.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.personnel_attendance.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.personnel_attendance.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">calendar_month</span>
                         <span class="fw-semibold" style="font-size: 14px;">Puantaj</span>
                     </a>
                 </li>
                 <li class="mb-1">
-                    <a href="{{ route('admin.advances.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.advances.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.advances.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.advances.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">account_balance_wallet</span>
                         <span class="fw-semibold" style="font-size: 14px;">Avanslar</span>
                     </a>
                 </li>
                 <li class="mb-1">
-                    <a href="{{ route('admin.payrolls.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.payrolls.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.payrolls.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.payrolls.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">receipt_long</span>
                         <span class="fw-semibold" style="font-size: 14px;">Bordrolar</span>
                     </a>
@@ -153,7 +169,7 @@
                 </li>
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('payment.view'))
                 <li class="mb-1">
-                    <a href="{{ route('admin.payments.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.payments.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.payments.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.payments.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">payments</span>
                         <span class="fw-semibold" style="font-size: 14px;">Finans</span>
                     </a>
@@ -161,7 +177,7 @@
                 @endif
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('document.view'))
                 <li class="mb-1">
-                    <a href="{{ route('admin.documents.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.documents.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.documents.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.documents.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">description</span>
                         <span class="fw-semibold" style="font-size: 14px;">Belgeler</span>
                     </a>
@@ -173,63 +189,46 @@
                     <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Sistem & Yönetimi</p>
                 </li>
                 <li class="mb-1">
-                    <a href="{{ route('admin.notifications.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.notifications.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.notifications.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.notifications.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">notifications</span>
                         <span class="fw-semibold" style="font-size: 14px;">Bildirimler</span>
-                        @php
-                            $unreadCount = \App\Models\Notification::where('user_id', Auth::id())
-                                ->where('is_read', false)
-                                ->count();
-                        @endphp
-                        @if($unreadCount > 0)
+                        @if(($unreadCount ?? 0) > 0)
                             <span class="badge bg-danger rounded-pill ms-auto" style="font-size: 10px;">{{ $unreadCount }}</span>
                         @endif
                     </a>
                 </li>
                 @php
-                    // Sidebar'dan "Firma Ayarları" linkine tıklandığında:
-                    // - Aktif firma varsa -> Aktif firmanın settings sayfasına git
-                    // - Aktif firma yoksa -> Select sayfasına git
-                    $settingsUrl = route('admin.companies.select');
-                    try {
-                        $user = Auth::user();
-                        if ($user) {
-                            $activeCompany = $user->activeCompany();
-                            if ($activeCompany) {
-                                $settingsUrl = route('admin.companies.settings', $activeCompany);
-                            }
-                        }
-                    } catch (\Exception $e) {
-                        // Hata durumunda select sayfasına git
-                        $settingsUrl = route('admin.companies.select');
-                    }
+                    // $activeCompanyForLayout middleware (active.company) üzerinden geliyor
+                    $settingsUrl = ($activeCompanyForLayout ?? null)
+                        ? route('admin.companies.settings', $activeCompanyForLayout)
+                        : route('admin.companies.select');
                 @endphp
                 <li class="mb-1">
-                    <a href="{{ route('admin.companies.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.companies.index') || request()->routeIs('admin.companies.create') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.companies.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.companies.index') || request()->routeIs('admin.companies.create') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">business</span>
                         <span class="fw-semibold" style="font-size: 14px;">Firmalar</span>
                     </a>
                 </li>
                 <li class="mb-1">
-                    <a href="{{ $settingsUrl }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.companies.settings') || request()->routeIs('admin.companies.select') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ $settingsUrl }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.companies.settings') || request()->routeIs('admin.companies.select') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">settings</span>
                         <span class="fw-semibold" style="font-size: 14px;">Firma Ayarları</span>
                     </a>
                 </li>
                 <li class="mb-1">
-                    <a href="{{ route('admin.profile.show') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.profile.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.profile.show') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.profile.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">person</span>
                         <span class="fw-semibold" style="font-size: 14px;">Profil</span>
                     </a>
                 </li>
                 <li class="mb-1">
-                    <a href="{{ route('admin.settings.show') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.settings.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.settings.show') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.settings.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">settings</span>
                         <span class="fw-semibold" style="font-size: 14px;">Ayarlar</span>
                     </a>
                 </li>
                 <li class="mb-1">
-                    <a href="{{ route('admin.users.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('admin.users.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('admin.users.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.users.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">group</span>
                         <span class="fw-semibold" style="font-size: 14px;">Kullanıcılar</span>
                     </a>
@@ -241,7 +240,7 @@
                     <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Müşteri</p>
                 </li>
                 <li class="mb-1">
-                    <a href="{{ route('customer.dashboard') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all {{ request()->routeIs('customer.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-primary-200' }}">
+                    <a href="{{ route('customer.dashboard') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('customer.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">store</span>
                         <span class="fw-semibold" style="font-size: 14px;">Müşteri Portalı</span>
                     </a>
@@ -260,7 +259,7 @@
                         <span class="material-symbols-outlined" style="font-size: 20px;">person</span>
                     </div>
                 @endif
-                <div class="grow min-w-0">
+                <div class="flex-grow-1" style="min-width: 0;">
                     <p class="small fw-bold text-dark mb-0" style="font-size: 13px;">{{ Auth::user()->name ?? 'Kullanıcı' }}</p>
                     <p class="small text-secondary mb-0" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ Auth::user()->email ?? '' }}</p>
                 </div>
