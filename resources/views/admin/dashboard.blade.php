@@ -453,68 +453,159 @@
             </div>
         </div>
 
+        <!-- Dashboard Widgets -->
+        <!-- Upcoming Calendar Events Widget -->
+        <div class="col-lg-6 order-lg-3 order-3">
+            <div class="bg-white rounded-3xl shadow-sm border p-4 h-100" style="border-color: rgba(61, 105, 206, 0.12);">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="h5 fw-bold text-dark mb-1">📅 Yaklaşan Etkinlikler</h3>
+                        <p class="small text-secondary mb-0">Önümüzdeki 7 gün</p>
+                    </div>
+                    <a href="{{ route('admin.calendar.index') }}" class="btn btn-sm btn-outline-primary">
+                        Takvim
+                    </a>
+                </div>
+                
+                @if($upcomingEvents->isEmpty())
+                    <div class="text-center py-4">
+                        <span class="material-symbols-outlined text-secondary" style="font-size: 3rem;">event_available</span>
+                        <p class="text-secondary mb-0 mt-2">Yaklaşan etkinlik bulunmamaktadır.</p>
+                    </div>
+                @else
+                    <div class="d-flex flex-column gap-2">
+                        @foreach($upcomingEvents as $event)
+                            <div class="d-flex align-items-start gap-3 p-3 rounded-2xl border transition-all hover:shadow-sm" style="border-color: {{ $event->color }}20; background: {{ $event->color }}05;">
+                                <div class="rounded-2xl flex-shrink-0" style="width: 8px; height: 8px; background: {{ $event->color }}; margin-top: 8px;"></div>
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <p class="small fw-bold text-dark mb-1">{{ $event->title }}</p>
+                                    <p class="small text-secondary mb-1">
+                                        <span class="badge" style="background-color: {{ $event->color }}; color: white; font-size: 0.7rem;">
+                                            {{ $event->start_date->format('d.m.Y') }}
+                                        </span>
+                                    </p>
+                                    @if($event->description)
+                                        <p class="small text-secondary mb-0">{{ Str::limit($event->description, 50) }}</p>
+                                    @endif
+                                </div>
+                                <span class="badge rounded-pill px-2 py-1 flex-shrink-0" style="background-color: {{ $event->color }}; color: white; font-size: 0.7rem;">
+                                    @php
+                                        $daysUntil = now()->diffInDays($event->start_date, false);
+                                    @endphp
+                                    @if($daysUntil <= 0)
+                                        Bugün
+                                    @elseif($daysUntil == 1)
+                                        Yarın
+                                    @else
+                                        {{ $daysUntil }} gün
+                                    @endif
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Critical Stock Alerts Widget -->
+        <div class="col-lg-6 order-lg-4 order-4">
+            <div class="bg-white rounded-3xl shadow-sm border p-4 h-100" style="border-color: rgba(61, 105, 206, 0.12);">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="h5 fw-bold text-dark mb-1">⚠️ Kritik Stok Uyarıları</h3>
+                        <p class="small text-secondary mb-0">Minimum seviye altı</p>
+                    </div>
+                    <a href="{{ route('admin.warehouses.index') }}" class="btn btn-sm btn-outline-primary">
+                        Depo
+                    </a>
+                </div>
+                
+                @if($criticalStocks->isEmpty())
+                    <div class="text-center py-4">
+                        <span class="material-symbols-outlined text-success" style="font-size: 3rem;">inventory_2</span>
+                        <p class="text-secondary mb-0 mt-2">Tüm stoklar normal seviyede.</p>
+                    </div>
+                @else
+                    <div class="d-flex flex-column gap-2">
+                        @foreach($criticalStocks as $item)
+                            <div class="d-flex align-items-center gap-3 p-3 rounded-2xl border transition-all hover:shadow-sm" style="border-color: #C41E5A20; background: #FCE8F0;">
+                                <div class="rounded-2xl d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background: #C41E5A20;">
+                                    <span class="material-symbols-outlined" style="color: #C41E5A; font-size: 1.25rem;">warning</span>
+                                </div>
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <p class="small fw-bold text-dark mb-1">{{ $item->name }}</p>
+                                    <p class="small text-secondary mb-0">
+                                        <strong>Depo:</strong> {{ $item->warehouse->name ?? 'N/A' }} |
+                                        <strong>Stok:</strong> 
+                                        <span class="text-danger fw-bold">{{ $item->quantity }} {{ $item->unit }}</span> /
+                                        <span class="text-secondary">Min: {{ $item->min_level }}</span>
+                                    </p>
+                                </div>
+                                <span class="badge rounded-pill px-2 py-1 flex-shrink-0" style="background: #C41E5A; color: white; font-size: 0.7rem;">
+                                    Kritik
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </div>
+
         <!-- Hızlı Erişim -->
-        <div class="col-lg-4 order-lg-3 order-3">
+        <div class="col-12 order-lg-6 order-6">
             <div class="bg-white rounded-3xl shadow-sm border p-4 h-100">
                 <div class="mb-4">
                     <h3 class="h4 fw-bold text-dark mb-1">Hızlı Erişim</h3>
                     <p class="small text-secondary mb-0">Sık kullanılan işlemler</p>
                 </div>
-                <div class="d-flex flex-column gap-3">
-                    <a href="{{ route('admin.orders.create') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none transition-all hover:shadow-md position-relative overflow-hidden bg-primary-200 border-primary" style="border-color: rgba(61, 105, 206, 0.12) !important;">
-                        <div class="rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--bs-primary-200), var(--bs-primary-red-200));">
-                            <span class="material-symbols-outlined text-primary">add_shopping_cart</span>
-                        </div>
-                        <div class="flex-grow-1" style="min-width: 0;">
-                            <p class="small fw-bold text-dark mb-0">Yeni Sipariş</p>
-                            <p class="small text-secondary mb-0">Sipariş oluştur</p>
-                        </div>
-                        <span class="material-symbols-outlined text-secondary flex-shrink-0">arrow_forward</span>
-                    </a>
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-4 col-xl-3">
+                        <a href="{{ route('admin.orders.create') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none transition-all hover:shadow-md position-relative overflow-hidden bg-primary-200 border-primary h-100" style="border-color: rgba(61, 105, 206, 0.12) !important;">
+                            <div class="rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--bs-primary-200), var(--bs-primary-red-200));">
+                                <span class="material-symbols-outlined text-primary">add_shopping_cart</span>
+                            </div>
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <p class="small fw-bold text-dark mb-0">Yeni Sipariş</p>
+                                <p class="small text-secondary mb-0">Sipariş oluştur</p>
+                            </div>
+                        </a>
+                    </div>
 
-                    <a href="{{ route('admin.shipments.create') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none transition-all hover:shadow-md bg-primary-200" style="border-color: rgba(61, 105, 206, 0.12) !important;">
-                        <div class="rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--bs-primary-red-200), var(--bs-primary-200));">
-                            <span class="material-symbols-outlined text-primary-red">local_shipping</span>
-                        </div>
-                        <div class="flex-grow-1" style="min-width: 0;">
-                            <p class="small fw-bold text-dark mb-0">Yeni Sevkiyat</p>
-                            <p class="small text-secondary mb-0">Sevkiyat oluştur</p>
-                        </div>
-                        <span class="material-symbols-outlined text-secondary flex-shrink-0">arrow_forward</span>
-                    </a>
+                    <div class="col-md-6 col-lg-4 col-xl-3">
+                        <a href="{{ route('admin.shipments.create') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none transition-all hover:shadow-md bg-primary-200 h-100" style="border-color: rgba(61, 105, 206, 0.12) !important;">
+                            <div class="rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--bs-primary-red-200), var(--bs-primary-200));">
+                                <span class="material-symbols-outlined text-primary-red">local_shipping</span>
+                            </div>
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <p class="small fw-bold text-dark mb-0">Yeni Sevkiyat</p>
+                                <p class="small text-secondary mb-0">Sevkiyat oluştur</p>
+                            </div>
+                        </a>
+                    </div>
 
-                    <a href="{{ route('admin.vehicles.create') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none transition-all hover:shadow-md bg-primary-200" style="border-color: rgba(61, 105, 206, 0.12) !important;">
-                        <div class="rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--bs-primary-200), var(--bs-primary-red-200));">
-                            <span class="material-symbols-outlined text-primary">directions_car</span>
-                        </div>
-                        <div class="flex-grow-1" style="min-width: 0;">
-                            <p class="small fw-bold text-dark mb-0">Yeni Araç</p>
-                            <p class="small text-secondary mb-0">Araç ekle</p>
-                        </div>
-                        <span class="material-symbols-outlined text-secondary flex-shrink-0">arrow_forward</span>
-                    </a>
+                    <div class="col-md-6 col-lg-4 col-xl-3">
+                        <a href="{{ route('admin.vehicles.create') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none transition-all hover:shadow-md bg-primary-200 h-100" style="border-color: rgba(61, 105, 206, 0.12) !important;">
+                            <div class="rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--bs-primary-200), var(--bs-primary-red-200));">
+                                <span class="material-symbols-outlined text-primary">directions_car</span>
+                            </div>
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <p class="small fw-bold text-dark mb-0">Yeni Araç</p>
+                                <p class="small text-secondary mb-0">Araç ekle</p>
+                            </div>
+                        </a>
+                    </div>
 
-                    <a href="{{ route('admin.employees.create') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none transition-all hover:shadow-md bg-primary-200" style="border-color: rgba(61, 105, 206, 0.12) !important;">
-                        <div class="rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--bs-primary-200), var(--bs-primary-red-200));">
-                            <span class="material-symbols-outlined text-primary-red-200">person_add</span>
-                        </div>
-                        <div class="flex-grow-1" style="min-width: 0;">
-                            <p class="small fw-bold text-dark mb-0">Yeni Personel</p>
-                            <p class="small text-secondary mb-0">Personel ekle</p>
-                        </div>
-                        <span class="material-symbols-outlined text-secondary flex-shrink-0">arrow_forward</span>
-                    </a>
-
-                    <a href="{{ route('admin.orders.index') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none transition-all hover:shadow-md bg-primary-200" style="border-color: rgba(61, 105, 206, 0.12) !important;">
-                        <div class="rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--bs-primary-200), var(--bs-primary-red-200));">
-                            <span class="material-symbols-outlined text-primary">list</span>
-                        </div>
-                        <div class="flex-grow-1" style="min-width: 0;">
-                            <p class="small fw-bold text-dark mb-0">Sipariş Listesi</p>
-                            <p class="small text-secondary mb-0">Tüm siparişler</p>
-                        </div>
-                        <span class="material-symbols-outlined text-secondary flex-shrink-0">arrow_forward</span>
-                    </a>
+                    <div class="col-md-6 col-lg-4 col-xl-3">
+                        <a href="{{ route('admin.employees.create') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none transition-all hover:shadow-md bg-primary-200 h-100" style="border-color: rgba(61, 105, 206, 0.12) !important;">
+                            <div class="rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--bs-primary-200), var(--bs-primary-red-200));">
+                                <span class="material-symbols-outlined text-primary-red-200">person_add</span>
+                            </div>
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <p class="small fw-bold text-dark mb-0">Yeni Personel</p>
+                                <p class="small text-secondary mb-0">Personel ekle</p>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

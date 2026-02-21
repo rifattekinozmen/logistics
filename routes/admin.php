@@ -2,6 +2,7 @@
 
 use App\Analytics\Controllers\Web\AnalyticsController;
 use App\BusinessPartner\Controllers\Web\BusinessPartnerController;
+use App\Core\Services\CalendarService;
 use App\Core\Services\ExportService;
 use App\Customer\Controllers\Web\CustomerController;
 use App\Delivery\Controllers\Web\DeliveryImportController;
@@ -24,6 +25,7 @@ use App\Shipment\Controllers\Web\ShipmentController;
 use App\Vehicle\Controllers\Web\VehicleController;
 use App\Warehouse\Controllers\Web\WarehouseController;
 use App\WorkOrder\Controllers\Web\WorkOrderController;
+use App\Http\Controllers\Admin\CalendarController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -157,6 +159,18 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         $operationsService = app(OperationsPerformanceService::class);
         $operationsData = $operationsService->getPerformanceSummary();
 
+        // Calendar upcoming events
+        $calendarService = app(CalendarService::class);
+        $upcomingEvents = $calendarService->getUpcomingEvents(7);
+
+        // Critical stock alerts
+        $criticalStocks = \App\Models\InventoryItem::query()
+            ->whereColumn('quantity', '<=', 'min_level')
+            ->with('warehouse')
+            ->orderBy('quantity')
+            ->limit(10)
+            ->get();
+
         return view('admin.dashboard', compact(
             'stats',
             'recentActivities',
@@ -166,6 +180,8 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
             'sapStats',
             'bpCount',
             'activePricing',
+            'upcomingEvents',
+            'criticalStocks',
         ));
     })->name('dashboard');
 
@@ -350,5 +366,15 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         Route::get('/finance', [AnalyticsController::class, 'finance'])->name('finance');
         Route::get('/operations', [AnalyticsController::class, 'operations'])->name('operations');
         Route::get('/fleet', [AnalyticsController::class, 'fleet'])->name('fleet');
+    });
+
+    // Calendar
+    Route::prefix('calendar')->name('calendar.')->group(function () {
+        Route::get('/', [CalendarController::class, 'index'])->name('index');
+        Route::get('/events', [CalendarController::class, 'getEvents'])->name('events');
+        Route::post('/', [CalendarController::class, 'store'])->name('store');
+        Route::get('/{event}', [CalendarController::class, 'show'])->name('show');
+        Route::put('/{event}', [CalendarController::class, 'update'])->name('update');
+        Route::delete('/{event}', [CalendarController::class, 'destroy'])->name('destroy');
     });
 });

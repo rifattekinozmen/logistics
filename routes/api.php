@@ -53,6 +53,8 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         Route::post('/barcode/scan', [BarcodeController::class, 'scan'])->name('barcode.scan');
         Route::post('/barcode/stock-in', [BarcodeController::class, 'stockIn'])->name('barcode.stock-in');
         Route::post('/barcode/stock-out', [BarcodeController::class, 'stockOut'])->name('barcode.stock-out');
+        Route::post('/stock/transfer', [BarcodeController::class, 'transfer'])->name('stock.transfer');
+        Route::get('/stock/alerts', [BarcodeController::class, 'criticalStockAlerts'])->name('stock.alerts');
     });
 });
 

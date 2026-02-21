@@ -1,0 +1,106 @@
+/* FullCalendar.js Core Styles */
+/* Note: FullCalendar v6 styles are imported via JavaScript */
+
+/* Custom FullCalendar Overrides */
+.fc {
+    font-family: var(--bs-font-sans, inherit);
+}
+
+.fc-event {
+    cursor: pointer;
+    border-radius: 0.375rem;
+}
+
+.fc-daygrid-event {
+    white-space: normal;
+    padding: 2px 4px;
+}
+
+.fc .fc-button-primary {
+    background-color: var(--bs-primary, #3D69CE);
+    border-color: var(--bs-primary, #3D69CE);
+    font-weight: 500;
+}
+
+.fc .fc-button-primary:hover {
+    background-color: var(--bs-primary-hover, #335bb5);
+    border-color: var(--bs-primary-hover, #335bb5);
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    background-color: var(--bs-primary-hover, #335bb5);
+    border-color: var(--bs-primary-hover, #335bb5);
+}
+
+.fc .fc-button-primary:disabled {
+    background-color: var(--bs-secondary, #6B7A99);
+    border-color: var(--bs-secondary, #6B7A99);
+    opacity: 0.5;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+    border-color: var(--bs-primary-200, #DCE8FC);
+}
+
+.fc-theme-standard .fc-scrollgrid {
+    border-color: var(--bs-primary-200, #DCE8FC);
+}
+
+.fc-col-header-cell {
+    background-color: var(--bs-soft-bg, #F0F4FA);
+    font-weight: 600;
+    padding: 0.75rem 0.5rem;
+}
+
+.fc-daygrid-day-number {
+    color: var(--bs-black-blue, #0F1A2E);
+    font-weight: 500;
+    padding: 0.5rem;
+}
+
+.fc-day-today {
+    background-color: var(--bs-primary-200, #DCE8FC) !important;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+    color: var(--bs-primary, #3D69CE);
+    font-weight: 700;
+}
+
+.fc-event-title {
+    font-weight: 500;
+}
+
+.fc-event-time {
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+/* Event colors by priority */
+.fc-event.event-priority-high {
+    border-color: #DC2626;
+}
+
+.fc-event.event-priority-medium {
+    border-color: #F59E0B;
+}
+
+.fc-event.event-priority-low {
+    border-color: #10B981;
+}
+
+/* Loading overlay */
+.fc .fc-view-harness-active > .fc-view {
+    position: relative;
+}
+
+/* Modal improvements */
+#eventDetailModal .modal-header {
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+#eventDetailModal .badge {
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
+}

@@ -33,11 +33,17 @@ class SendToLogoJob implements ShouldQueue
     public function handle(LogoIntegrationService $logoService): void
     {
         try {
-            $result = $logoService->sendInvoice($this->invoiceData, $this->company);
+            $payment = \App\Models\Payment::find($this->invoiceData['payment_id'] ?? null);
+            
+            if (!$payment) {
+                throw new Exception('Payment not found for LOGO export');
+            }
+
+            $result = $logoService->exportInvoice($payment);
 
             Log::info("Logo'ya fatura gönderildi", [
                 'company_id' => $this->company->id,
-                'logo_invoice_id' => $result['logo_invoice_id'] ?? null,
+                'payment_id' => $payment->id,
             ]);
         } catch (Exception $e) {
             Log::error("Logo'ya fatura gönderim hatası: {$e->getMessage()}", [

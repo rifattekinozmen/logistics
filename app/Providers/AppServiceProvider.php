@@ -38,7 +38,13 @@ class AppServiceProvider extends ServiceProvider
 
         $this->commands([
             \App\Notification\Console\Commands\SendDailyNotifications::class,
+            \App\Notification\Console\Commands\CheckDocumentExpiryCommand::class,
+            \App\Notification\Console\Commands\CheckPaymentDueCommand::class,
         ]);
+
+        // Register observers
+        \App\Models\Document::observe(\App\Observers\DocumentObserver::class);
+        \App\Models\Payment::observe(\App\Observers\PaymentObserver::class);
 
         View::share('activeCompanyForLayout', null);
 

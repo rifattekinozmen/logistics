@@ -5,6 +5,7 @@ namespace App\Warehouse\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\InventoryItem;
 use App\Models\InventoryStock;
+use App\Warehouse\Services\InventoryTransferService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -139,6 +140,44 @@ class BarcodeController extends Controller
                 'stock_id' => $stock->id,
                 'new_quantity' => $stock->quantity,
             ],
+        ]);
+    }
+
+    /**
+     * Stok transferi (depo → depo).
+     */
+    public function transfer(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'from_warehouse_id' => 'required|exists:warehouses,id',
+            'to_warehouse_id' => 'required|exists:warehouses,id|different:from_warehouse_id',
+            'item_id' => 'required|exists:inventory_items,id',
+            'quantity' => 'required|numeric|min:0.01',
+        ]);
+
+        try {
+            $result = $this->transferService->transfer($validated);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Kritik stok uyarıları.
+     */
+    public function criticalStockAlerts(): JsonResponse
+    {
+        $alerts = $this->transferService->getCriticalStockAlerts();
+
+        return response()->json([
+            'success' => true,
+            'alerts' => $alerts,
+            'count' => count($alerts),
         ]);
     }
 }

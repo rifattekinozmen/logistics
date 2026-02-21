@@ -13,11 +13,11 @@ return new class extends Migration
     {
         // Orders table indexes
         Schema::table('orders', function (Blueprint $table) {
-            // Composite index for company filtering with status and date
-            $table->index(['company_id', 'status', 'created_at'], 'idx_orders_company_status_created');
-
             // Index for customer queries
             $table->index(['customer_id', 'status'], 'idx_orders_customer_status');
+
+            // Index for status and date queries
+            $table->index(['status', 'created_at'], 'idx_orders_status_created');
 
             // Index for date range queries
             $table->index('planned_delivery_date', 'idx_orders_planned_delivery');
@@ -41,7 +41,7 @@ return new class extends Migration
         // Delivery numbers table indexes
         Schema::table('delivery_numbers', function (Blueprint $table) {
             // Composite index for batch + location
-            $table->index(['delivery_import_batch_id', 'location_id'], 'idx_delivery_numbers_batch_location');
+            $table->index(['import_batch_id', 'location_id'], 'idx_delivery_numbers_batch_location');
 
             // Index for location queries
             $table->index('location_id', 'idx_delivery_numbers_location');
@@ -93,8 +93,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->dropIndex('idx_orders_company_status_created');
             $table->dropIndex('idx_orders_customer_status');
+            $table->dropIndex('idx_orders_status_created');
             $table->dropIndex('idx_orders_planned_delivery');
         });
 

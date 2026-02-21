@@ -5,13 +5,25 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: [
+                'resources/css/app.css',
+                'resources/css/calendar.css',
+                'resources/js/app.js',
+                'resources/js/calendar.js'
+            ],
             refresh: true,
         }),
         tailwindcss(),
     ],
     optimizeDeps: {
-        include: ['bootstrap'],
+        include: [
+            'bootstrap',
+            '@fullcalendar/core',
+            '@fullcalendar/daygrid',
+            '@fullcalendar/timegrid',
+            '@fullcalendar/list',
+            '@fullcalendar/interaction'
+        ],
     },
     build: {
         rollupOptions: {
@@ -19,6 +31,9 @@ export default defineConfig({
                 manualChunks: (id) => {
                     if (id.includes('node_modules/bootstrap')) {
                         return 'bootstrap';
+                    }
+                    if (id.includes('node_modules/@fullcalendar')) {
+                        return 'fullcalendar';
                     }
                 },
             },

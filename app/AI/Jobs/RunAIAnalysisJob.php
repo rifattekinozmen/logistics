@@ -2,7 +2,10 @@
 
 namespace App\AI\Jobs;
 
+use App\AI\Services\AIDocumentService;
 use App\AI\Services\AIFinanceService;
+use App\AI\Services\AIFleetService;
+use App\AI\Services\AIHRService;
 use App\AI\Services\AIOperationsService;
 use App\Models\AiReport;
 use App\Models\Company;
@@ -35,7 +38,9 @@ class RunAIAnalysisJob implements ShouldQueue
      */
     public function handle(
         AIOperationsService $operationsService,
-        AIFinanceService $financeService
+        AIFinanceService $financeService,
+        AIHRService $hrService,
+        AIFleetService $fleetService
     ): void {
         try {
             $companies = $this->company
@@ -73,6 +78,30 @@ class RunAIAnalysisJob implements ShouldQueue
                         'severity' => $report['severity'],
                         'data_snapshot' => $report['data_snapshot'],
                         'generated_at' => $report['generated_at'],
+                    ]);
+                }
+
+                // HR analizi (Turnover prediction)
+                $turnoverPrediction = $hrService->predictTurnover($company);
+                if ($turnoverPrediction['at_risk_count'] > 0) {
+                    AiReport::create([
+                        'type' => 'hr_turnover_risk',
+                        'summary_text' => $turnoverPrediction['at_risk_count'].' çalışan işten ayrılma riski taşıyor',
+                        'severity' => $turnoverPrediction['at_risk_count'] > 3 ? 'high' : 'medium',
+                        'data_snapshot' => $turnoverPrediction,
+                        'generated_at' => now(),
+                    ]);
+                }
+
+                // Fleet analizi (Deployment optimization)
+                $fleetOptimization = $fleetService->optimizeFleetDeployment($company->id);
+                if (isset($fleetOptimization['recommendations'])) {
+                    AiReport::create([
+                        'type' => 'fleet_optimization',
+                        'summary_text' => 'Filo kullanım oranı: '.$fleetOptimization['average_utilization'],
+                        'severity' => 'low',
+                        'data_snapshot' => $fleetOptimization,
+                        'generated_at' => now(),
                     ]);
                 }
             }
