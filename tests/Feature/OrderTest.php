@@ -3,10 +3,11 @@
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\User;
+use Laravel\Sanctum\Sanctum;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
-    $this->actingAs($this->user);
+    Sanctum::actingAs($this->user, ['*']);
     session(['active_company_id' => 1]);
 });
 
@@ -15,17 +16,18 @@ it('can create an order', function () {
 
     $orderData = [
         'customer_id' => $customer->id,
-        'order_number' => 'ORD-'.rand(1000, 9999),
-        'order_date' => now()->format('Y-m-d'),
+        'pickup_address' => 'İstanbul, Türkiye',
+        'delivery_address' => 'Ankara, Türkiye',
         'planned_delivery_date' => now()->addDays(3)->format('Y-m-d'),
         'status' => 'pending',
-        'total_amount' => 1500.00,
+        'total_weight' => 1500,
+        'total_volume' => 10,
     ];
 
     $response = $this->postJson('/api/v1/orders', $orderData);
 
     $response->assertCreated();
-    expect($response->json('data'))->toHaveKey('id');
+    expect($response->json())->toHaveKey('id');
 });
 
 it('can list orders', function () {
@@ -43,18 +45,20 @@ it('can show an order', function () {
     $response = $this->getJson("/api/v1/orders/{$order->id}");
 
     $response->assertSuccessful();
-    expect($response->json('data.id'))->toBe($order->id);
+    expect($response->json('id'))->toBe($order->id);
 });
 
 it('can update an order', function () {
     $order = Order::factory()->create(['status' => 'pending']);
 
     $response = $this->putJson("/api/v1/orders/{$order->id}", [
-        'status' => 'confirmed',
+        'status' => 'assigned',
+        'pickup_address' => $order->pickup_address,
+        'delivery_address' => $order->delivery_address,
     ]);
 
     $response->assertSuccessful();
-    expect($order->fresh()->status)->toBe('confirmed');
+    expect($order->fresh()->status)->toBe('assigned');
 });
 
 it('can delete an order', function () {
@@ -82,14 +86,10 @@ it('prevents updating order to invalid status', function () {
     $response->assertUnprocessable();
 });
 
-it('calculates order total correctly', function () {
+it('calculates freight price correctly', function () {
     $order = Order::factory()->create([
-        'subtotal' => 1000.00,
-        'tax_amount' => 180.00,
-        'discount_amount' => 50.00,
+        'freight_price' => 13583.73,
     ]);
 
-    $expectedTotal = 1000.00 + 180.00 - 50.00;
-
-    expect((float) $order->total_amount)->toBe($expectedTotal);
+    expect((float) $order->freight_price)->toBe(13583.73);
 });

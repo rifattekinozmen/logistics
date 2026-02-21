@@ -18,7 +18,8 @@ class OrderService
     public function create(array $data, ?User $user = null): Order
     {
         $data['created_by'] = $user?->id;
-        $data['order_number'] = $this->generateOrderNumber();
+        $data['order_number'] = $data['order_number'] ?? $this->generateOrderNumber();
+        $data['status'] = $data['status'] ?? 'pending';
 
         $order = Order::create($data);
         $this->documentFlowService->initializeOrderChain($order);

@@ -2,14 +2,13 @@
 
 use App\AI\Services\AIFleetService;
 use App\AI\Services\AIHRService;
+use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Vehicle;
 
 it('can predict vehicle maintenance needs', function () {
-    $vehicle = Vehicle::factory()->create([
-        'current_mileage' => 85000,
-    ]);
+    $vehicle = Vehicle::factory()->create();
 
     $fleetService = app(AIFleetService::class);
     $prediction = $fleetService->predictMaintenanceNeeds($vehicle);
@@ -34,7 +33,8 @@ it('can analyze fuel consumption', function () {
 
 it('can optimize fleet deployment', function () {
     $company = Company::factory()->create();
-    Vehicle::factory()->count(5)->create(['company_id' => $company->id]);
+    $branch = Branch::factory()->create(['company_id' => $company->id]);
+    Vehicle::factory()->count(5)->create(['branch_id' => $branch->id]);
 
     $fleetService = app(AIFleetService::class);
     $optimization = $fleetService->optimizeFleetDeployment($company->id);
@@ -58,7 +58,8 @@ it('can analyze employee performance', function () {
 
 it('can predict employee turnover', function () {
     $company = Company::factory()->create();
-    Employee::factory()->count(10)->create(['company_id' => $company->id]);
+    $branch = Branch::factory()->create(['company_id' => $company->id]);
+    Employee::factory()->count(10)->create(['branch_id' => $branch->id]);
 
     $hrService = app(AIHRService::class);
     $prediction = $hrService->predictTurnover($company);

@@ -17,7 +17,7 @@ class DocumentFlowService
     public function initializeOrderChain(Order $order): DocumentFlow
     {
         return DocumentFlow::create([
-            'company_id' => $order->customer?->company_id ?? 0,
+            'company_id' => $order->customer?->businessPartner?->company_id ?? $order->company_id ?? 0,
             'source_type' => Order::class,
             'source_id' => $order->id,
             'step' => 'order_created',
@@ -31,7 +31,7 @@ class DocumentFlowService
     public function recordDeliveryStep(Order $order, Shipment $shipment): DocumentFlow
     {
         return DocumentFlow::create([
-            'company_id' => $order->customer?->company_id ?? 0,
+            'company_id' => $order->customer?->businessPartner?->company_id ?? $order->company_id ?? 0,
             'source_type' => Order::class,
             'source_id' => $order->id,
             'target_type' => Shipment::class,

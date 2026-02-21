@@ -77,6 +77,9 @@
     <div class="col-lg-4">
         <div class="bg-white rounded-3xl shadow-sm border p-4">
             <h3 class="h4 fw-bold text-dark mb-4">Aylık Karşılaştırma</h3>
+            <div class="mb-4" style="height: 220px;">
+                <canvas id="monthlyComparisonChart"></canvas>
+            </div>
             <div class="table-responsive">
                 <table class="table table-sm">
                     <thead>
@@ -103,6 +106,10 @@
 <script>
 window.chartData = {
     revenue: {
+        labels: @json(array_column($metrics['monthly_trend'], 'month')),
+        values: @json(array_column($metrics['monthly_trend'], 'total'))
+    },
+    monthlyComparison: {
         labels: @json(array_column($metrics['monthly_trend'], 'month')),
         values: @json(array_column($metrics['monthly_trend'], 'total'))
     }

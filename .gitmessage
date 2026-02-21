@@ -1,0 +1,21 @@
+# Commit formatı: <prefix>: <açıklama> (max 72 karakter)
+# Prefix'ler: feat | fix | refactor | test | docs | perf | chore
+#
+# Örnek başlık:
+# feat: Kullanıcı şifre sıfırlama sayfası eklendi
+#
+# ──────────────────────────────────────────────────────────────────
+# Değişiklikler (madde madde — her madde ayrı bir satırda):
+#
+# -
+# -
+# -
+#
+# ──────────────────────────────────────────────────────────────────
+# Etkilenen modül(ler):
+#
+# Test komutu:
+# php artisan test --compact --filter=
+#
+# ──────────────────────────────────────────────────────────────────
+# Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>

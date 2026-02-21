@@ -370,17 +370,38 @@ class SapDocumentService
             return null;
         }
 
-        return DocumentFlow::firstOrCreate(
+        $companyId = $sapDoc->company_id ?? $this->getCompanyId($sapDoc->local_model_type, $sapDoc->local_model_id);
+
+        $flow = DocumentFlow::firstOrCreate(
             [
                 'source_type' => $sapDoc->local_model_type,
                 'source_id' => $sapDoc->local_model_id,
             ],
             [
-                'document_type' => $this->mapSapDocTypeToLocal($sapDoc->sap_doc_type),
-                'document_number' => $sapDoc->sap_doc_number,
-                'status' => $sapDoc->sap_status,
+                'company_id' => $companyId ?: 1,
+                'source_sap_doc_number' => $sapDoc->sap_doc_number,
+                'step' => 'order_created',
             ]
         );
+
+        if ($sapDoc->sap_doc_number && ! $flow->source_sap_doc_number) {
+            $flow->update(['source_sap_doc_number' => $sapDoc->sap_doc_number]);
+        }
+
+        return $flow;
+    }
+
+    /**
+     * Get company ID from the local model referenced by SAP document.
+     */
+    protected function getCompanyId(string $modelType, int $modelId): ?int
+    {
+        return match ($modelType) {
+            Order::class => Order::find($modelId)?->company_id,
+            Shipment::class => Shipment::find($modelId)?->order?->company_id,
+            Payment::class => null,
+            default => null,
+        };
     }
 
     /**
@@ -462,8 +483,11 @@ class SapDocumentService
      */
     protected function getHttpClient(): PendingRequest
     {
+        $username = config('sap.username') ?? '';
+        $password = config('sap.password') ?? '';
+
         return Http::timeout(config('sap.timeout', 30))
-            ->withBasicAuth(config('sap.username'), config('sap.password'))
+            ->withBasicAuth($username, $password)
             ->withHeaders([
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',

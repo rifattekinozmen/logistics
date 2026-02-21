@@ -3,13 +3,12 @@
 use App\Models\Employee;
 use App\Models\Order;
 use App\Models\Shipment;
-use App\Models\User;
 use App\Models\Vehicle;
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
-    $this->actingAs($this->user);
-    session(['active_company_id' => 1]);
+    [$this->user, $this->company] = createAdminUser();
+    $this->actingAs($this->user)
+        ->withSession(['active_company_id' => $this->company->id]);
 });
 
 it('can create a shipment', function () {
@@ -21,15 +20,15 @@ it('can create a shipment', function () {
         'order_id' => $order->id,
         'vehicle_id' => $vehicle->id,
         'driver_id' => $driver->id,
-        'shipment_number' => 'SHIP-'.rand(1000, 9999),
         'status' => 'pending',
-        'pickup_date' => now()->format('Y-m-d'),
-        'planned_delivery_date' => now()->addDays(2)->format('Y-m-d'),
+        'pickup_date' => now()->addDays(2)->format('Y-m-d H:i:s'),
+        'delivery_date' => now()->addDays(5)->format('Y-m-d H:i:s'),
     ];
 
-    $response = $this->postJson('/admin/shipments', $shipmentData);
+    $response = $this->post(route('admin.shipments.store'), $shipmentData);
 
-    $response->assertSuccessful();
+    $response->assertRedirect();
+    expect(Shipment::count())->toBe(1);
 });
 
 it('can list shipments', function () {
@@ -51,20 +50,25 @@ it('can show a shipment', function () {
 it('can update shipment status', function () {
     $shipment = Shipment::factory()->create(['status' => 'pending']);
 
-    $response = $this->putJson("/admin/shipments/{$shipment->id}", [
+    $response = $this->put(route('admin.shipments.update', $shipment), [
+        'order_id' => $shipment->order_id,
+        'vehicle_id' => $shipment->vehicle_id,
+        'driver_id' => $shipment->driver_id,
         'status' => 'in_transit',
+        'pickup_date' => $shipment->pickup_date->format('Y-m-d H:i:s'),
+        'delivery_date' => $shipment->delivery_date?->format('Y-m-d H:i:s'),
     ]);
 
-    $response->assertSuccessful();
+    $response->assertRedirect();
     expect($shipment->fresh()->status)->toBe('in_transit');
 });
 
 it('can delete a shipment', function () {
     $shipment = Shipment::factory()->create();
 
-    $response = $this->delete("/admin/shipments/{$shipment->id}");
+    $response = $this->delete(route('admin.shipments.destroy', $shipment));
 
-    $response->assertSuccessful();
+    $response->assertRedirect(route('admin.shipments.index'));
 });
 
 it('validates vehicle assignment', function () {

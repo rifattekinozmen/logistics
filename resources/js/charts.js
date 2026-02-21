@@ -1,11 +1,23 @@
 import Chart from 'chart.js/auto';
 
 /**
+ * Check if chart data has valid labels and values for rendering.
+ */
+export function hasValidChartData(data) {
+    return data
+        && Array.isArray(data.labels)
+        && Array.isArray(data.values)
+        && data.labels.length > 0
+        && data.values.length > 0;
+}
+
+/**
  * Initialize revenue trend chart
  */
 export function initRevenueChart(canvasId, data) {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
+    if (!hasValidChartData(data)) return;
 
     new Chart(ctx, {
         type: 'line',
@@ -61,6 +73,7 @@ const defaultStatusColors = [
 export function initOrderStatusChart(canvasId, data) {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
+    if (!hasValidChartData(data)) return;
 
     const colors = data.colors && data.colors.length === data.values.length
         ? data.colors
@@ -91,8 +104,56 @@ export function initOrderStatusChart(canvasId, data) {
                             const label = context.label || '';
                             const value = context.parsed;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
                             return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Initialize monthly revenue bar chart (for aylık karşılaştırma)
+ */
+export function initMonthlyRevenueBarChart(canvasId, data) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    if (!hasValidChartData(data)) return;
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Gelir (₺)',
+                data: data.values,
+                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                borderColor: 'rgb(59, 130, 246)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return context.parsed.x.toLocaleString('tr-TR') + ' ₺';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (value) {
+                            return value.toLocaleString('tr-TR') + ' ₺';
                         }
                     }
                 }
@@ -107,6 +168,7 @@ export function initOrderStatusChart(canvasId, data) {
 export function initVehicleUtilizationChart(canvasId, data) {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
+    if (!hasValidChartData(data)) return;
 
     new Chart(ctx, {
         type: 'bar',
@@ -156,6 +218,7 @@ export function initVehicleUtilizationChart(canvasId, data) {
 export function initDeliveryPerformanceChart(canvasId, percentage) {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
+    if (typeof percentage !== 'number' || isNaN(percentage) || percentage < 0 || percentage > 100) return;
 
     new Chart(ctx, {
         type: 'doughnut',
@@ -207,22 +270,3 @@ export function initDeliveryPerformanceChart(canvasId, percentage) {
         }]
     });
 }
-
-// Auto-initialize charts on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if chart data is available in window object
-    if (window.chartData) {
-        if (window.chartData.revenue) {
-            initRevenueChart('revenueChart', window.chartData.revenue);
-        }
-        if (window.chartData.orderStatus) {
-            initOrderStatusChart('orderStatusChart', window.chartData.orderStatus);
-        }
-        if (window.chartData.vehicleUtilization) {
-            initVehicleUtilizationChart('vehicleUtilizationChart', window.chartData.vehicleUtilization);
-        }
-        if (window.chartData.deliveryPerformance !== undefined) {
-            initDeliveryPerformanceChart('deliveryPerformanceChart', window.chartData.deliveryPerformance);
-        }
-    }
-});

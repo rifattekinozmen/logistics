@@ -17,6 +17,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipArchive;
@@ -47,7 +48,7 @@ class CustomerPortalController extends Controller
         }
 
         // Aktif siparişler
-        $activeOrders = Order::with(['customer', 'pickupLocation', 'deliveryLocation'])
+        $activeOrders = Order::with(['customer'])
             ->where('customer_id', $customer->id)
             ->whereNotIn('status', ['delivered', 'cancelled'])
             ->latest()
@@ -55,7 +56,7 @@ class CustomerPortalController extends Controller
             ->get();
 
         // Son teslim edilenler
-        $recentDelivered = Order::with(['customer', 'pickupLocation', 'deliveryLocation'])
+        $recentDelivered = Order::with(['customer'])
             ->where('customer_id', $customer->id)
             ->where('status', 'delivered')
             ->latest('delivered_at')
@@ -82,16 +83,19 @@ class CustomerPortalController extends Controller
                 ->count(),
         ];
 
-        // Aylık sipariş trendi (son 6 ay)
+        // Aylık sipariş trendi (son 6 ay) - SQLite/MySQL uyumlu
+        $isSqlite = DB::connection()->getDriverName() === 'sqlite';
+        $yearExpr = $isSqlite ? "strftime('%Y', created_at)" : 'YEAR(created_at)';
+        $monthExpr = $isSqlite ? "strftime('%m', created_at)" : 'MONTH(created_at)';
         $monthlyOrders = Order::where('customer_id', $customer->id)
             ->where('created_at', '>=', now()->subMonths(6))
-            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
-            ->groupByRaw('YEAR(created_at), MONTH(created_at)')
-            ->orderByRaw('YEAR(created_at) ASC, MONTH(created_at) ASC')
+            ->selectRaw("{$yearExpr} as year, {$monthExpr} as month, COUNT(*) as count")
+            ->groupByRaw("{$yearExpr}, {$monthExpr}")
+            ->orderByRaw("{$yearExpr} ASC, {$monthExpr} ASC")
             ->get()
             ->map(function ($item) {
                 return [
-                    'label' => \Carbon\Carbon::create($item->year, $item->month, 1)->format('M Y'),
+                    'label' => \Carbon\Carbon::create((int) $item->year, (int) $item->month, 1)->format('M Y'),
                     'count' => $item->count,
                 ];
             });
@@ -124,7 +128,7 @@ class CustomerPortalController extends Controller
             abort(404, 'Müşteri kaydı bulunamadı.');
         }
 
-        $query = Order::with(['customer', 'pickupLocation', 'deliveryLocation'])
+        $query = Order::with(['customer'])
             ->where('customer_id', $customer->id);
 
         if ($request->filled('status')) {
@@ -238,8 +242,8 @@ class CustomerPortalController extends Controller
             'notes' => 'nullable|string|max:2000',
         ]);
 
+        $validated['customer_id'] = $customer->id;
         $order = $this->orderService->create($validated, $user);
-        $order->update(['customer_id' => $customer->id]);
 
         return redirect()
             ->route('customer.orders.show', $order)
@@ -785,7 +789,7 @@ class CustomerPortalController extends Controller
 
         // Sadece belirli durumlarda iptal edilebilir
         if (! in_array($order->status, ['pending', 'assigned'], true)) {
-            return back()->withErrors(['order' => 'Bu sipariş iptal edilemez. Sadece beklemede veya atanmış siparişler iptal edilebilir.']);
+            abort(403, 'Bu sipariş iptal edilemez. Sadece beklemede veya atanmış siparişler iptal edilebilir.');
         }
 
         $validated = $request->validate([
@@ -988,6 +992,7 @@ class CustomerPortalController extends Controller
 
         // Şablon verilerini kullanarak sipariş oluştur
         $orderData = [
+            'customer_id' => $customer->id,
             'pickup_address' => $orderTemplate->pickup_address,
             'delivery_address' => $orderTemplate->delivery_address,
             'planned_delivery_date' => now()->addDays(1),
@@ -998,7 +1003,6 @@ class CustomerPortalController extends Controller
         ];
 
         $order = $this->orderService->create($orderData, $user);
-        $order->update(['customer_id' => $customer->id]);
 
         return redirect()
             ->route('customer.orders.show', $order)

@@ -62,9 +62,13 @@ class PaymentController extends Controller
 
     protected function buildQuery(array $filters): \Illuminate\Database\Eloquent\Builder
     {
-        $query = \App\Models\Payment::query();
+        $query = \App\Models\Payment::query()->with(['related.businessPartner.company']);
         $query->when($filters['type'] ?? null, fn ($q, $type) => $q->where('payment_type', $type));
-        $query->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status));
+        $query->when($filters['status'] ?? null, function ($q, $status) {
+            $statusMap = ['pending' => 0, 'paid' => 1, 'overdue' => 2, 'cancelled' => 3];
+
+            return $q->where('status', $statusMap[$status] ?? $status);
+        });
         $query->when($filters['due_date_from'] ?? null, fn ($q, $date) => $q->whereDate('due_date', '>=', $date));
         $query->when($filters['due_date_to'] ?? null, fn ($q, $date) => $q->whereDate('due_date', '<=', $date));
 
@@ -87,14 +91,16 @@ class PaymentController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'company_id' => 'required|exists:companies,id',
-            'type' => 'required|string|max:50',
+            'related_type' => 'required|string|in:'.implode(',', [\App\Models\Customer::class]),
+            'related_id' => 'required|integer|exists:customers,id',
+            'payment_type' => 'required|string|in:incoming,outgoing',
             'amount' => 'required|numeric|min:0',
             'due_date' => 'required|date',
-            'description' => 'nullable|string|max:1000',
-            'status' => 'required|string|max:50',
+            'status' => 'required|integer|in:0,1,2,3',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
+        $validated['created_by'] = $request->user()?->id;
         $payment = \App\Models\Payment::create($validated);
 
         return redirect()->route('admin.payments.show', $payment)
@@ -106,7 +112,7 @@ class PaymentController extends Controller
      */
     public function show(int $id): View
     {
-        $payment = \App\Models\Payment::with(['company'])->findOrFail($id);
+        $payment = \App\Models\Payment::with(['related.businessPartner.company'])->findOrFail($id);
 
         return view('admin.payments.show', compact('payment'));
     }
@@ -130,12 +136,13 @@ class PaymentController extends Controller
         $payment = \App\Models\Payment::findOrFail($id);
 
         $validated = $request->validate([
-            'company_id' => 'required|exists:companies,id',
-            'type' => 'required|string|max:50',
+            'related_type' => 'required|string|in:'.implode(',', [\App\Models\Customer::class]),
+            'related_id' => 'required|integer|exists:customers,id',
+            'payment_type' => 'required|string|in:incoming,outgoing',
             'amount' => 'required|numeric|min:0',
             'due_date' => 'required|date',
-            'description' => 'nullable|string|max:1000',
-            'status' => 'required|string|max:50',
+            'status' => 'required|integer|in:0,1,2,3',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         $payment->update($validated);

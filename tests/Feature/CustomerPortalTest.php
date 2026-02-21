@@ -123,7 +123,8 @@ it('customer can manage favorite addresses', function () {
     $response = $this->actingAs($user)
         ->withSession(['active_company_id' => $company->id])
         ->post(route('customer.favorite-addresses.store'), [
-            'title' => 'Ev Adresi',
+            'name' => 'Ev Adresi',
+            'type' => 'both',
             'address' => 'İstanbul, Kadıköy',
             'latitude' => 40.9880,
             'longitude' => 29.0256,
@@ -248,8 +249,8 @@ function createCustomerUser(): array
     $user->companies()->attach($company->id, ['role' => 'customer', 'is_default' => true]);
     $user->roles()->attach($role->id);
 
-    // Müşteriyi kullanıcıya bağla
-    $customer->update(['user_id' => $user->id]);
+    // Müşteriyi kullanıcıya bağla (CustomerPortal email ile eşleştirir)
+    $customer->update(['email' => $user->email]);
 
     return [$user, $company, $customer];
 }

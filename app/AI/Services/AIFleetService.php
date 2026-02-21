@@ -67,21 +67,29 @@ class AIFleetService
 
     /**
      * Analyze fuel consumption patterns.
+     *
+     * Note: fuel_records table may not exist; returns placeholder metrics when absent.
      */
     public function analyzeFuelConsumption(Vehicle $vehicle, int $months = 3): array
     {
-        $fuelRecords = DB::table('fuel_records')
-            ->where('vehicle_id', $vehicle->id)
-            ->whereBetween('created_at', [now()->subMonths($months), now()])
-            ->get();
+        $totalFuelConsumed = 0.0;
+        $totalCost = 0.0;
+        $averageConsumption = 0.0;
 
-        $totalFuelConsumed = $fuelRecords->sum('quantity');
-        $totalCost = $fuelRecords->sum('total_cost');
-        $averageConsumption = $fuelRecords->avg('quantity') ?? 0;
+        if (\Illuminate\Support\Facades\Schema::hasTable('fuel_records')) {
+            $fuelRecords = DB::table('fuel_records')
+                ->where('vehicle_id', $vehicle->id)
+                ->whereBetween('created_at', [now()->subMonths($months), now()])
+                ->get();
 
-        $avgFuelPrice = FuelPrice::query()
+            $totalFuelConsumed = (float) $fuelRecords->sum('quantity');
+            $totalCost = (float) $fuelRecords->sum('total_cost');
+            $averageConsumption = (float) ($fuelRecords->avg('quantity') ?? 0);
+        }
+
+        $avgFuelPrice = (float) (FuelPrice::query()
             ->whereBetween('price_date', [now()->subMonths($months), now()])
-            ->avg('purchase_price') ?? 0;
+            ->avg('purchase_price') ?? 0);
 
         $efficiency = $this->calculateFuelEfficiency($vehicle, $totalFuelConsumed, $months);
 
@@ -105,16 +113,21 @@ class AIFleetService
     /**
      * Optimize fleet deployment for a company.
      */
-    public function optimizeFleetDeployment($companyId): array
+    public function optimizeFleetDeployment(int $companyId): array
     {
-        $vehicles = Vehicle::where('company_id', $companyId)
+        $vehicles = Vehicle::whereHas('branch', fn ($q) => $q->where('company_id', $companyId))
             ->where('status', 1)
             ->get();
 
-        $activeShipments = DB::table('shipments')
-            ->where('company_id', $companyId)
-            ->whereIn('status', ['pending', 'in_transit'])
-            ->get();
+        $vehicleIds = $vehicles->pluck('id')->all();
+        $activeShipments = collect();
+
+        if (! empty($vehicleIds)) {
+            $activeShipments = DB::table('shipments')
+                ->whereIn('vehicle_id', $vehicleIds)
+                ->whereIn('status', ['pending', 'in_transit'])
+                ->get();
+        }
 
         $utilization = [];
         foreach ($vehicles as $vehicle) {

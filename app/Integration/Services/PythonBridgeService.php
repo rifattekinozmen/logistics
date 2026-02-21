@@ -2,10 +2,10 @@
 
 namespace App\Integration\Services;
 
+use App\Integration\Jobs\SendToPythonJob;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Queue;
 
 class PythonBridgeService
 {
@@ -45,13 +45,36 @@ class PythonBridgeService
     }
 
     /**
-     * Queue üzerinden Python'a gönder.
+     * Queue üzerinden Python'a gönder (Queue-first mimari).
      */
     public function sendToPythonAsync(array $data, string $action = 'process'): void
     {
-        Queue::push(\App\Integration\Jobs\SendToPythonJob::class, [
-            'data' => $data,
-            'action' => $action,
-        ]);
+        dispatch(new SendToPythonJob($data, $action));
+    }
+
+    /**
+     * Teslimat/analitik verilerini Python pipeline'a gönderir.
+     *
+     * @param  array<string, mixed>  $payload  { batch_id, rows_count, summary }
+     */
+    public function pushDeliveryDataToPipeline(array $payload): void
+    {
+        $this->sendToPythonAsync([
+            'source' => 'delivery_import',
+            'payload' => $payload,
+        ], 'analytics');
+    }
+
+    /**
+     * Sipariş verilerini Python pipeline'a gönderir (ML/optimizasyon için).
+     *
+     * @param  array<string, mixed>  $ordersData  Order verileri
+     */
+    public function pushOrderDataToPipeline(array $ordersData): void
+    {
+        $this->sendToPythonAsync([
+            'source' => 'orders',
+            'payload' => $ordersData,
+        ], 'optimization');
     }
 }

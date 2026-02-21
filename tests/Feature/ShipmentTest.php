@@ -28,6 +28,17 @@ it('can create a shipment', function () {
     expect(Shipment::first()->order_id)->toBe($order->id);
 });
 
+it('can access shipment create form', function () {
+    [$user, $company] = createAdminUser();
+
+    $response = $this->actingAs($user)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('admin.shipments.create'));
+
+    $response->assertSuccessful();
+    $response->assertViewHas(['orders', 'vehicles', 'employees']);
+});
+
 it('can list shipments', function () {
     [$user, $company] = createAdminUser();
     Shipment::factory()->count(3)->create();
@@ -38,6 +49,18 @@ it('can list shipments', function () {
 
     $response->assertSuccessful();
     $response->assertViewHas('shipments');
+});
+
+it('can access shipment edit form', function () {
+    [$user, $company] = createAdminUser();
+    $shipment = Shipment::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('admin.shipments.edit', $shipment));
+
+    $response->assertSuccessful();
+    $response->assertViewHas(['shipment', 'orders', 'vehicles', 'employees']);
 });
 
 it('can show a shipment', function () {

@@ -85,7 +85,7 @@
                         <span class="fw-bold text-dark">{{ $payment->company->name ?? '-' }}</span>
                     </td>
                     <td class="align-middle">
-                        <small class="text-secondary">{{ $payment->type }}</small>
+                        <small class="text-secondary">{{ $payment->payment_type ?? '-' }}</small>
                     </td>
                     <td class="align-middle">
                         <span class="fw-bold text-dark">{{ number_format($payment->amount, 2) }} ₺</span>

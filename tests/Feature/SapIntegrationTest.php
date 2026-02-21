@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
     Config::set('sap.sync.enabled', false);
+    Config::set('sap.username', 'test_user');
+    Config::set('sap.password', 'test_pass');
 });
 
 it('can register order as SAP document', function () {
@@ -74,6 +76,8 @@ it('logs sync operation', function () {
 
 it('creates sales order in SAP when sync enabled', function () {
     Config::set('sap.sync.enabled', true);
+    Config::set('sap.username', 'test_user');
+    Config::set('sap.password', 'test_pass');
     Config::set('sap.odata_url', 'https://mock-sap.test');
     Config::set('sap.service_paths.sales_order', '/sales-orders');
 
@@ -109,6 +113,8 @@ it('skips sync when SAP sync is disabled', function () {
 
 it('handles SAP API errors gracefully', function () {
     Config::set('sap.sync.enabled', true);
+    Config::set('sap.username', 'test_user');
+    Config::set('sap.password', 'test_pass');
     Config::set('sap.odata_url', 'https://mock-sap.test');
     Config::set('sap.service_paths.sales_order', '/sales-orders');
 
@@ -131,6 +137,8 @@ it('handles SAP API errors gracefully', function () {
 
 it('can sync delivery to SAP', function () {
     Config::set('sap.sync.enabled', true);
+    Config::set('sap.username', 'test_user');
+    Config::set('sap.password', 'test_pass');
     Config::set('sap.odata_url', 'https://mock-sap.test');
     Config::set('sap.service_paths.delivery', '/deliveries');
 
@@ -153,6 +161,8 @@ it('can sync delivery to SAP', function () {
 
 it('can sync invoice to SAP', function () {
     Config::set('sap.sync.enabled', true);
+    Config::set('sap.username', 'test_user');
+    Config::set('sap.password', 'test_pass');
     Config::set('sap.odata_url', 'https://mock-sap.test');
     Config::set('sap.service_paths.invoice', '/invoices');
 
@@ -182,7 +192,7 @@ it('can retrieve document flow by SAP doc number', function () {
     $flow = $service->getDocumentFlow('SAP-999');
 
     expect($flow)->toBeInstanceOf(\App\DocumentFlow\Models\DocumentFlow::class);
-    expect($flow->document_number)->toBe('SAP-999');
+    expect($flow->source_sap_doc_number)->toBe('SAP-999');
 });
 
 it('returns null for non-existent SAP doc number', function () {

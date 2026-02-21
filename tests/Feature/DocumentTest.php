@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Company;
 use App\Models\Document;
 use App\Models\Vehicle;
 
@@ -16,11 +17,10 @@ it('can access document create form', function () {
 
 it('can list documents', function () {
     [$user, $company] = createAdminUser();
+    $this->actingAs($user)->withSession(['active_company_id' => $company->id]);
     Document::factory()->count(3)->create();
 
-    $response = $this->actingAs($user)
-        ->withSession(['active_company_id' => $company->id])
-        ->get(route('admin.documents.index'));
+    $response = $this->get(route('admin.documents.index'));
 
     $response->assertSuccessful();
     $response->assertViewHas('documents');
@@ -28,11 +28,10 @@ it('can list documents', function () {
 
 it('can show a document', function () {
     [$user, $company] = createAdminUser();
+    $this->actingAs($user)->withSession(['active_company_id' => $company->id]);
     $document = Document::factory()->create();
 
-    $response = $this->actingAs($user)
-        ->withSession(['active_company_id' => $company->id])
-        ->get(route('admin.documents.show', $document));
+    $response = $this->get(route('admin.documents.show', $document));
 
     $response->assertSuccessful();
     $response->assertViewHas('document');
@@ -61,18 +60,19 @@ it('can create a document', function () {
 
 it('can delete a document', function () {
     [$user, $company] = createAdminUser();
+    $this->actingAs($user)->withSession(['active_company_id' => $company->id]);
     $document = Document::factory()->create();
 
-    $response = $this->actingAs($user)
-        ->withSession(['active_company_id' => $company->id])
-        ->delete(route('admin.documents.destroy', $document));
+    $response = $this->delete(route('admin.documents.destroy', $document));
 
     $response->assertRedirect();
     expect(Document::count())->toBe(0);
 });
 
 it('requires authentication to access document routes', function () {
-    $document = Document::factory()->create();
+    $company = Company::factory()->create();
+    session(['active_company_id' => $company->id]);
+    $document = Document::factory()->create(['valid_until' => null]);
 
     $this->get(route('admin.documents.index'))
         ->assertRedirect('/login');
@@ -82,10 +82,13 @@ it('requires authentication to access document routes', function () {
 });
 
 it('belongs to documentable polymorphically', function () {
+    $company = Company::factory()->create();
+    session(['active_company_id' => $company->id]);
     $vehicle = Vehicle::factory()->create();
     $document = Document::factory()->create([
         'documentable_type' => Vehicle::class,
         'documentable_id' => $vehicle->id,
+        'valid_until' => null,
     ]);
 
     expect($document->documentable)->toBeInstanceOf(Vehicle::class);

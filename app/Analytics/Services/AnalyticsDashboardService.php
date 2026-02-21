@@ -99,16 +99,20 @@ class AnalyticsDashboardService
 
         $completionRate = $totalOrders > 0 ? ($completedOrders / $totalOrders) * 100 : 0;
 
-        // Shipments
+        // Shipments (scoped by company via orders)
         $onTimeDeliveries = DB::table('shipments')
-            ->where('status', 'delivered')
-            ->whereRaw('delivery_date <= pickup_date')
-            ->whereBetween('created_at', [$last30Days, now()])
+            ->join('orders', 'shipments.order_id', '=', 'orders.id')
+            ->where('orders.company_id', $company->id)
+            ->where('shipments.status', 'delivered')
+            ->whereRaw('shipments.delivery_date <= shipments.pickup_date')
+            ->whereBetween('shipments.created_at', [$last30Days, now()])
             ->count();
 
         $totalDeliveries = DB::table('shipments')
-            ->where('status', 'delivered')
-            ->whereBetween('created_at', [$last30Days, now()])
+            ->join('orders', 'shipments.order_id', '=', 'orders.id')
+            ->where('orders.company_id', $company->id)
+            ->where('shipments.status', 'delivered')
+            ->whereBetween('shipments.created_at', [$last30Days, now()])
             ->count();
 
         $onTimeRate = $totalDeliveries > 0 ? ($onTimeDeliveries / $totalDeliveries) * 100 : 0;
@@ -191,14 +195,14 @@ class AnalyticsDashboardService
             ->where('vehicles.status', 1)
             ->count();
 
-        // Active vehicles (with active shipments)
+        // Active vehicles (with active shipments) — COUNT(DISTINCT vehicles.id)
         $activeVehicles = DB::table('vehicles')
             ->join('branches', 'vehicles.branch_id', '=', 'branches.id')
             ->join('shipments', 'vehicles.id', '=', 'shipments.vehicle_id')
             ->where('branches.company_id', $company->id)
             ->whereIn('shipments.status', ['assigned', 'loaded', 'in_transit'])
-            ->distinct('vehicles.id')
-            ->count();
+            ->distinct()
+            ->count('vehicles.id');
 
         // Idle vehicles
         $idleVehicles = $totalVehicles - $activeVehicles;

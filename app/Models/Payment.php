@@ -66,4 +66,17 @@ class Payment extends Model
     {
         return $this->morphMany(CalendarEvent::class, 'related');
     }
+
+    /**
+     * Get company through related model (e.g. Customer -> BusinessPartner -> Company).
+     */
+    public function getCompanyAttribute(): ?\App\Models\Company
+    {
+        $related = $this->related;
+
+        return match (true) {
+            $related instanceof \App\Models\Customer => $related->businessPartner?->company,
+            default => null,
+        };
+    }
 }

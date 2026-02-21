@@ -67,7 +67,7 @@ class AIHRService
      */
     public function predictTurnover(Company $company): array
     {
-        $employees = Employee::where('company_id', $company->id)
+        $employees = Employee::whereHas('branch', fn ($q) => $q->where('company_id', $company->id))
             ->where('status', 1)
             ->with('position')
             ->get();

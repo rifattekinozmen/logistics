@@ -163,11 +163,11 @@ it('validates payment type', function () {
 
 it('calculates days until due date', function () {
     $payment = Payment::factory()->create([
-        'due_date' => now()->addDays(15),
+        'due_date' => now()->addDays(15)->startOfDay(),
         'status' => 0,
     ]);
 
-    $daysUntilDue = $payment->due_date->diffInDays(now());
+    $daysUntilDue = now()->startOfDay()->diffInDays($payment->due_date, false);
 
     expect($daysUntilDue)->toBeGreaterThanOrEqual(14);
     expect($daysUntilDue)->toBeLessThanOrEqual(15);

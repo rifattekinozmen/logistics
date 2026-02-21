@@ -15,6 +15,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'customer_id' => 'required|exists:customers,id',
+            'status' => 'nullable|string|in:pending,planned,assigned,loaded,in_transit,delivered,invoiced,cancelled',
             'pickup_address' => 'required|string|max:1000',
             'delivery_address' => 'required|string|max:1000',
             'planned_pickup_date' => 'nullable|date',

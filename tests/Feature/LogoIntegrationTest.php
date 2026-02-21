@@ -92,7 +92,7 @@ it('can get accounting data from LOGO', function () {
 
     expect($data)->toBeArray();
     expect($data)->toHaveKey('total_revenue');
-    expect($data['total_revenue'])->toBe(150000.00);
+    expect((float) $data['total_revenue'])->toBe(150000.0);
 });
 
 it('returns empty array when LOGO integration is disabled for accounting data', function () {
