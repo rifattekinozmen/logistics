@@ -41,7 +41,7 @@ class OrderService
      */
     public function getPaginated(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
-        $query = Order::query()->with(['customer', 'creator', 'pickupLocation', 'deliveryLocation']);
+        $query = Order::query()->with(['customer', 'creator']);
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -67,7 +67,7 @@ class OrderService
      */
     public function getForExport(array $filters = []): Collection
     {
-        $query = Order::query()->with(['customer', 'creator', 'pickupLocation', 'deliveryLocation']);
+        $query = Order::query()->with(['customer', 'creator']);
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);

@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             LocationSeeder::class,
             CompanySeeder::class,
+            FullTestDataSeeder::class,
         ]);
 
         // Admin kullanıcı oluştur
@@ -45,6 +46,21 @@ class DatabaseSeeder extends Seeder
         $adminRole = \App\Models\CustomRole::where('name', 'admin')->first();
         if ($adminRole) {
             $admin->roles()->attach($adminRole->id);
+        }
+
+        // Admin kullanıcısına Ana Şirket'i ata
+        $company = \App\Models\Company::where('name', 'Ana Şirket')->first();
+        if ($company) {
+            $admin->companies()->attach($company->id, [
+                'role' => 'admin',
+                'is_default' => true,
+            ]);
+
+            Log::info('admin_company_attached', [
+                'user_id' => $admin->id,
+                'company_id' => $company->id,
+                'company_name' => $company->name,
+            ]);
         }
     }
 }

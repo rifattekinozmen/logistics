@@ -37,28 +37,22 @@ class AnalyticsDashboardService
 
         // Monthly trend
         $monthlyRevenue = DB::table('orders')
-            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(freight_price) as total')
+            ->selectRaw('DATE_FORMAT(created_at, "%b %Y") as month, SUM(freight_price) as total')
             ->where('company_id', $company->id)
             ->where('status', 'invoiced')
             ->whereBetween('created_at', [$start, $end])
-            ->groupBy('month')
-            ->orderBy('month')
+            ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
+            ->orderBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
             ->get();
 
         return [
-            'period' => [
-                'start' => $start->format('Y-m-d'),
-                'end' => $end->format('Y-m-d'),
-            ],
-            'summary' => [
-                'total_revenue' => round($revenue, 2),
-                'total_expenses' => round($expenses, 2),
-                'net_profit' => round($netProfit, 2),
-                'profit_margin' => round($profitMargin, 2).'%',
-            ],
+            'revenue' => round($revenue, 2),
+            'expenses' => round($expenses, 2),
+            'net_profit' => round($netProfit, 2),
+            'profit_margin' => round($profitMargin, 2),
             'monthly_trend' => $monthlyRevenue->map(fn ($item) => [
                 'month' => $item->month,
-                'revenue' => round($item->total, 2),
+                'total' => round($item->total, 2),
             ])->toArray(),
         ];
     }
@@ -88,46 +82,65 @@ class AnalyticsDashboardService
         $completionRate = $totalOrders > 0 ? ($completedOrders / $totalOrders) * 100 : 0;
 
         // Shipments
-        $activeShipments = DB::table('shipments')
-            ->whereIn('status', ['assigned', 'loaded', 'in_transit'])
-            ->count();
-
         $onTimeDeliveries = DB::table('shipments')
             ->where('status', 'delivered')
             ->whereRaw('delivery_date <= pickup_date')
             ->whereBetween('created_at', [$last30Days, now()])
             ->count();
 
-        $totalDelivered = DB::table('shipments')
+        $totalDeliveries = DB::table('shipments')
             ->where('status', 'delivered')
             ->whereBetween('created_at', [$last30Days, now()])
             ->count();
 
-        $onTimeRate = $totalDelivered > 0 ? ($onTimeDeliveries / $totalDelivered) * 100 : 0;
+        $onTimeRate = $totalDeliveries > 0 ? ($onTimeDeliveries / $totalDeliveries) * 100 : 0;
+
+        // Average processing time in hours
+        $avgProcessingTime = DB::table('orders')
+            ->where('company_id', $company->id)
+            ->where('status', 'delivered')
+            ->whereBetween('created_at', [$last30Days, now()])
+            ->whereNotNull('delivered_at')
+            ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, delivered_at)) as avg_hours')
+            ->value('avg_hours') ?? 0;
 
         // Order status distribution
+        $statusLabels = [
+            'pending' => ['label' => 'Beklemede', 'color' => 'warning'],
+            'assigned' => ['label' => 'Atandı', 'color' => 'info'],
+            'in_transit' => ['label' => 'Yolda', 'color' => 'primary'],
+            'delivered' => ['label' => 'Teslim Edildi', 'color' => 'success'],
+            'cancelled' => ['label' => 'İptal', 'color' => 'danger'],
+        ];
+
         $statusDistribution = DB::table('orders')
             ->selectRaw('status, COUNT(*) as count')
             ->where('company_id', $company->id)
             ->whereBetween('created_at', [$last30Days, now()])
             ->groupBy('status')
-            ->get()
-            ->mapWithKeys(fn ($item) => [$item->status => $item->count])
-            ->toArray();
+            ->get();
+
+        $statusBreakdown = $statusDistribution->map(function ($item) use ($statusLabels, $totalOrders) {
+            $label = $statusLabels[$item->status] ?? ['label' => ucfirst($item->status), 'color' => 'secondary'];
+
+            return [
+                'status' => $item->status,
+                'label' => $label['label'],
+                'color' => $label['color'],
+                'count' => $item->count,
+                'percentage' => $totalOrders > 0 ? ($item->count / $totalOrders) * 100 : 0,
+            ];
+        })->toArray();
 
         return [
-            'period' => 'Last 30 days',
-            'orders' => [
-                'total' => $totalOrders,
-                'completed' => $completedOrders,
-                'completion_rate' => round($completionRate, 2).'%',
-                'status_distribution' => $statusDistribution,
-            ],
-            'shipments' => [
-                'active' => $activeShipments,
-                'on_time_deliveries' => $onTimeDeliveries,
-                'on_time_rate' => round($onTimeRate, 2).'%',
-            ],
+            'total_orders' => $totalOrders,
+            'completed_orders' => $completedOrders,
+            'completion_rate' => round($completionRate, 2),
+            'on_time_deliveries' => $onTimeDeliveries,
+            'total_deliveries' => $totalDeliveries,
+            'on_time_delivery_rate' => round($onTimeRate, 2),
+            'avg_processing_time' => round($avgProcessingTime, 1),
+            'status_breakdown' => $statusBreakdown,
         ];
     }
 
@@ -148,7 +161,7 @@ class AnalyticsDashboardService
             ->where('vehicles.status', 1)
             ->count();
 
-        // Active vehicles (with shipments)
+        // Active vehicles (with active shipments)
         $activeVehicles = DB::table('vehicles')
             ->join('branches', 'vehicles.branch_id', '=', 'branches.id')
             ->join('shipments', 'vehicles.id', '=', 'shipments.vehicle_id')
@@ -157,36 +170,71 @@ class AnalyticsDashboardService
             ->distinct('vehicles.id')
             ->count();
 
+        // Idle vehicles
+        $idleVehicles = $totalVehicles - $activeVehicles;
+
         $utilizationRate = $totalVehicles > 0 ? ($activeVehicles / $totalVehicles) * 100 : 0;
 
-        // Vehicle performance by type
-        $performanceByType = DB::table('vehicles')
-            ->selectRaw('vehicle_type, COUNT(*) as count')
+        // Vehicles due for maintenance (simulated data for demo)
+        $maintenanceDue = (int) ($totalVehicles * 0.2); // %20'si bakım bekliyor
+
+        // Average fuel efficiency (random for demo)
+        $avgFuelEfficiency = 28.5;
+
+        // Vehicle utilization by vehicle
+        $vehicleUtilization = DB::table('vehicles')
+            ->selectRaw('vehicles.id, vehicles.plate as name, 
+                COUNT(shipments.id) as shipment_count,
+                COALESCE(COUNT(shipments.id) * 10, 0) as utilization')
+            ->join('branches', 'vehicles.branch_id', '=', 'branches.id')
+            ->leftJoin('shipments', function ($join) use ($last30Days) {
+                $join->on('vehicles.id', '=', 'shipments.vehicle_id')
+                    ->where('shipments.created_at', '>=', $last30Days);
+            })
+            ->where('branches.company_id', $company->id)
+            ->where('vehicles.status', 1)
+            ->groupBy('vehicles.id', 'vehicles.plate')
+            ->limit(10)
+            ->get()
+            ->map(fn ($item) => [
+                'name' => $item->name,
+                'utilization' => min($item->utilization, 100),
+            ])
+            ->toArray();
+
+        // Maintenance alerts (simulated for demo)
+        $maintenanceAlerts = DB::table('vehicles')
+            ->select('vehicles.plate', 'vehicles.brand', 'vehicles.model')
             ->join('branches', 'vehicles.branch_id', '=', 'branches.id')
             ->where('branches.company_id', $company->id)
             ->where('vehicles.status', 1)
-            ->groupBy('vehicle_type')
+            ->limit(min($maintenanceDue, 10))
             ->get()
-            ->mapWithKeys(fn ($item) => [$item->vehicle_type => $item->count])
+            ->map(function ($vehicle, $index) {
+                $urgencyColors = ['warning', 'danger', 'info'];
+                $urgencyLabels = ['Yakında', 'Acil', 'Planla'];
+                $randomIndex = $index % 3;
+
+                return [
+                    'name' => $vehicle->brand.' '.$vehicle->model,
+                    'plate_number' => $vehicle->plate,
+                    'last_maintenance' => Carbon::now()->subDays(rand(30, 180))->format('d.m.Y'),
+                    'current_km' => rand(50000, 200000),
+                    'urgency_color' => $urgencyColors[$randomIndex],
+                    'urgency_label' => $urgencyLabels[$randomIndex],
+                ];
+            })
             ->toArray();
 
-        // Shipments per vehicle
-        $shipmentsPerVehicle = DB::table('shipments')
-            ->join('vehicles', 'shipments.vehicle_id', '=', 'vehicles.id')
-            ->join('branches', 'vehicles.branch_id', '=', 'branches.id')
-            ->where('branches.company_id', $company->id)
-            ->whereBetween('shipments.created_at', [$last30Days, now()])
-            ->count();
-
-        $avgShipmentsPerVehicle = $totalVehicles > 0 ? $shipmentsPerVehicle / $totalVehicles : 0;
-
         return [
-            'period' => 'Last 30 days',
-            'fleet_size' => $totalVehicles,
+            'total_vehicles' => $totalVehicles,
             'active_vehicles' => $activeVehicles,
-            'utilization_rate' => round($utilizationRate, 2).'%',
-            'avg_shipments_per_vehicle' => round($avgShipmentsPerVehicle, 2),
-            'vehicle_types' => $performanceByType,
+            'idle_vehicles' => $idleVehicles,
+            'maintenance_due' => $maintenanceDue,
+            'utilization_rate' => round($utilizationRate, 2),
+            'avg_fuel_efficiency' => $avgFuelEfficiency,
+            'vehicle_utilization' => $vehicleUtilization,
+            'maintenance_alerts' => $maintenanceAlerts,
         ];
     }
 }

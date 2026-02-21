@@ -184,9 +184,38 @@
                 </li>
                 @endif
 
-                <!-- 6. Sistem & Yönetimi -->
+                <!-- 6. Analitik & Raporlama -->
+                <li class="mb-2 mt-3">
+                    <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Analitik & Raporlama</p>
+                </li>
+                <li class="mb-1">
+                    <a href="{{ route('admin.analytics.finance') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.analytics.finance') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">analytics</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Finans Analitik</span>
+                    </a>
+                </li>
+                <li class="mb-1">
+                    <a href="{{ route('admin.analytics.operations') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.analytics.operations') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">donut_small</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Operasyon Analitik</span>
+                    </a>
+                </li>
+                <li class="mb-1">
+                    <a href="{{ route('admin.analytics.fleet') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.analytics.fleet') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">speed</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Filo Analitik</span>
+                    </a>
+                </li>
+
+                <!-- 7. Sistem & Yönetimi -->
                 <li class="mb-2 mt-3">
                     <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Sistem & Yönetimi</p>
+                </li>
+                <li class="mb-1">
+                    <a href="{{ route('admin.calendar.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.calendar.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">calendar_today</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Takvim</span>
+                    </a>
                 </li>
                 <li class="mb-1">
                     <a href="{{ route('admin.notifications.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.notifications.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">

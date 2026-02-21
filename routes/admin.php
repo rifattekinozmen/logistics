@@ -164,12 +164,8 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         $upcomingEvents = $calendarService->getUpcomingEvents(7);
 
         // Critical stock alerts
-        $criticalStocks = \App\Models\InventoryItem::query()
-            ->whereColumn('quantity', '<=', 'min_level')
-            ->with('warehouse')
-            ->orderBy('quantity')
-            ->limit(10)
-            ->get();
+        // TODO: Stok kontrolünü inventory_stocks tablosu üzerinden yap
+        $criticalStocks = collect(); // Geçici olarak boş koleksiyon
 
         return view('admin.dashboard', compact(
             'stats',

@@ -50,12 +50,14 @@ class LoginRequest extends FormRequest
         $user = \App\Models\User::where('email', $credentials['email'])->first();
 
         if (! $user && app()->environment('local') && $credentials['email'] === 'admin@logistics.com') {
-            $user = \App\Models\User::create([
-                'name' => 'Admin User',
-                'email' => 'admin@logistics.com',
-                'password' => 'password',
-                'status' => 1,
-            ]);
+            $user = \App\Models\User::firstOrCreate(
+                ['email' => 'admin@logistics.com'],
+                [
+                    'name' => 'Admin User',
+                    'password' => 'password',
+                    'status' => 1,
+                ]
+            );
         }
 
         Log::info('login_attempt', [

@@ -13,7 +13,7 @@ class CompanySeeder extends Seeder
         $company = Company::factory()->create([
             'name' => 'Ana Şirket',
             'tax_number' => '1234567890',
-            'status' => 1,
+            'is_active' => true,
         ]);
 
         // Ana şirket için örnek dijital mali hizmetler oluştur

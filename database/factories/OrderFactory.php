@@ -16,6 +16,7 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
+            'company_id' => null,
             'customer_id' => Customer::factory(),
             'order_number' => 'ORD-'.$this->faker->unique()->numerify('########'),
             'status' => $this->faker->randomElement(['pending', 'planned', 'assigned', 'loaded', 'in_transit', 'delivered', 'invoiced', 'cancelled']),
@@ -28,6 +29,7 @@ class OrderFactory extends Factory
             'total_weight' => $this->faker->randomFloat(2, 100, 10000),
             'total_volume' => $this->faker->randomFloat(2, 1, 100),
             'is_dangerous' => $this->faker->boolean(20),
+            'freight_price' => $this->faker->randomFloat(2, 5000, 50000),
             'notes' => $this->faker->optional()->sentence(),
             'created_by' => null,
         ];

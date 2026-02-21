@@ -38,14 +38,14 @@ return new class extends Migration
             $table->index('order_id', 'idx_shipments_order_id');
         });
 
-        // Delivery numbers table indexes
-        Schema::table('delivery_numbers', function (Blueprint $table) {
-            // Composite index for batch + location
-            $table->index(['import_batch_id', 'location_id'], 'idx_delivery_numbers_batch_location');
-
-            // Index for location queries
-            $table->index('location_id', 'idx_delivery_numbers_location');
-        });
+        // Delivery numbers table indexes (index oluşturmayı atlıyoruz çünkü tablo mevcut değil veya kolonlar eksik)
+        // Schema::table('delivery_numbers', function (Blueprint $table) {
+        //     // Composite index for batch + location
+        //     $table->index(['import_batch_id', 'location_id'], 'idx_delivery_numbers_batch_location');
+        //
+        //     // Index for location queries
+        //     $table->index('location_id', 'idx_delivery_numbers_location');
+        // });
 
         // Customers table indexes
         Schema::table('customers', function (Blueprint $table) {
@@ -105,10 +105,10 @@ return new class extends Migration
             $table->dropIndex('idx_shipments_order_id');
         });
 
-        Schema::table('delivery_numbers', function (Blueprint $table) {
-            $table->dropIndex('idx_delivery_numbers_batch_location');
-            $table->dropIndex('idx_delivery_numbers_location');
-        });
+        // Schema::table('delivery_numbers', function (Blueprint $table) {
+        //     $table->dropIndex('idx_delivery_numbers_batch_location');
+        //     $table->dropIndex('idx_delivery_numbers_location');
+        // });
 
         Schema::table('customers', function (Blueprint $table) {
             $table->dropIndex('idx_customers_business_partner');
