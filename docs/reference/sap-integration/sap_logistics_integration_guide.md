@@ -81,7 +81,7 @@ SAP S/4HANA SD Module
 
 ### Sevkiyat Senkronizasyonu
 - SAP Delivery oluşturur
-- API webhook veya polling ile SaaS’a aktarılır
+- API webhook veya polling ile SaaS'a aktarılır
 
 ---
 
@@ -110,7 +110,7 @@ SAP S/4HANA SD Module
 - Otomatik fiyat hesaplama
 
 ## 7.3 Document Flow
-SAP’te tüm belgeler birbirine bağlıdır:
+SAP'te tüm belgeler birbirine bağlıdır:
 
 Order → Delivery → Billing
 
@@ -156,7 +156,7 @@ sap_documents
 SAP = Resmi kayıt sistemi
 Logistics SaaS = Operasyon UI
 
-Kullanıcılar SAP’e girmez.
+Kullanıcılar SAP'e girmez.
 Tüm operasyon SaaS üzerinden yapılır.
 
 ---
@@ -455,137 +455,3 @@ This directly increases:
 ---
 
 **Result:** Enterprise‑grade Logistics Dashboard aligned with SAP-style UX principles and scalable SaaS architecture.
-
-
-
----
-
-# 💼 Logistics SaaS – Investor & Client Presentation (Value Edition)
-
-## 1. Product Vision
-
-The Logistics Platform is designed to transform traditional transportation management into a **data‑driven decision ecosystem**. Instead of manually tracking shipments and invoices, companies gain real‑time operational intelligence.
-
-**Core Promise:**
-> Manage logistics operations, financial flow, and performance insights from a single intelligent platform.
-
----
-
-## 2. Problem Statement (Market Reality)
-
-Most logistics companies today:
-- Operate with Excel-based tracking
-- Experience delayed invoicing
-- Lack shipment visibility
-- Cannot measure carrier performance
-- Make decisions without real analytics
-
-Result:
-- Revenue leakage
-- Operational inefficiency
-- Customer dissatisfaction
-
----
-
-## 3. Solution Overview
-
-The platform provides:
-
-✅ Centralized shipment management  
-✅ Automated invoicing workflows  
-✅ Real-time dashboards  
-✅ Multitenant SaaS infrastructure  
-✅ Role-based visibility  
-✅ Performance analytics
-
----
-
-## 4. Target Customers
-
-- Logistics service providers
-- Manufacturing companies
-- Cement & industrial transport operations
-- Waste & bulk material transportation
-- 3PL operators
-
----
-
-## 5. Competitive Advantage
-
-| Feature | Traditional Software | This Platform |
-|---|---|---|
-| Real-time dashboard | ❌ | ✅ |
-| Multitenant SaaS | ❌ | ✅ |
-| KPI analytics | Limited | Advanced |
-| SAP-like UX | ❌ | ✅ |
-| Modular scalability | Limited | High |
-
----
-
-## 6. Revenue Model
-
-### SaaS Subscription
-- Per company monthly subscription
-- Tiered pricing (Starter / Pro / Enterprise)
-
-### Optional Modules
-- Advanced analytics
-- Financial reporting
-- API integrations
-- Custom enterprise modules
-
----
-
-## 7. Growth Strategy
-
-Phase expansion model:
-
-1. Core logistics operations
-2. Financial intelligence
-3. Predictive analytics
-4. AI-supported optimization
-5. Enterprise integrations (ERP / SAP ecosystem)
-
----
-
-## 8. Market Value Drivers
-
-Platform valuation increases through:
-- Recurring SaaS revenue
-- Customer retention
-- Data analytics capability
-- Scalable multitenant architecture
-- Integration readiness
-
----
-
-## 9. Estimated Product Value Logic
-
-| Stage | Product Status | Estimated Market Value Impact |
-|---|---|---|
-| MVP | Operational tracking | Base valuation |
-| Analytics Added | KPI dashboards | +40% value |
-| Finance Integration | Revenue visibility | +25% value |
-| AI & Forecasting | Predictive system | +60% value |
-
----
-
-## 10. Long-Term Vision
-
-The goal is not only to sell software but to build:
-
-➡️ A **Logistics Intelligence Platform**
-
-Where companies rely on the system for operational and strategic decisions.
-
----
-
-## 11. Investment Narrative (Short Pitch)
-
-This platform digitizes logistics workflows while creating measurable operational intelligence. By combining SaaS scalability, enterprise UX principles, and analytics-driven dashboards, it positions itself as a next-generation logistics management solution capable of regional and global expansion.
-
----
-
-**Outcome:**
-A sellable, scalable, and investor-ready logistics SaaS product aligned with enterprise software standards.
-

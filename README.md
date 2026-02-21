@@ -195,13 +195,15 @@ app/
 
 Detaylı teknik dokümantasyon `docs/` klasöründe bulunur:
 
-- [Proje Genel Bakış](docs/01-project-overview.md)
-- [Veritabanı Şeması](docs/02-database-schema.md)
-- [Geliştirme Rehberi](docs/03-development-guide.md)
-- [Modül Dokümantasyonu](docs/04-modules-documentation.md)
-- [UX ve Sayfa Akışı](docs/05-ux-page-flow.md)
-- [Şirket Ayarları ve Geçiş](docs/06-company-settings-and-switch.md)
-- [Hizmet Sözleşmesi](docs/07-service-agreement.md)
+- [AI Autopilot (Cursor)](docs/ai/AI_AUTOPILOT.md) — Cursor IDE için proje kuralları, token optimizasyonu
+- [Yol Haritası (ROADMAP)](docs/ROADMAP.md) — Tamamlanan görevler, production checklist
+- [Proje Genel Bakış](docs/architecture/01-project-overview.md)
+- [Veritabanı Şeması](docs/architecture/02-database-schema.md)
+- [Geliştirme Rehberi](docs/workflows/03-development-guide.md)
+- [Modül Dokümantasyonu](docs/modules/04-modules-documentation.md)
+- [UX ve Sayfa Akışı](docs/workflows/05-ux-page-flow.md)
+- [Şirket Ayarları ve Geçiş](docs/architecture/06-company-settings-and-switch.md)
+- [Hizmet Sözleşmesi](docs/legal/07-service-agreement.md)
 
 ## Lisans
 

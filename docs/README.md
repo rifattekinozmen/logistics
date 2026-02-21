@@ -5,7 +5,25 @@ Technical documentation for the Logistics ERP + CRM + Fleet Management system.
 
 ---
 
-## AI Workflow Brain
+## Cursor AI Autopilot
+
+**`docs/ai/AI_AUTOPILOT.md`** — Cursor IDE'nin projeyi otomatik anlamasını sağlar.
+
+**Kullanım:** `README.md` (root) veya `docs/ai/AI_AUTOPILOT.md` dosyasını chat'e sürükle → `/session` yaz.
+
+Detaylı workflow rehberi: [AI Workflow & Cursor Kullanım](ai/README.md)
+
+---
+
+## Project Status
+
+| Document | Contents |
+|----------|----------|
+| [ROADMAP](ROADMAP.md) | Tamamlanan görevler, production checklist, sonraki aşamalar |
+
+---
+
+## AI Workflow Brain (.ai/)
 
 The `.ai/` folder is the AI workflow system. Load these before starting any coding session:
 
@@ -69,7 +87,22 @@ The `.ai/` folder is the AI workflow system. Load these before starting any codi
 | [Delivery Report Pivot & Invoice Lines](reference/delivery-report-pivot-and-invoice-lines.md) | Pivot table design, invoice line mapping, implementation roadmap |
 | [Cemiloglu Pivot Reference](reference/cemiloglu-pivot-reference.md) | Source pivot logic for BOŞ-DOLU/DOLU-DOLU calculations |
 | [Customer Portal Access](reference/customer-portal-access.md) | How to set up customer portal users |
+| [SAP Integration Guide](reference/sap-integration/sap_logistics_integration_guide.md) | SAP S/4HANA entegrasyon mimarisi, SD eşleşmesi |
+| [SAP Integration Guide (Value Edition)](reference/sap-integration/sap_logistics_integration_guide2.md) | SAP entegrasyonu + Dashboard + Investor presentation |
 
 ---
 
-**Last updated:** 2026-02-19
+## Dosya Konumları (Hangi Dosya Nerede?)
+
+| Dosya | Konum | Açıklama |
+|-------|-------|----------|
+| **README.md** | `README.md` (root) | Ana proje girişi — GitHub/Git varsayılan |
+| **ROADMAP.md** | `docs/ROADMAP.md` | Yol haritası, tamamlanan görevler |
+| **AI_AUTOPILOT.md** | `docs/ai/AI_AUTOPILOT.md` | Cursor AI autopilot kuralları |
+| **AGENTS.md** | `AGENTS.md` (root) | Cursor agent kuralları (otomatik yüklenir) |
+
+Root'taki `AI_AUTOPILOT.md` ve `ROADMAP.md` sadece yönlendirme stub'ıdır.
+
+---
+
+**Last updated:** 2026-02-21
