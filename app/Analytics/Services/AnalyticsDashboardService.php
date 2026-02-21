@@ -35,14 +35,32 @@ class AnalyticsDashboardService
         $netProfit = $revenue - $expenses;
         $profitMargin = $revenue > 0 ? ($netProfit / $revenue) * 100 : 0;
 
-        // Monthly trend
+        // Monthly trend (driver-specific: SQL Server FORMAT, MySQL DATE_FORMAT, SQLite strftime)
+        // SQL Server requires all SELECT columns to be in GROUP BY
+        $driver = DB::connection()->getDriverName();
+        $monthSelect = match ($driver) {
+            'sqlsrv' => "FORMAT(created_at, 'yyyy-MM') as sort_key, FORMAT(created_at, 'MMM yyyy') as month, SUM(freight_price) as total",
+            'sqlite' => "strftime('%b %Y', created_at) as month, SUM(freight_price) as total",
+            default => 'DATE_FORMAT(created_at, "%b %Y") as month, SUM(freight_price) as total',
+        };
+        $monthGroup = match ($driver) {
+            'sqlsrv' => "FORMAT(created_at, 'yyyy-MM'), FORMAT(created_at, 'MMM yyyy')",
+            'sqlite' => "strftime('%Y-%m', created_at)",
+            default => 'DATE_FORMAT(created_at, "%Y-%m")',
+        };
+        $monthOrder = match ($driver) {
+            'sqlsrv' => 'sort_key',
+            'sqlite' => "strftime('%Y-%m', created_at)",
+            default => 'DATE_FORMAT(created_at, "%Y-%m")',
+        };
+
         $monthlyRevenue = DB::table('orders')
-            ->selectRaw('DATE_FORMAT(created_at, "%b %Y") as month, SUM(freight_price) as total')
+            ->selectRaw($monthSelect)
             ->where('company_id', $company->id)
             ->where('status', 'invoiced')
             ->whereBetween('created_at', [$start, $end])
-            ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
-            ->orderBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
+            ->groupBy(DB::raw($monthGroup))
+            ->orderBy($monthOrder)
             ->get();
 
         return [
@@ -95,22 +113,32 @@ class AnalyticsDashboardService
 
         $onTimeRate = $totalDeliveries > 0 ? ($onTimeDeliveries / $totalDeliveries) * 100 : 0;
 
-        // Average processing time in hours
+        // Average processing time in hours (driver-specific: SQL Server DATEDIFF, MySQL TIMESTAMPDIFF, SQLite julianday)
+        $driver = DB::connection()->getDriverName();
+        $diffExpr = match ($driver) {
+            'sqlsrv' => 'AVG(DATEDIFF(HOUR, created_at, delivered_at)) as avg_hours',
+            'sqlite' => 'AVG((julianday(delivered_at) - julianday(created_at)) * 24) as avg_hours',
+            default => 'AVG(TIMESTAMPDIFF(HOUR, created_at, delivered_at)) as avg_hours',
+        };
+
         $avgProcessingTime = DB::table('orders')
             ->where('company_id', $company->id)
             ->where('status', 'delivered')
             ->whereBetween('created_at', [$last30Days, now()])
             ->whereNotNull('delivered_at')
-            ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, delivered_at)) as avg_hours')
+            ->selectRaw($diffExpr)
             ->value('avg_hours') ?? 0;
 
-        // Order status distribution
+        // Order status distribution (Order model statuses)
         $statusLabels = [
-            'pending' => ['label' => 'Beklemede', 'color' => 'warning'],
-            'assigned' => ['label' => 'Atandı', 'color' => 'info'],
-            'in_transit' => ['label' => 'Yolda', 'color' => 'primary'],
-            'delivered' => ['label' => 'Teslim Edildi', 'color' => 'success'],
-            'cancelled' => ['label' => 'İptal', 'color' => 'danger'],
+            'pending' => ['label' => 'Beklemede', 'color' => 'warning', 'chartColor' => 'rgb(245, 158, 11)'],
+            'planned' => ['label' => 'Planlandı', 'color' => 'info', 'chartColor' => 'rgb(55, 117, 168)'],
+            'assigned' => ['label' => 'Atandı', 'color' => 'info', 'chartColor' => 'rgb(55, 117, 168)'],
+            'loaded' => ['label' => 'Yüklendi', 'color' => 'primary', 'chartColor' => 'rgb(61, 105, 206)'],
+            'in_transit' => ['label' => 'Yolda', 'color' => 'primary', 'chartColor' => 'rgb(61, 105, 206)'],
+            'delivered' => ['label' => 'Teslim Edildi', 'color' => 'success', 'chartColor' => 'rgb(45, 139, 111)'],
+            'invoiced' => ['label' => 'Faturalandı', 'color' => 'success', 'chartColor' => 'rgb(45, 139, 111)'],
+            'cancelled' => ['label' => 'İptal', 'color' => 'danger', 'chartColor' => 'rgb(196, 30, 90)'],
         ];
 
         $statusDistribution = DB::table('orders')
@@ -121,12 +149,14 @@ class AnalyticsDashboardService
             ->get();
 
         $statusBreakdown = $statusDistribution->map(function ($item) use ($statusLabels, $totalOrders) {
-            $label = $statusLabels[$item->status] ?? ['label' => ucfirst($item->status), 'color' => 'secondary'];
+            $statusKey = strtolower((string) $item->status);
+            $label = $statusLabels[$statusKey] ?? ['label' => ucfirst($item->status), 'color' => 'secondary', 'chartColor' => 'rgb(107, 114, 128)'];
 
             return [
                 'status' => $item->status,
                 'label' => $label['label'],
                 'color' => $label['color'],
+                'chartColor' => $label['chartColor'],
                 'count' => $item->count,
                 'percentage' => $totalOrders > 0 ? ($item->count / $totalOrders) * 100 : 0,
             ];

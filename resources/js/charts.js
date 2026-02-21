@@ -50,9 +50,21 @@ export function initRevenueChart(canvasId, data) {
 /**
  * Initialize order status distribution pie chart
  */
+const defaultStatusColors = [
+    'rgb(59, 130, 246)',
+    'rgb(245, 158, 11)',
+    'rgb(16, 185, 129)',
+    'rgb(239, 68, 68)',
+    'rgb(107, 114, 128)',
+];
+
 export function initOrderStatusChart(canvasId, data) {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
+
+    const colors = data.colors && data.colors.length === data.values.length
+        ? data.colors
+        : defaultStatusColors;
 
     new Chart(ctx, {
         type: 'doughnut',
@@ -60,13 +72,7 @@ export function initOrderStatusChart(canvasId, data) {
             labels: data.labels,
             datasets: [{
                 data: data.values,
-                backgroundColor: [
-                    'rgb(59, 130, 246)',   // pending - blue
-                    'rgb(245, 158, 11)',   // planned - amber
-                    'rgb(16, 185, 129)',   // delivered - green
-                    'rgb(239, 68, 68)',    // cancelled - red
-                    'rgb(107, 114, 128)',  // other - gray
-                ],
+                backgroundColor: colors,
                 borderWidth: 2,
                 borderColor: '#fff'
             }]

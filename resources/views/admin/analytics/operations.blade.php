@@ -109,21 +109,16 @@
 </div>
 
 @push('scripts')
-<script type="module">
-import { initOrderStatusChart, initDeliveryPerformanceChart } from '/resources/js/charts.js';
-
+<script>
 window.chartData = {
     orderStatus: {
         labels: @json(array_column($kpis['status_breakdown'], 'label')),
-        values: @json(array_column($kpis['status_breakdown'], 'count'))
+        values: @json(array_column($kpis['status_breakdown'], 'count')),
+        colors: @json(array_column($kpis['status_breakdown'], 'chartColor'))
     },
     deliveryPerformance: {{ $kpis['on_time_delivery_rate'] }}
 };
-
-document.addEventListener('DOMContentLoaded', function() {
-    initOrderStatusChart('orderStatusChart', window.chartData.orderStatus);
-    initDeliveryPerformanceChart('deliveryPerformanceChart', window.chartData.deliveryPerformance);
-});
 </script>
+@vite(['resources/js/analytics-charts.js'])
 @endpush
 @endsection

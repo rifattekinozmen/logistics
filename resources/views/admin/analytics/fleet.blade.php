@@ -146,19 +146,14 @@
 </div>
 
 @push('scripts')
-<script type="module">
-import { initVehicleUtilizationChart } from '/resources/js/charts.js';
-
+<script>
 window.chartData = {
     vehicleUtilization: {
         labels: @json(array_column($performance['vehicle_utilization'], 'name')),
         values: @json(array_column($performance['vehicle_utilization'], 'utilization'))
     }
 };
-
-document.addEventListener('DOMContentLoaded', function() {
-    initVehicleUtilizationChart('vehicleUtilizationChart', window.chartData.vehicleUtilization);
-});
 </script>
+@vite(['resources/js/analytics-charts.js'])
 @endpush
 @endsection

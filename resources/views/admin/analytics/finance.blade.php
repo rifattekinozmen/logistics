@@ -100,19 +100,14 @@
 </div>
 
 @push('scripts')
-<script type="module">
-import { initRevenueChart } from '/resources/js/charts.js';
-
+<script>
 window.chartData = {
     revenue: {
         labels: @json(array_column($metrics['monthly_trend'], 'month')),
         values: @json(array_column($metrics['monthly_trend'], 'total'))
     }
 };
-
-document.addEventListener('DOMContentLoaded', function() {
-    initRevenueChart('revenueChart', window.chartData.revenue);
-});
 </script>
+@vite(['resources/js/analytics-charts.js'])
 @endpush
 @endsection

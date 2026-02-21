@@ -9,7 +9,8 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/calendar.css',
                 'resources/js/app.js',
-                'resources/js/calendar.js'
+                'resources/js/calendar.js',
+                'resources/js/analytics-charts.js',
             ],
             refresh: true,
         }),
@@ -41,6 +42,8 @@ export default defineConfig({
     },
     server: {
         host: '127.0.0.1',
+        port: 5173,
+        strictPort: false,
         hmr: {
             host: 'localhost',
         },

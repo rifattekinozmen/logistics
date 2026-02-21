@@ -6,19 +6,36 @@
     <title>@yield('title', 'Logistics')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {{-- Material Symbols: display=block ile ikon adları (shopping_cart vb.) gizlenir; font yüklenene kadar boş alan --}}
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    {{-- Source Sans Pro: non-blocking yükleme --}}
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    {{-- Font subset (400,600,700); preload ile daha hızlı yükleme --}}
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-    {{-- Material Symbols: display=swap ile FOUC azaltılır; ikon alanı inline CSS ile rezerve edilir --}}
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     
     <!-- Critical CSS - ilk paint öncesi layout sabitliği -->
     <style>
         html, body { min-height: 100vh; }
-        .material-symbols-outlined { min-width: 1em; min-height: 1em; }
+        /* Layout shell - app.css gelmeden önce sayfa yapısı sabit */
+        .d-flex { display: flex !important; }
+        .flex-grow-1 { flex: 1 1 0% !important; }
+        .flex-column { flex-direction: column !important; }
+        .min-vh-100 { min-height: 100vh !important; }
+        .position-fixed { position: fixed !important; }
+        .top-0 { top: 0 !important; }
+        .start-0 { left: 0 !important; }
+        .h-100 { height: 100% !important; }
+        .overflow-y-auto { overflow-y: auto !important; }
+        .overflow-hidden { overflow: hidden !important; }
+        .list-unstyled { list-style: none !important; padding-left: 0 !important; margin-bottom: 0 !important; }
+        .material-symbols-outlined { min-width: 1em; min-height: 1em; flex-shrink: 0; }
+        /* Sidebar ikonları (18px) */
+        .material-symbols-outlined[style*="18px"] { min-width: 18px; min-height: 18px; }
+        /* Kart ikonları için (dashboard vb.) */
+        .material-symbols-outlined[style*="1.75rem"] { min-width: 1.75rem; min-height: 1.75rem; }
+        /* 1.25rem ikonlar (butonlar vb.) */
+        .material-symbols-outlined[style*="1.25rem"] { min-width: 1.25rem; min-height: 1.25rem; }
         :root {
             --bs-primary: #3D69CE;
             --bs-primary-200: #DCE8FC;
