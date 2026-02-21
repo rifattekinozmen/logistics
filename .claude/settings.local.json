@@ -12,7 +12,12 @@
       "mcp__laravel-boost__get-absolute-url",
       "mcp__laravel-boost__tinker",
       "mcp__laravel-boost__database-schema",
-      "mcp__laravel-boost__last-error"
+      "mcp__laravel-boost__last-error",
+      "Bash(git stash:*)",
+      "Bash(test:*)",
+      "Bash(cmd /c \"dir C:\\\\Users\\\\TekinOzmen\\\\Desktop\\\\logistics\\\\public\\\\build\\\\assets 2>&1\")",
+      "Bash(cmd /c \"dir C:\\\\Users\\\\TekinOzmen\\\\Desktop\\\\logistics\\\\public\\\\build\\\\ 2>&1\")",
+      "Bash(cmd /c \"findstr /c:\"\"btn-primary\"\" C:\\\\Users\\\\TekinOzmen\\\\Desktop\\\\logistics\\\\public\\\\build\\\\assets\\\\app-A26OHbJB.css | head\")"
     ]
   }
 }

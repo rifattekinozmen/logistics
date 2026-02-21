@@ -48,7 +48,7 @@
             "@php artisan key:generate --ansi"
         ],
         "dev": [
-            "npm run dev"
+            "npm run serve"
         ],
         "build": [
             "npm run build"

@@ -23,9 +23,9 @@ class SecurityHeadersMiddleware
         // Content Security Policy
         $response->headers->set('Content-Security-Policy', implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net unpkg.com",
             "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net fonts.googleapis.com",
-            "font-src 'self' fonts.gstatic.com",
+            "font-src 'self' fonts.gstatic.com data:",
             "img-src 'self' data: https:",
             "connect-src 'self'",
         ]));

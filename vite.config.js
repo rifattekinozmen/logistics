@@ -10,6 +10,9 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    optimizeDeps: {
+        include: ['bootstrap'],
+    },
     build: {
         rollupOptions: {
             output: {
