@@ -296,6 +296,8 @@ class DeliveryImportController extends Controller
      */
     public function veriAnalizRaporu(DeliveryImportBatch $batch, DeliveryReportPivotService $pivotService): View|RedirectResponse
     {
+        $batch->load(['reportRows' => fn ($q) => $q->orderBy('row_index')]);
+
         $pivot = $pivotService->buildMaterialPivot($batch);
         if ($pivot['materials'] === [] && $pivot['rows'] === []) {
             return redirect()->route('admin.delivery-imports.show', $batch)

@@ -56,6 +56,30 @@ class Document extends Model
     }
 
     /**
+     * Alias for category (view compatibility).
+     */
+    public function getTypeAttribute(): string
+    {
+        return $this->category ?? '';
+    }
+
+    /**
+     * Alias for valid_until (view compatibility).
+     */
+    public function getExpiryDateAttribute(): ?\Illuminate\Support\Carbon
+    {
+        return $this->valid_until;
+    }
+
+    /**
+     * Placeholder for view compatibility (documents table has no status column).
+     */
+    public function getStatusAttribute(): int
+    {
+        return 1;
+    }
+
+    /**
      * Get the calendar events for this document.
      */
     public function calendarEvents(): MorphMany

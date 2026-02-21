@@ -1,6 +1,6 @@
 # Session State
 
-**Last updated:** 2026-02-19
+**Last updated:** 2026-02-21
 **Branch:** main
 **Status:** Active development
 
@@ -8,12 +8,17 @@
 
 Delivery import pipeline (DeliveryImportBatch / DeliveryReportPivotService).
 
+Recent completed work (last session):
+- Vite entegrasyonu: layouts.app'e @vite eklendi, CDN Bootstrap kaldırıldı — HMR aktif
+- Document modülü: DocumentFactory, DocumentTest (7 test), controller schema uyumu (category/valid_until)
+- README HMR notu, Development guide TODO referansı, docs/sessions arşiv
+
 Recent completed work (last 5 commits):
+- `DeliveryReportPivotService` eager loading optimization (reportRows N+1 fix)
+- Index on `delivery_report_rows.delivery_import_batch_id` (migration applied)
 - `invoice_status` field on `delivery_import_batches` (pending/created/sent)
 - `petrokok_route_preference` field (ekinciler/isdemir) on `delivery_import_batches`
-- `DeliveryReportPivotService` — company-specific material tracking, BOŞ-DOLU/DOLU-DOLU formulas
 - Pivot view enhancements: material codes, short descriptions, route details
-- Pagination support (10/20 items) in DeliveryImportController
 
 ## Active Areas
 
@@ -22,16 +27,14 @@ Recent completed work (last 5 commits):
 | Delivery | `DeliveryReportPivotService`, `DeliveryImportController` | Active |
 | Finance | `FinanceDashboardService`, `PaymentController` | Stable |
 | Employee | `PersonnelAttendanceController`, `Personel` model | Stable |
-| AI | `AIOperationsService`, `AIFinanceService` | Partial |
+| AI | `AIOperationsService`, `AIFinanceService`, `AIHRService` | Partial |
 
 ## Pending Work (Known TODOs)
 
-- Logo integration (`LogoIntegrationService`) — invoice export to LOGO ERP
 - Python bridge (`PythonBridgeService`) — data pipeline to Python backend
-- AI submodule expansion: AIHRService, AIFleetService, AIDocumentService (stubs in docs, not yet implemented)
+- AI submodule expansion: AIFleetService, AIDocumentService (AIHRService implemented)
 - E-Fatura / E-Arşiv XML export
 - Flutter/React Native mobile app (Faz 2 — not started)
-- Performance indexing on `delivery_report_rows` (large table, batch_id index needed)
 - Queue optimization review
 
 ## Module Status Snapshot
@@ -50,23 +53,22 @@ Recent completed work (last 5 commits):
 | FuelPrice | FuelPrice | FuelPriceController | — | FuelPriceTest |
 | Customer | Customer, FavoriteAddress, OrderTemplate | CustomerController, CustomerPortalController | — | — |
 | Driver | — | DriverController (API) | — | — |
-| Document | Document | DocumentController | — | — |
+| Document | Document | DocumentController | — | DocumentTest |
 | WorkOrder | WorkOrder, ServiceProvider | WorkOrderController | — | — |
 | Shift | ShiftTemplate, ShiftSchedule, ShiftAssignment | ShiftController | — | — |
 | Notification | Notification | NotificationController | — | NotificationTest |
-| AI | AiReport | — | AIService, AIOperationsService, AIFinanceService | — |
+| AI | AiReport | — | AIService, AIOperationsService, AIFinanceService, AIHRService, AIFleetService, AIDocumentService | — |
 | Integration | — | — | LogoIntegrationService, PythonBridgeService | — |
 | Location | Country, City, District, Neighborhood, Location | GeocodingController | GeocodingService | — |
 | Excel | — | — | ExcelImportService, AnalysisService, BillingService, PeriodCalculationService | — |
 
 ## Safe Next Actions
 
-1. Add index on `delivery_report_rows.delivery_import_batch_id` (performance — large table)
-2. Implement `LogoIntegrationService::exportInvoice()` (pending integration)
-3. Expand AI module: add `AIHRService` for personnel analytics
-4. Add missing feature tests for Order and Shipment modules
-5. Optimize `DeliveryReportPivotService` eager loading
+1. Add missing feature tests for Order and Shipment modules (expand coverage)
+2. Implement `AIFleetService` for fleet maintenance prediction
+3. Implement `AIDocumentService` for document analysis
+4. Python bridge (`PythonBridgeService`) — data pipeline integration
 
 ## Session Archive
 
-Previous session summaries: `docs/sessions/` (empty — first structured session)
+Previous session summaries: `docs/sessions/2026-02-21-vite-integration-and-project-gaps.md`

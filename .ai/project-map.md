@@ -9,7 +9,7 @@
 
 ```
 app/
-├── AI/            Jobs/RunAIAnalysisJob, Services/{AIService, AIOperationsService, AIFinanceService}
+├── AI/            Jobs/RunAIAnalysisJob, Services/{AIService, AIOperationsService, AIFinanceService, AIHRService, AIFleetService, AIDocumentService}
 ├── Core/          Middleware/{RoleMiddleware, PermissionMiddleware, ActiveCompanyMiddleware},
 │                  Scopes/CompanyScope, Services/{AuditService, ExportService, GeocodingService}
 ├── Customer/      Controllers/Web/{CustomerController, CustomerPortalController}

@@ -141,7 +141,9 @@ class DeliveryReportPivotService
             }
         }
 
-        $rows = $batch->reportRows()->orderBy('row_index')->get();
+        $rows = $batch->relationLoaded('reportRows')
+            ? $batch->reportRows
+            : $batch->reportRows()->orderBy('row_index')->get();
         $pivotData = [];
         /** @var array<string, array{uy_tanim: string, ad: string}> Malzeme key → ÜY Tanım & Ad bilgisi */
         $materialLocationInfo = [];
@@ -733,7 +735,9 @@ class DeliveryReportPivotService
         $petrokokRoutePref = $batch->petrokok_route_preference ?? 'ekinciler';
         $petrokokRouteKey = $petrokokRoutePref === 'isdemir' ? 'curuf_route' : 'petrokok_route';
 
-        $rows = $batch->reportRows()->orderBy('row_index')->get();
+        $rows = $batch->relationLoaded('reportRows')
+            ? $batch->reportRows
+            : $batch->reportRows()->orderBy('row_index')->get();
 
         /*
          * Satırları firma bazında grupla.
@@ -1420,7 +1424,9 @@ class DeliveryReportPivotService
             ? $groupByDimensionKeys
             : array_values($dimensions);
 
-        $rows = $batch->reportRows()->orderBy('row_index')->get();
+        $rows = $batch->relationLoaded('reportRows')
+            ? $batch->reportRows
+            : $batch->reportRows()->orderBy('row_index')->get();
         $aggregated = [];
 
         foreach ($rows as $row) {
@@ -1501,7 +1507,9 @@ class DeliveryReportPivotService
             return [];
         }
 
-        $rows = $batch->reportRows()->orderBy('row_index')->get();
+        $rows = $batch->relationLoaded('reportRows')
+            ? $batch->reportRows
+            : $batch->reportRows()->orderBy('row_index')->get();
         $lines = [];
 
         foreach ($rows as $row) {

@@ -156,7 +156,7 @@ Execute only step 1.
 
 # SESSION MEMORY MODE
 
-Assume previous work summarized via `/session`.
+Assume previous work summarized via `/session`. When user invokes `/session`, the Cursor command injects `.ai/session.md` — read it for Current Focus, Pending Work, Safe Next Actions.
 
 Do NOT ask user to repeat context.
 

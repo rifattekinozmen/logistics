@@ -122,7 +122,7 @@ LOGO_AUTO_SYNC=false
 ## Geliştirme
 
 ```bash
-# Dev sunucusu (PHP + Vite)
+# Dev sunucusu (PHP + Vite) — CSS/JS değişiklikleri HMR ile anında tarayıcıda yansır
 composer run dev
 
 # Testleri çalıştır
@@ -134,6 +134,8 @@ php artisan test --compact --filter=OrderTest
 # Kod formatını düzelt
 vendor/bin/pint --dirty
 ```
+
+**Tarayıcıda değişiklik görmek:** Geliştirme sırasında `composer run dev` çalıştırın. Bu komut hem PHP sunucusunu hem de Vite dev server'ı (HMR) başlatır; CSS ve JS değişiklikleri sayfa yenilemeden otomatik yansır.
 
 ## Uygulama Yapısı
 

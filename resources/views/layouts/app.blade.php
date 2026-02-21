@@ -6,18 +6,19 @@
     <title>@yield('title', 'Logistics')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     {{-- Font subset (400,600,700); preload ile daha hızlı yükleme --}}
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-    {{-- Material Symbols: blocking yükleme ile ikonlar hemen görünür (flash-of-unstyled-icon önlenir) --}}
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    {{-- Material Symbols: display=swap ile FOUC azaltılır; ikon alanı inline CSS ile rezerve edilir --}}
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     
-    <!-- Custom Styles -->
+    <!-- Critical CSS - ilk paint öncesi layout sabitliği -->
     <style>
+        html, body { min-height: 100vh; }
+        .material-symbols-outlined { min-width: 1em; min-height: 1em; }
         :root {
             --bs-primary: #3D69CE;
             --bs-primary-200: #DCE8FC;
@@ -180,9 +181,6 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    
     @stack('scripts')
     <script>
         // Sidebar toggle for mobile

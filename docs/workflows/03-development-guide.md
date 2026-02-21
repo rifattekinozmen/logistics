@@ -255,6 +255,8 @@ AI/
 
 ## MASTER TODO LİSTESİ
 
+> **Not:** Bu liste referans amaçlıdır. Güncel proje durumu ve tamamlanan görevler için [docs/ROADMAP.md](../ROADMAP.md) dosyasına bakın. Proje %95+ tamamlanmış, production ready durumdadır.
+
 ### 1. PROJE TEMEL KURULUMU
 - [ ] Laravel 12 kurulumu ve yapılandırması
 - [ ] MSSQL bağlantı yapılandırması

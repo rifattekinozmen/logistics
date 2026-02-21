@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "bootstrap/dist/css/bootstrap.min.css";
 
 /* Cemiloğlu logo paleti: #3D69CE (primary), #3D69CE -200, kırmızı -200 soft */
 @theme {

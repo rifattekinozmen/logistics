@@ -341,7 +341,7 @@ class CompleteTestDataSeeder extends Seeder
                 Document::factory()->create([
                     'documentable_type' => Order::class,
                     'documentable_id' => $order->id,
-                    'document_type' => $documentTypes[array_rand($documentTypes)],
+                    'category' => $documentTypes[array_rand($documentTypes)],
                     'uploaded_by' => $this->users[array_rand($this->users)]->id ?? null,
                     'created_at' => $order->created_at->copy()->addHours(rand(1, 48)),
                 ]);

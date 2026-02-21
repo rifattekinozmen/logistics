@@ -14,14 +14,13 @@ class DocumentController extends Controller
      */
     public function index(Request $request): View
     {
-        $filters = $request->only(['type', 'documentable_type', 'status', 'expiry_date_from', 'expiry_date_to']);
+        $filters = $request->only(['type', 'documentable_type', 'expiry_date_from', 'expiry_date_to']);
         $documents = \App\Models\Document::query()
-            ->when($filters['type'] ?? null, fn ($q, $type) => $q->where('type', $type))
+            ->when($filters['type'] ?? null, fn ($q, $type) => $q->where('category', $type))
             ->when($filters['documentable_type'] ?? null, fn ($q, $type) => $q->where('documentable_type', $type))
-            ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
-            ->when($filters['expiry_date_from'] ?? null, fn ($q, $date) => $q->whereDate('expiry_date', '>=', $date))
-            ->when($filters['expiry_date_to'] ?? null, fn ($q, $date) => $q->whereDate('expiry_date', '<=', $date))
-            ->orderBy('expiry_date', 'asc')
+            ->when($filters['expiry_date_from'] ?? null, fn ($q, $date) => $q->whereDate('valid_until', '>=', $date))
+            ->when($filters['expiry_date_to'] ?? null, fn ($q, $date) => $q->whereDate('valid_until', '<=', $date))
+            ->orderBy('valid_until', 'asc')
             ->paginate(25);
 
         return view('admin.documents.index', compact('documents'));
@@ -54,7 +53,14 @@ class DocumentController extends Controller
             'status' => 'required|integer|in:0,1',
         ]);
 
-        $document = \App\Models\Document::create($validated);
+        $document = \App\Models\Document::create([
+            'documentable_type' => $validated['documentable_type'],
+            'documentable_id' => $validated['documentable_id'],
+            'category' => $validated['type'],
+            'name' => $validated['name'],
+            'file_path' => $validated['file_path'],
+            'valid_until' => $validated['expiry_date'] ?? null,
+        ]);
 
         return redirect()->route('admin.documents.show', $document)
             ->with('success', 'Belge başarıyla oluşturuldu.');
@@ -95,7 +101,12 @@ class DocumentController extends Controller
             'status' => 'required|integer|in:0,1',
         ]);
 
-        $document->update($validated);
+        $document->update([
+            'category' => $validated['type'],
+            'name' => $validated['name'],
+            'file_path' => $validated['file_path'],
+            'valid_until' => $validated['expiry_date'] ?? null,
+        ]);
 
         return redirect()->route('admin.documents.show', $document)
             ->with('success', 'Belge başarıyla güncellendi.');
