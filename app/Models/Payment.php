@@ -17,8 +17,11 @@ class Payment extends Model
      * Status constants
      */
     public const STATUS_PENDING = 0;
+
     public const STATUS_PAID = 1;
+
     public const STATUS_OVERDUE = 2;
+
     public const STATUS_CANCELLED = 3;
 
     protected $fillable = [

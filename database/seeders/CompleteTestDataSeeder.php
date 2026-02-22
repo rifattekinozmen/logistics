@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\Warehouse;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -110,7 +111,7 @@ class CompleteTestDataSeeder extends Seeder
                     ]
                 );
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             if ($this->command) {
                 $this->command->error('Hata: '.$e->getMessage());

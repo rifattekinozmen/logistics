@@ -39,7 +39,7 @@ class DocumentObserver
     {
         if ($document->isDirty('valid_until') && $document->valid_until) {
             $existingEvent = $document->calendarEvents()->first();
-            
+
             if ($existingEvent) {
                 $this->calendarService->updateEvent($existingEvent, [
                     'start_date' => $document->valid_until,

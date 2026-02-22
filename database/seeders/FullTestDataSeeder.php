@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use const STR_PAD_LEFT;
+
 use App\BusinessPartner\Models\BusinessPartner;
 use App\Models\Advance;
 use App\Models\Branch;
@@ -25,8 +27,6 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-
-use const STR_PAD_LEFT;
 
 class FullTestDataSeeder extends Seeder
 {

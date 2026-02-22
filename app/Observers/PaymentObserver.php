@@ -28,7 +28,7 @@ class PaymentObserver
     {
         if ($payment->isDirty('due_date') && $payment->due_date) {
             $existingEvent = $payment->calendarEvents()->first();
-            
+
             if ($existingEvent) {
                 $this->calendarService->updateEvent($existingEvent, [
                     'start_date' => $payment->due_date,
