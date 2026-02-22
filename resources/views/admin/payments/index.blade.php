@@ -82,7 +82,7 @@
                 @forelse($payments as $payment)
                 <tr>
                     <td class="align-middle">
-                        <span class="fw-bold text-dark">{{ $payment->company->name ?? '-' }}</span>
+                        <span class="fw-bold text-dark">{{ $payment->company?->name ?? '-' }}</span>
                     </td>
                     <td class="align-middle">
                         <small class="text-secondary">{{ $payment->payment_type ?? '-' }}</small>

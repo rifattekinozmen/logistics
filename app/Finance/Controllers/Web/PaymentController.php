@@ -4,6 +4,7 @@ namespace App\Finance\Controllers\Web;
 
 use App\Core\Services\ExportService;
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -28,6 +29,9 @@ class PaymentController extends Controller
         }
 
         $payments = $this->buildQuery($filters)->paginate(25);
+        $payments->getCollection()->loadMorph('related', [
+            Customer::class => ['businessPartner.company'],
+        ]);
 
         return view('admin.payments.index', compact('payments'));
     }
@@ -62,7 +66,7 @@ class PaymentController extends Controller
 
     protected function buildQuery(array $filters): \Illuminate\Database\Eloquent\Builder
     {
-        $query = \App\Models\Payment::query()->with(['related.businessPartner.company']);
+        $query = \App\Models\Payment::query()->with('related');
         $query->when($filters['type'] ?? null, fn ($q, $type) => $q->where('payment_type', $type));
         $query->when($filters['status'] ?? null, function ($q, $status) {
             $statusMap = ['pending' => 0, 'paid' => 1, 'overdue' => 2, 'cancelled' => 3];
@@ -112,7 +116,10 @@ class PaymentController extends Controller
      */
     public function show(int $id): View
     {
-        $payment = \App\Models\Payment::with(['related.businessPartner.company'])->findOrFail($id);
+        $payment = \App\Models\Payment::with('related')->findOrFail($id);
+        $payment->loadMorph('related', [
+            Customer::class => ['businessPartner.company'],
+        ]);
 
         return view('admin.payments.show', compact('payment'));
     }

@@ -33,6 +33,8 @@ class CalendarController extends Controller
         $end = $request->input('end');
 
         if ($start && $end) {
+            $start = str_replace(' ', '+', $start);
+            $end = str_replace(' ', '+', $end);
             $startDate = Carbon::parse($start);
             $endDate = Carbon::parse($end);
             $events = $this->calendarService->getEventsBetweenDates($startDate, $endDate);
