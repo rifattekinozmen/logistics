@@ -31,6 +31,3 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('personel', PersonelController::class);
 });
-
-// Admin routes
-require __DIR__.'/admin.php';

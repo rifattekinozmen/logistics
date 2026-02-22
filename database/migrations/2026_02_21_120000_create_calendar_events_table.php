@@ -25,7 +25,7 @@ return new class extends Migration
                 'inspection',
                 'other',
             ]);
-            
+
             // Polymorphic relationship
             $table->string('related_type')->nullable();
             $table->bigInteger('related_id')->nullable();

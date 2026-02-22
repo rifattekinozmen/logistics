@@ -9,7 +9,8 @@ class PaymentObserver
 {
     public function __construct(
         protected CalendarService $calendarService
-    ) {}
+    ) {
+    }
 
     /**
      * Handle the Payment "created" event.

@@ -280,7 +280,7 @@ class FullTestDataSeeder extends Seeder
             $status = $this->weightedRandom($statuses, $weights);
 
             $deliveredAt = null;
-            if (in_array($status, ['delivered', 'invoiced'])) {
+            if (in_array($status, ['delivered', 'invoiced'], true)) {
                 $deliveredAt = $createdAt->copy()->addHours(rand(24, 168));
             }
 
@@ -374,7 +374,7 @@ class FullTestDataSeeder extends Seeder
             $count = rand(1, 3);
             for ($i = 0; $i < $count; $i++) {
                 $status = $statuses[array_rand($statuses)];
-                $startedAt = in_array($status, ['in_progress', 'completed'])
+                $startedAt = in_array($status, ['in_progress', 'completed'], true)
                     ? Carbon::now()->subDays(rand(1, 30))
                     : null;
                 $completedAt = $status === 'completed'
@@ -466,7 +466,7 @@ class FullTestDataSeeder extends Seeder
                     'amount' => rand(1000, 5000),
                     'reason' => fake()->sentence(),
                     'requested_date' => Carbon::now()->subDays(rand(5, 30)),
-                    'approved_at' => in_array($status, ['approved', 'paid']) ? Carbon::now()->subDays(rand(1, 20)) : null,
+                    'approved_at' => in_array($status, ['approved', 'paid'], true) ? Carbon::now()->subDays(rand(1, 20)) : null,
                     'payment_date' => $status === 'paid' ? Carbon::now()->subDays(rand(1, 15)) : null,
                     'status' => $status,
                 ]);

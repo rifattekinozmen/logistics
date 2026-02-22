@@ -2,7 +2,6 @@
 
 namespace App\AI\Jobs;
 
-use App\AI\Services\AIDocumentService;
 use App\AI\Services\AIFinanceService;
 use App\AI\Services\AIFleetService;
 use App\AI\Services\AIHRService;
@@ -31,7 +30,8 @@ class RunAIAnalysisJob implements ShouldQueue
      */
     public function __construct(
         protected ?Company $company = null
-    ) {}
+    ) {
+    }
 
     /**
      * Execute the job.

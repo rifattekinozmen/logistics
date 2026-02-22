@@ -13,7 +13,9 @@ class Payment extends Model
 {
     use HasFactory, SoftDeletes;
 
-    // Status constants
+    /**
+     * Status constants
+     */
     public const STATUS_PENDING = 0;
     public const STATUS_PAID = 1;
     public const STATUS_OVERDUE = 2;

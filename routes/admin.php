@@ -16,6 +16,7 @@ use App\Employee\Controllers\Web\PersonnelAttendanceController;
 use App\Finance\Controllers\Web\PaymentController;
 use App\Finance\Services\FinanceDashboardService;
 use App\FuelPrice\Controllers\Web\FuelPriceController;
+use App\Http\Controllers\Admin\CalendarController;
 use App\Notification\Controllers\Web\NotificationController;
 use App\Order\Controllers\Web\OrderController;
 use App\Order\Services\OperationsPerformanceService;
@@ -25,7 +26,6 @@ use App\Shipment\Controllers\Web\ShipmentController;
 use App\Vehicle\Controllers\Web\VehicleController;
 use App\Warehouse\Controllers\Web\WarehouseController;
 use App\WorkOrder\Controllers\Web\WorkOrderController;
-use App\Http\Controllers\Admin\CalendarController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 

@@ -5,7 +5,6 @@ namespace App\AI\Services;
 use App\Models\FuelPrice;
 use App\Models\Vehicle;
 use App\Models\VehicleInspection;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 

@@ -271,7 +271,7 @@ class CompleteTestDataSeeder extends Seeder
             $status = $this->weightedRandom($statuses, $statusWeights);
 
             $deliveredAt = null;
-            if (in_array($status, ['delivered', 'invoiced'])) {
+            if (in_array($status, ['delivered', 'invoiced'], true)) {
                 $deliveredAt = $createdAt->copy()->addHours(rand(24, 168));
             }
 

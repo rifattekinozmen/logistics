@@ -6,6 +6,7 @@ use App\Mail\PaymentDueReminderMail;
 use App\Models\Notification;
 use App\Models\Payment;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -133,7 +134,7 @@ class CheckPaymentDueCommand extends Command
 
                 $status = $isOverdue ? 'overdue' : "{$daysUntil} days";
                 $this->info("Email sent to {$adminEmail} for {$status} reminder.");
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error("Failed to send email: {$e->getMessage()}");
             }
         }

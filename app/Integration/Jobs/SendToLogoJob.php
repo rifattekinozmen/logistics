@@ -25,7 +25,8 @@ class SendToLogoJob implements ShouldQueue
     public function __construct(
         protected array $invoiceData,
         protected Company $company
-    ) {}
+    ) {
+    }
 
     /**
      * Execute the job.
@@ -35,7 +36,7 @@ class SendToLogoJob implements ShouldQueue
         try {
             $payment = \App\Models\Payment::find($this->invoiceData['payment_id'] ?? null);
             
-            if (!$payment) {
+            if (! $payment) {
                 throw new Exception('Payment not found for LOGO export');
             }
 

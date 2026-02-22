@@ -17,7 +17,8 @@ class DocumentExpiryReminderMail extends Mailable
     public function __construct(
         public Collection $documents,
         public int $daysUntil
-    ) {}
+    ) {
+    }
 
     public function envelope(): Envelope
     {

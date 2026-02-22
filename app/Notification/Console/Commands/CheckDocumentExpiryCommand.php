@@ -6,6 +6,7 @@ use App\Mail\DocumentExpiryReminderMail;
 use App\Models\Document;
 use App\Models\Notification;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -113,7 +114,7 @@ class CheckDocumentExpiryCommand extends Command
                     ->send(new DocumentExpiryReminderMail($documents, $daysUntil));
 
                 $this->info("Email sent to {$adminEmail} for {$daysUntil} days reminder.");
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error("Failed to send email: {$e->getMessage()}");
             }
         }

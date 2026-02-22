@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleDamage;
-use App\Models\VehicleInspection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
