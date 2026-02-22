@@ -5,7 +5,6 @@ namespace App\Notification\Console\Commands;
 use App\Mail\DocumentExpiryReminderMail;
 use App\Models\Document;
 use App\Models\Notification;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;

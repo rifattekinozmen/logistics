@@ -5,7 +5,6 @@ namespace App\Notification\Console\Commands;
 use App\Mail\PaymentDueReminderMail;
 use App\Models\Notification;
 use App\Models\Payment;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -94,8 +93,8 @@ class CheckPaymentDueCommand extends Command
         };
 
         $message = $daysUntil <= 0
-            ? "Ödeme vadesi doldu: {$payment->description} - ".number_format($payment->amount, 2)." TL"
-            : "Ödeme {$daysUntil} gün içinde yapılmalı: {$payment->description} - ".number_format($payment->amount, 2)." TL";
+            ? "Ödeme vadesi doldu: {$payment->description} - ".number_format($payment->amount, 2).' TL'
+            : "Ödeme {$daysUntil} gün içinde yapılmalı: {$payment->description} - ".number_format($payment->amount, 2).' TL';
 
         Notification::create([
             'user_id' => $payment->created_by,
