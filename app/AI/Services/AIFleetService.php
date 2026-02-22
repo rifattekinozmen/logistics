@@ -5,8 +5,8 @@ namespace App\AI\Services;
 use App\Models\FuelPrice;
 use App\Models\Vehicle;
 use App\Models\VehicleInspection;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AIFleetService
 {
@@ -75,7 +75,7 @@ class AIFleetService
         $totalCost = 0.0;
         $averageConsumption = 0.0;
 
-        if (\Illuminate\Support\Facades\Schema::hasTable('fuel_records')) {
+        if (Schema::hasTable('fuel_records')) {
             $fuelRecords = DB::table('fuel_records')
                 ->where('vehicle_id', $vehicle->id)
                 ->whereBetween('created_at', [now()->subMonths($months), now()])

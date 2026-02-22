@@ -17,6 +17,7 @@ use App\Models\Vehicle;
 use App\Models\Warehouse;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class CompleteTestDataSeeder extends Seeder
@@ -451,7 +452,7 @@ class CompleteTestDataSeeder extends Seeder
         foreach ($this->users as $user) {
             for ($i = 0; $i < rand(3, 10); $i++) {
                 DB::table('notifications')->insert([
-                    'id' => \Illuminate\Support\Str::uuid(),
+                    'id' => Str::uuid(),
                     'type' => 'App\Notifications\OrderStatusChanged',
                     'notifiable_type' => User::class,
                     'notifiable_id' => $user->id,
