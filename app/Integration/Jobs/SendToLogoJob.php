@@ -4,6 +4,7 @@ namespace App\Integration\Jobs;
 
 use App\Integration\Services\LogoIntegrationService;
 use App\Models\Company;
+use App\Models\Payment;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -25,8 +26,7 @@ class SendToLogoJob implements ShouldQueue
     public function __construct(
         protected array $invoiceData,
         protected Company $company
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -34,8 +34,8 @@ class SendToLogoJob implements ShouldQueue
     public function handle(LogoIntegrationService $logoService): void
     {
         try {
-            $payment = \App\Models\Payment::find($this->invoiceData['payment_id'] ?? null);
-            
+            $payment = Payment::find($this->invoiceData['payment_id'] ?? null);
+
             if (! $payment) {
                 throw new Exception('Payment not found for LOGO export');
             }

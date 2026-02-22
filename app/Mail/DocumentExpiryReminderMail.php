@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\Models\Document;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -17,8 +16,7 @@ class DocumentExpiryReminderMail extends Mailable
     public function __construct(
         public Collection $documents,
         public int $daysUntil
-    ) {
-    }
+    ) {}
 
     public function envelope(): Envelope
     {

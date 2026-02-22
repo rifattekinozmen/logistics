@@ -9,8 +9,7 @@ class DocumentObserver
 {
     public function __construct(
         protected CalendarService $calendarService
-    ) {
-    }
+    ) {}
 
     /**
      * Handle the Document "created" event.

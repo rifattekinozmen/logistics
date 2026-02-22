@@ -30,8 +30,7 @@ class RunAIAnalysisJob implements ShouldQueue
      */
     public function __construct(
         protected ?Company $company = null
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
