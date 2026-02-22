@@ -19,7 +19,7 @@
         <p class="text-secondary mb-0">Tüm personeli görüntüleyin ve yönetin</p>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('personel.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
+        <a href="{{ route('admin.personnel.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
             <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
             Yeni Personel
         </a>
@@ -27,7 +27,7 @@
 </div>
 
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
-    <form method="GET" action="{{ route('personel.index') }}" class="row g-3">
+    <form method="GET" action="{{ route('admin.personnel.index') }}" class="row g-3">
         <div class="col-md-3">
             <label class="form-label small fw-semibold text-dark">Durum</label>
             <select name="aktif" class="form-select">
@@ -97,13 +97,13 @@
                     </td>
                     <td class="align-middle text-end">
                         <div class="d-flex align-items-center justify-content-end gap-2">
-                            <a href="{{ route('personel.show', $personel->id) }}" class="btn btn-sm bg-info-200 text-info border-0 hover:bg-info hover:text-white transition-all" title="Görüntüle">
+                            <a href="{{ route('admin.personnel.show', $personel->id) }}" class="btn btn-sm bg-info-200 text-info border-0 hover:bg-info hover:text-white transition-all" title="Görüntüle">
                                 <span class="material-symbols-outlined" style="font-size: 1rem;">visibility</span>
                             </a>
-                            <a href="{{ route('personel.edit', $personel->id) }}" class="btn btn-sm bg-primary-200 text-primary border-0 hover:bg-primary hover:text-white transition-all" title="Düzenle">
+                            <a href="{{ route('admin.personnel.edit', $personel->id) }}" class="btn btn-sm bg-primary-200 text-primary border-0 hover:bg-primary hover:text-white transition-all" title="Düzenle">
                                 <span class="material-symbols-outlined" style="font-size: 1rem;">edit</span>
                             </a>
-                            <form action="{{ route('personel.destroy', $personel->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu personeli silmek istediğinize emin misiniz?');">
+                            <form action="{{ route('admin.personnel.destroy', $personel->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu personeli silmek istediğinize emin misiniz?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm bg-danger-200 text-danger border-0 hover:bg-danger hover:text-white transition-all" title="Sil">
@@ -119,7 +119,7 @@
                         <div class="d-flex flex-column align-items-center gap-2">
                             <span class="material-symbols-outlined text-secondary" style="font-size: 3rem;">groups</span>
                             <p class="text-secondary mb-0">Henüz personel bulunmuyor.</p>
-                            <a href="{{ route('personel.create') }}" class="btn btn-primary btn-sm mt-2">İlk Personeli Ekle</a>
+                            <a href="{{ route('admin.personnel.create') }}" class="btn btn-primary btn-sm mt-2">İlk Personeli Ekle</a>
                         </div>
                     </td>
                 </tr>

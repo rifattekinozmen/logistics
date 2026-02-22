@@ -560,6 +560,17 @@
                 </div>
                 <div class="row g-3">
                     <div class="col-md-6 col-lg-4 col-xl-3">
+                        <a href="{{ route('identity.form') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none transition-all hover:shadow-md position-relative overflow-hidden bg-primary-200 border-primary h-100" style="border-color: rgba(61, 105, 206, 0.12) !important;">
+                            <div class="rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--bs-primary-200), var(--bs-primary-red-200));">
+                                <span class="material-symbols-outlined text-primary">verified_user</span>
+                            </div>
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <p class="small fw-bold text-dark mb-0">Kimlik Doğrulama</p>
+                                <p class="small text-secondary mb-0">MERNİS entegrasyonu</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-4 col-xl-3">
                         <a href="{{ route('admin.orders.create') }}" class="d-flex align-items-center gap-3 p-3 rounded-2xl border text-decoration-none transition-all hover:shadow-md position-relative overflow-hidden bg-primary-200 border-primary h-100" style="border-color: rgba(61, 105, 206, 0.12) !important;">
                             <div class="rounded-3xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--bs-primary-200), var(--bs-primary-red-200));">
                                 <span class="material-symbols-outlined text-primary">add_shopping_cart</span>

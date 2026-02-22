@@ -40,7 +40,7 @@ class PersonnelAttendanceController extends Controller
             'csrfToken' => csrf_token(),
         ];
 
-        return view('admin.attendance.index', [
+        return view('admin.personnel-attendance.index', [
             'month' => $month,
             'daysInMonth' => $daysInMonth,
             'personnelData' => $personnelData,

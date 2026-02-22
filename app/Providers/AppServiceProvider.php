@@ -34,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Route::bind('personnel', fn (string $value) => \App\Models\Personel::findOrFail($value));
+
         Paginator::useBootstrapFive();
 
         $this->commands([
@@ -99,6 +101,7 @@ class AppServiceProvider extends ServiceProvider
             'work-orders' => 'İş Emirleri & Bakım',
             'fuel-prices' => 'Motorin Fiyat',
             'employees' => 'Personel',
+            'personnel' => 'Personel (Kimlik)',
             'personnel_attendance' => 'Puantaj',
             'shifts' => 'Vardiyalar',
             'leaves' => 'İzinler',

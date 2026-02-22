@@ -110,7 +110,8 @@
                             <a href="{{ route('admin.customers.edit', $customer->id) }}" class="btn btn-sm bg-primary-200 text-primary border-0 hover:bg-primary hover:text-white transition-all" title="Düzenle">
                                 <span class="material-symbols-outlined" style="font-size: 1rem;">edit</span>
                             </a>
-                            <form action="{{ route('admin.customers.destroy', $customer->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu müşteriyi silmek istediğinize emin misiniz?');">
+                            <form action="{{ route('admin.customers.destroy', $customer) }}" method="POST" class="d-inline delete-form"
+                                data-confirm="{{ $customer->name }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm bg-danger-200 text-danger border-0 hover:bg-danger hover:text-white transition-all" title="Sil">
@@ -122,12 +123,14 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center py-5">
-                        <div class="d-flex flex-column align-items-center gap-2">
-                            <span class="material-symbols-outlined text-secondary" style="font-size: 3rem;">people</span>
-                            <p class="text-secondary mb-0">Henüz müşteri bulunmuyor.</p>
-                            <a href="{{ route('admin.customers.create') }}" class="btn btn-customers btn-sm mt-2">İlk Müşteriyi Oluştur</a>
-                        </div>
+                    <td colspan="7" class="text-center p-0">
+                        <x-empty-state
+                            icon="group"
+                            title="Henüz müşteri bulunmuyor"
+                            message="Yeni bir müşteri ekleyerek başlayın."
+                            actionText="İlk Müşteriyi Oluştur"
+                            :actionUrl="route('admin.customers.create')"
+                        />
                     </td>
                 </tr>
                 @endforelse
@@ -140,4 +143,19 @@
     </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+document.querySelectorAll('.delete-form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var f = form;
+        showDeleteConfirm({
+            name: f.dataset.confirm,
+            onConfirm: function() { f.submit(); }
+        });
+    });
+});
+</script>
+@endpush
 @endsection

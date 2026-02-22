@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Employee\Controllers\Web;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePersonelRequest;
 use App\Http\Requests\UpdatePersonelRequest;
 use App\Models\Personel;
@@ -32,7 +33,7 @@ class PersonelController extends Controller
 
         $personels = $query->latest()->paginate(15);
 
-        return view('personel.index', compact('personels'));
+        return view('admin.personnel.index', compact('personels'));
     }
 
     /**
@@ -40,7 +41,7 @@ class PersonelController extends Controller
      */
     public function create(): View
     {
-        return view('personel.create');
+        return view('admin.personnel.create');
     }
 
     /**
@@ -50,45 +51,45 @@ class PersonelController extends Controller
     {
         Personel::create($request->validated());
 
-        return redirect()->route('personel.index')
+        return redirect()->route('admin.personnel.index')
             ->with('success', 'Personel başarıyla oluşturuldu.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Personel $personel): View
+    public function show(Personel $personnel): View
     {
-        return view('personel.show', compact('personel'));
+        return view('admin.personnel.show', compact('personnel'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Personel $personel): View
+    public function edit(Personel $personnel): View
     {
-        return view('personel.edit', compact('personel'));
+        return view('admin.personnel.edit', compact('personnel'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePersonelRequest $request, Personel $personel): RedirectResponse
+    public function update(UpdatePersonelRequest $request, Personel $personnel): RedirectResponse
     {
-        $personel->update($request->validated());
+        $personnel->update($request->validated());
 
-        return redirect()->route('personel.index')
+        return redirect()->route('admin.personnel.index')
             ->with('success', 'Personel başarıyla güncellendi.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Personel $personel): RedirectResponse
+    public function destroy(Personel $personnel): RedirectResponse
     {
-        $personel->delete();
+        $personnel->delete();
 
-        return redirect()->route('personel.index')
+        return redirect()->route('admin.personnel.index')
             ->with('success', 'Personel başarıyla silindi.');
     }
 }

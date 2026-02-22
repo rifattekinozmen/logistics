@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Müşteri Portalı - Logistics')</title>
     
     <!-- Bootstrap CSS -->
@@ -64,24 +65,13 @@
 
             <!-- Page Content -->
             <main class="flex-grow-1 p-4 p-lg-5">
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show rounded-3xl shadow-sm border-0 mb-4" role="alert">
-                        <span class="material-symbols-outlined align-middle me-2">check_circle</span>
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-                @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show rounded-3xl shadow-sm border-0 mb-4" role="alert">
-                        <span class="material-symbols-outlined align-middle me-2">error</span>
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
                 @yield('content')
             </main>
         </div>
     </div>
+
+    @include('components.delete-modal')
+    @include('components.toast')
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

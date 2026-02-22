@@ -26,7 +26,7 @@ class UpdatePersonelRequest extends FormRequest
             'ad_soyad' => ['required', 'string', 'max:255'],
             'tckn' => ['nullable', 'string', 'size:11', 'regex:/^[0-9]+$/'],
             'kimlik_seri_no' => ['nullable', 'string', 'max:50'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('personels')->ignore($this->personel)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('personels')->ignore($this->route('personnel'))],
             'telefon' => ['nullable', 'string', 'max:20'],
             'mobil_telefon' => ['nullable', 'string', 'max:20'],
             'acil_iletisim' => ['nullable', 'string', 'max:20'],

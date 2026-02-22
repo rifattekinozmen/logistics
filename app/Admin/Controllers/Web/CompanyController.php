@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Admin\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateCompanyGeneralRequest;
@@ -507,7 +507,7 @@ class CompanyController extends Controller
         try {
             Cache::tags(["company:{$company->id}"])->forget('settings');
         } catch (BadMethodCallException $e) {
-            // Cache store tagging desteklemiyorsa, direkt forget yap
+            // Cache store tagging desteklenmiyorsa, direkt forget yap
             Cache::forget("company:{$company->id}:settings");
         }
 

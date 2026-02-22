@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Admin\Controllers\Web;
 
 use App\Core\Services\CalendarService;
 use App\Http\Controllers\Controller;
@@ -16,17 +16,11 @@ class CalendarController extends Controller
         protected CalendarService $calendarService
     ) {}
 
-    /**
-     * Display the calendar view.
-     */
     public function index(): View
     {
         return view('admin.calendar.index');
     }
 
-    /**
-     * Get calendar events (API for FullCalendar.js).
-     */
     public function getEvents(Request $request): JsonResponse
     {
         $start = $request->input('start');
@@ -47,9 +41,6 @@ class CalendarController extends Controller
         return response()->json($events);
     }
 
-    /**
-     * Store a new calendar event.
-     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -70,9 +61,6 @@ class CalendarController extends Controller
         return response()->json($event, 201);
     }
 
-    /**
-     * Display the specified calendar event.
-     */
     public function show(CalendarEvent $event): JsonResponse
     {
         $event->load(['related', 'creator']);
@@ -80,9 +68,6 @@ class CalendarController extends Controller
         return response()->json($event);
     }
 
-    /**
-     * Update the specified calendar event.
-     */
     public function update(Request $request, CalendarEvent $event): JsonResponse
     {
         $validated = $request->validate([
@@ -104,9 +89,6 @@ class CalendarController extends Controller
         return response()->json($event);
     }
 
-    /**
-     * Remove the specified calendar event.
-     */
     public function destroy(CalendarEvent $event): JsonResponse
     {
         $this->calendarService->deleteEvent($event);

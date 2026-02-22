@@ -20,54 +20,33 @@
 
         <div class="row g-4">
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">Müşteri Adı <span class="text-danger">*</span></label>
-                <input type="text" name="name" value="{{ old('name') }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('name') is-invalid border-danger @enderror" required>
-                @error('name')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <x-form.input name="name" label="Müşteri Adı" :value="old('name')" required />
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">E-posta</label>
-                <input type="email" name="email" value="{{ old('email') }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('email') is-invalid border-danger @enderror">
-                @error('email')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <x-form.input name="email" type="email" label="E-posta" :value="old('email')" />
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">Telefon</label>
-                <input type="text" name="phone" value="{{ old('phone') }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('phone') is-invalid border-danger @enderror">
-                @error('phone')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <x-form.input name="phone" label="Telefon" :value="old('phone')" />
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">Vergi Numarası</label>
-                <input type="text" name="tax_number" value="{{ old('tax_number') }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('tax_number') is-invalid border-danger @enderror">
-                @error('tax_number')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <x-form.input name="tax_number" label="Vergi Numarası" :value="old('tax_number')" />
             </div>
 
             <div class="col-md-12">
-                <label class="form-label fw-semibold text-dark">Adres</label>
-                <textarea name="address" class="form-control border-info-200 focus:border-info focus:ring-info @error('address') is-invalid border-danger @enderror" rows="3">{{ old('address') }}</textarea>
-                @error('address')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <x-form.textarea name="address" label="Adres" :value="old('address')" :rows="3" />
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">Durum <span class="text-danger">*</span></label>
-                <select name="status" class="form-select border-info-200 focus:border-info focus:ring-info @error('status') is-invalid border-danger @enderror" required>
-                    <option value="1" {{ old('status', '1') == '1' ? 'selected' : '' }}>Aktif</option>
-                    <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Pasif</option>
-                </select>
-                @error('status')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <x-form.select
+                    name="status"
+                    label="Durum"
+                    :options="[1 => 'Aktif', 0 => 'Pasif']"
+                    :value="old('status', 1)"
+                    required
+                />
             </div>
         </div>
 

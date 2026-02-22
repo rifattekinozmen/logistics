@@ -126,7 +126,7 @@
                 </li>
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('employee.view'))
                 <li class="mb-1">
-                    <a href="{{ route('personel.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('personel.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                    <a href="{{ route('admin.personnel.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.personnel.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">groups</span>
                         <span class="fw-semibold" style="font-size: 14px;">Personel</span>
                     </a>
