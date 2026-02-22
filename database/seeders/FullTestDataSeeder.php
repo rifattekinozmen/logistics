@@ -22,6 +22,7 @@ use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Pricing\Models\PricingCondition;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -60,7 +61,7 @@ class FullTestDataSeeder extends Seeder
         try {
             $this->company = Company::where('name', 'Ana Şirket')->first();
 
-            if (! $this->company) {
+            if (!$this->company) {
                 if ($this->command) {
                     $this->command->error('Ana Şirket bulunamadı.');
                 }
@@ -81,7 +82,7 @@ class FullTestDataSeeder extends Seeder
             DB::commit();
 
             $this->showSummary();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             if ($this->command) {
                 $this->command->error('Hata: '.$e->getMessage());
@@ -440,7 +441,7 @@ class FullTestDataSeeder extends Seeder
                         $totalHours = $checkIn->diffInMinutes($checkOut) / 60;
 
                         $key = $employee->id.'_'.$date->format('Y-m-d');
-                        if (! isset($attendanceRecords[$key]) && isset($this->employeeToPersonelMap[$employee->id])) {
+                        if (!isset($attendanceRecords[$key]) && isset($this->employeeToPersonelMap[$employee->id])) {
                             PersonnelAttendance::create([
                                 'employee_id' => $employee->id,
                                 'personel_id' => $this->employeeToPersonelMap[$employee->id],
@@ -584,7 +585,7 @@ class FullTestDataSeeder extends Seeder
 
     private function showSummary(): void
     {
-        if (! $this->command) {
+        if (!$this->command) {
             return;
         }
 

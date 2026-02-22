@@ -49,7 +49,7 @@ class CompleteTestDataSeeder extends Seeder
         try {
             $this->company = Company::where('name', 'Ana Şirket')->first();
 
-            if (! $this->company) {
+            if (!$this->company) {
                 if ($this->command) {
                     $this->command->error('Ana Şirket bulunamadı. Önce CompanySeeder çalıştırın.');
                 }

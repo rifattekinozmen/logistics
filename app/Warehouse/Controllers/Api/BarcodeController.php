@@ -12,6 +12,11 @@ use Illuminate\Http\Request;
 
 class BarcodeController extends Controller
 {
+    public function __construct(
+        protected InventoryTransferService $transferService
+    ) {
+    }
+
     /**
      * Barkod okut ve stok bilgisini döndür.
      */
@@ -24,7 +29,7 @@ class BarcodeController extends Controller
 
         $item = InventoryItem::where('barcode', $validated['barcode'])->first();
 
-        if (! $item) {
+        if (!$item) {
             return response()->json([
                 'success' => false,
                 'message' => 'Barkod bulunamadı.',
@@ -68,7 +73,7 @@ class BarcodeController extends Controller
 
         $item = InventoryItem::where('barcode', $validated['barcode'])->first();
 
-        if (! $item) {
+        if (!$item) {
             return response()->json([
                 'success' => false,
                 'message' => 'Barkod bulunamadı.',
@@ -112,7 +117,7 @@ class BarcodeController extends Controller
 
         $item = InventoryItem::where('barcode', $validated['barcode'])->first();
 
-        if (! $item) {
+        if (!$item) {
             return response()->json([
                 'success' => false,
                 'message' => 'Barkod bulunamadı.',
@@ -124,7 +129,7 @@ class BarcodeController extends Controller
             ->when($validated['location_id'], fn ($q) => $q->where('location_id', $validated['location_id']))
             ->first();
 
-        if (! $stock || $stock->quantity < $validated['quantity']) {
+        if (!$stock || $stock->quantity < $validated['quantity']) {
             return response()->json([
                 'success' => false,
                 'message' => 'Yetersiz stok.',
