@@ -24,6 +24,7 @@ use App\Pricing\Models\PricingCondition;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+
 use const STR_PAD_LEFT;
 
 class FullTestDataSeeder extends Seeder

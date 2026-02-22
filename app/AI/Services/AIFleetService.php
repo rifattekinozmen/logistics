@@ -27,7 +27,7 @@ class AIFleetService
         $maintenanceScore = $this->calculateMaintenanceScore($daysSinceInspection, $mileage);
 
         $upcomingMaintenance = [];
-        
+
         if ($daysSinceInspection >= 150) {
             $upcomingMaintenance[] = [
                 'type' => 'Periyodik Muayene',
