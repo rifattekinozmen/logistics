@@ -72,12 +72,12 @@ class Payment extends Model
     /**
      * Get company through related model (e.g. Customer -> BusinessPartner -> Company).
      */
-    public function getCompanyAttribute(): ?\App\Models\Company
+    public function getCompanyAttribute(): ?Company
     {
         $related = $this->related;
 
         return match (true) {
-            $related instanceof \App\Models\Customer => $related->businessPartner?->company,
+            $related instanceof Customer => $related->businessPartner?->company,
             default => null,
         };
     }

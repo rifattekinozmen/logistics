@@ -61,7 +61,7 @@ class FullTestDataSeeder extends Seeder
         try {
             $this->company = Company::where('name', 'Ana Şirket')->first();
 
-            if (!$this->company) {
+            if (! $this->company) {
                 if ($this->command) {
                     $this->command->error('Ana Şirket bulunamadı.');
                 }
@@ -441,7 +441,7 @@ class FullTestDataSeeder extends Seeder
                         $totalHours = $checkIn->diffInMinutes($checkOut) / 60;
 
                         $key = $employee->id.'_'.$date->format('Y-m-d');
-                        if (!isset($attendanceRecords[$key]) && isset($this->employeeToPersonelMap[$employee->id])) {
+                        if (! isset($attendanceRecords[$key]) && isset($this->employeeToPersonelMap[$employee->id])) {
                             PersonnelAttendance::create([
                                 'employee_id' => $employee->id,
                                 'personel_id' => $this->employeeToPersonelMap[$employee->id],
@@ -585,7 +585,7 @@ class FullTestDataSeeder extends Seeder
 
     private function showSummary(): void
     {
-        if (!$this->command) {
+        if (! $this->command) {
             return;
         }
 

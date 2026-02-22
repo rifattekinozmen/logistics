@@ -121,7 +121,7 @@ class AIFleetService
         $vehicleIds = $vehicles->pluck('id')->all();
         $activeShipments = collect();
 
-        if (!empty($vehicleIds)) {
+        if (! empty($vehicleIds)) {
             $activeShipments = DB::table('shipments')
                 ->whereIn('vehicle_id', $vehicleIds)
                 ->whereIn('status', ['pending', 'in_transit'])
@@ -243,7 +243,7 @@ class AIFleetService
             $recommendations[] = 'Acil bakım gerekiyor - En kısa sürede servis randevusu alın';
         }
 
-        if (!empty($upcoming)) {
+        if (! empty($upcoming)) {
             foreach ($upcoming as $item) {
                 if ($item['urgency'] === 'high') {
                     $recommendations[] = $item['type'].' için hemen randevu alın';
