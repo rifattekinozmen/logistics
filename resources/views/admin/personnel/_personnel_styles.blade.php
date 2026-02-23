@@ -45,18 +45,22 @@
 }
 .tr-id-header {
     grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
-    padding: 10px 12px 6px;
+    padding: 8px 12px 8px;
     color: #1A1A1A;
 }
 .tr-id-title {
-    margin: 0;
+    margin: 0 0 2px 0;
     font-family: "Source Sans Pro", ui-sans-serif, sans-serif;
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.02em;
 }
 .tr-id-subtitle {
+    display: block;
     font-size: 7px;
     color: #4a4a4a;
     letter-spacing: 0.02em;
@@ -72,7 +76,7 @@
 .tr-id-idno {
     position: absolute;
     left: 7%;
-    top: 22%;
+    top: 20%;
     z-index: 2;
     width: 22%;
     text-align: center;
@@ -85,7 +89,7 @@
 .tr-id-idno-num {
     position: absolute;
     left: 7%;
-    top: 25%;
+    top: 23%;
     z-index: 2;
     width: 22%;
     text-align: center;
@@ -98,9 +102,9 @@
 .tr-id-photo-main {
     position: absolute;
     left: 7%;
-    top: 29%;
+    top: 75px;
     width: 22%;
-    aspect-ratio: 188 / 232;
+    height: 125px;
     border-radius: 12px;
     overflow: hidden;
     background: #e9edf3;
@@ -134,7 +138,7 @@
 .tr-id-info {
     position: absolute;
     left: 30.2%;
-    top: 29%;
+    top: 26%;
     right: 6.6%;
     bottom: 18%;
     line-height: 1.2;
