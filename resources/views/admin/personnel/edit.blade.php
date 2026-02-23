@@ -210,7 +210,8 @@ document.addEventListener('DOMContentLoaded', function() {
         setPreview('preview-kimlik_seri_no', getVal('kimlik_seri_no'));
         setPreview('preview-son_gecerlilik', getVal('son_gecerlilik_tarihi') ? formatDate(document.getElementById('son_gecerlilik_tarihi')?.value) : '');
         setPreview('preview-uyruk', uyrukText);
-        setPreview('preview-imza', getVal('ad_soyad'));
+        setPreview('preview-anne_adi', getVal('anne_adi'));
+        setPreview('preview-baba_adi', getVal('baba_adi'));
     }
     fields.forEach(function (name) {
         var el = document.getElementById(name);

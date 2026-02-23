@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Türkiye Cumhuriyeti Kimlik Kartı — Gerçeğe Yakın UI</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap');
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#eef1f5;
+  font-family:"Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.stage{ perspective:1400px; }
+
+.card-wrapper{
+  width:856px;
+  height:540px;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:.8s;
+}
+
+.stage.flip .card-wrapper{ transform:rotateY(180deg); }
+
+.card{
+  position:absolute;
+  inset:0;
+  background:#f8f9fb;
+  border-radius:32px;
+  border:1px solid #dfe3ea;
+  overflow:hidden;
+  backface-visibility:hidden;
+}
+
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(#d5dae3 1px, transparent 1px);
+  background-size:12px 12px;
+  opacity:.25;
+}
+
+.back{ transform:rotateY(180deg); }
+
+.grid-overlay{ position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0; }
+.stage.show-grid .grid-overlay{ opacity:1; }
+
+/* ---------- FRONT — Baseline grid 856×540 ---------- */
+.header{
+  position:absolute;
+  top:18px;
+  width:100%;
+  text-align:center;
+  color:#1A1A1A;
+  font-family:Bahnschrift,"DIN 2014",Arial,sans-serif;
+}
+
+.header h1{ margin:0; font-size:18px; font-weight:700; letter-spacing:0.02em; }
+.header span{ font-size:12px; color:#4a4a4a; letter-spacing:0.02em; font-weight:400; }
+
+.flag-svg{
+  position:absolute;
+  right:56px;
+  top:70px;
+  width:255px;
+  height:170px;
+  opacity:.95;
+  z-index:2;
+}
+
+.idno{
+  position:absolute;
+  left:60px;
+  top:118px;
+  width:188px;
+  z-index:2;
+  text-align:center;
+  font-size:16px;
+  font-weight:400;
+  color:#4a4a4a;
+  letter-spacing:0.02em;
+  font-family:Bahnschrift,"DIN 2014",Arial,sans-serif;
+}
+.idno-number{
+  position:absolute;
+  left:60px;
+  top:138px;
+  width:188px;
+  z-index:2;
+  text-align:center;
+  font-family:ui-monospace, monospace;
+  font-size:28px;
+  font-weight:700;
+  color:#1A1A1A;
+  letter-spacing:0.02em;
+}
+
+.photo{
+  position:absolute;
+  left:60px;
+  top:155px;
+  width:188px;
+  height:232px;
+  background:#e9edf3;
+  border-radius:12px;
+  border:1px solid #cfd4dc;
+  overflow:hidden;
+}
+.photo::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(200,200,220,0.15) 50%, transparent 100%);
+  opacity:0.18;
+  mix-blend-mode:overlay;
+  transform:rotate(25deg);
+  transform-origin:50% 50%;
+  pointer-events:none;
+}
+
+.small-photo{
+  position:absolute;
+  left:560px;
+  top:340px;
+  width:70px;
+  height:90px;
+  background:#e9edf3;
+  border:1px solid #cfd4dc;
+  border-radius:6px;
+}
+
+.info{ position:absolute; left:258px; right:56px; top:150px; font-family:Bahnschrift,"DIN 2014",Arial,sans-serif; }
+
+.info .soyadi{ position:absolute; left:0; top:100px; }
+.info .soyadi .label{ font-size:16px; font-weight:400; color:#4a4a4a; }
+.info .soyadi .value{ font-size:22px; font-weight:600; color:#1A1A1A; }
+
+.info .adi{ position:absolute; left:0; top:140px; }
+.info .adi .label{ font-size:16px; font-weight:400; color:#4a4a4a; }
+.info .adi .value{ font-size:22px; font-weight:600; color:#1A1A1A; }
+
+.info .dogum{ position:absolute; left:0; top:180px; }
+.info .dogum .label{ font-size:16px; font-weight:400; color:#4a4a4a; }
+.info .dogum .value{ font-size:14px; font-weight:400; color:#1A1A1A; }
+
+.info .cinsiyet{ position:absolute; left:0; top:220px; }
+.info .cinsiyet .label{ font-size:16px; font-weight:400; color:#4a4a4a; }
+.info .cinsiyet .value{ font-size:14px; font-weight:400; color:#1A1A1A; }
+
+.info .seri{ position:absolute; left:0; top:220px; }
+.info .seri .label{ font-size:16px; font-weight:400; color:#4a4a4a; }
+.info .seri .value{ font-size:14px; font-weight:400; color:#1A1A1A; }
+
+.info .uyruk{ position:absolute; left:280px; top:220px; }
+.info .uyruk .label{ font-size:16px; font-weight:400; color:#4a4a4a; }
+.info .uyruk .value{ font-size:14px; font-weight:400; color:#1A1A1A; }
+
+.info .gecerlilik{ position:absolute; left:0; top:290px; }
+.info .gecerlilik .label{ font-size:16px; font-weight:400; color:#4a4a4a; }
+.info .gecerlilik .value{ font-size:14px; font-weight:400; color:#1A1A1A; }
+
+.label,.value{ margin:0; letter-spacing:0.02em; }
+
+.signature{
+  position:absolute;
+  left:560px;
+  right:56px;
+  bottom:110px;
+  height:40px;
+  border-bottom:2px solid #aaa;
+  text-align:center;
+  font-size:14px;
+  font-weight:300;
+  color:#4a4a4a;
+  letter-spacing:0.02em;
+  line-height:40px;
+  font-family:Bahnschrift,"DIN 2014",Arial,sans-serif;
+}
+
+/* ---------- BACK ---------- */
+.back-content{ padding:40px 60px; height:100%; }
+
+.back-header{
+  text-align:left;
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+.barcode{
+  width:100%;
+  height:40px;
+  background:repeating-linear-gradient(
+    to right,
+    #000,
+    #000 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  margin-bottom:20px;
+}
+
+.back-grid{ display:flex; gap:40px; }
+
+.chip{
+  width:120px;
+  height:90px;
+  border-radius:10px;
+  background:#d9d9d9;
+  box-shadow:inset 0 0 0 2px #aaa;
+}
+
+.back-fields{ flex:1; }
+
+.issuing{ margin-top:10px; font-weight:600; }
+
+.mrz{
+  position:absolute;
+  left:40px;
+  right:40px;
+  bottom:40px;
+  background:#eef1f6;
+  border-radius:10px;
+  padding:14px;
+  font-family:monospace;
+  font-size:18px;
+  letter-spacing:2px;
+  white-space:pre;
+}
+
+.toggle-btn{
+  position:absolute;
+  bottom:-60px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#2e3c72;
+  color:#fff;
+  border:none;
+  padding:12px 22px;
+  border-radius:10px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="stage" id="stage"><!-- show-grid ekleyerek grid overlay açılır -->
+<div class="card-wrapper">
+
+<!-- FRONT -->
+<div class="card">
+<!-- Grid overlay: class="show-grid" ekleyerek aç/kapat -->
+<svg class="grid-overlay" viewBox="0 0 856 540" aria-hidden="true">
+  <g stroke="#00AEEF" stroke-opacity="0.2">
+    <line x1="280" y1="0" x2="280" y2="540"/>
+    <line x1="0" y1="250" x2="856" y2="250"/>
+    <line x1="0" y1="370" x2="856" y2="370"/>
+  </g>
+</svg>
+
+<div class="header">
+<h1>TÜRKİYE CUMHURİYETİ KİMLİK KARTI</h1>
+<span>REPUBLIC OF TURKEY IDENTITY CARD</span>
+</div>
+
+<svg class="flag-svg" viewBox="0 0 300 200">
+  <rect width="300" height="200" fill="#f8f9fb"/>
+  <!-- Hilal: dış r=0.5A, iç r=0.4A, merkezler arası 22, uçlar açık -->
+  <circle cx="100" cy="100" r="100" fill="#E30A17"/>
+  <circle cx="122" cy="100" r="80" fill="#f8f9fb"/>
+  <!-- Yıldız: çap 0.25A, bir köşe sağa bakar -->
+  <polygon fill="#E30A17" points="284,100 266.7,105.6 266.7,123.8 256.1,109.1 238.8,114.7 249.5,100 238.8,85.3 256.1,90.9 266.7,76.2 266.7,94.4"/>
+</svg>
+
+<div class="idno">T.C. Kimlik No / TR Identity No</div>
+<div class="idno-number">12345678901</div>
+
+<div class="photo"></div>
+<div class="small-photo"></div>
+
+<div class="info">
+<div class="soyadi"><span class="label">Soyadı / Surname</span><br><span class="value">KARAÇAMOĞLU</span></div>
+<div class="adi"><span class="label">Adı / Given Name(s)</span><br><span class="value">ÖMER SELİM</span></div>
+<div class="dogum"><span class="label">Doğum Tarihi / Date of Birth</span><br><span class="value">15.10.1956</span></div>
+<div class="cinsiyet"><span class="label">Cinsiyet / Gender</span><br><span class="value">E/M</span></div>
+<div class="seri"><span class="label">Seri No / Document No</span><br><span class="value">M00A59153</span></div>
+<div class="uyruk"><span class="label">Uyruğu / Nationality</span><br><span class="value">T.C./TUR</span></div>
+<div class="gecerlilik"><span class="label">Son Geçerlilik / Valid Until</span><br><span class="value">17.08.2024</span></div>
+</div>
+
+<div class="signature">İmza / Signature</div>
+
+
+
+</div>
+
+<!-- BACK -->
+<div class="card back">
+<div class="back-content">
+
+<div class="back-header">
+TÜRKİYE CUMHURİYETİ KİMLİK KARTI
+</div>
+
+<div class="barcode"></div>
+
+<div class="back-grid">
+<div class="chip"></div>
+
+<div class="back-fields">
+<div class="label">Anne Adı / Mother's Name</div>
+<div class="value">AYŞEGÜL</div>
+
+<div class="label">Baba Adı / Father's Name</div>
+<div class="value">HÜDAVERDİ</div>
+
+<div class="label">Veren Makam / Issuing Authority</div>
+<div class="issuing">İÇİŞLERİ BAKANLIĞI</div>
+</div>
+</div>
+
+<div class="mrz">I&lt;TURM00A59153&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
+5610152M2408147TUR&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;2
+KARACAMOGLU&lt;&lt;OMERSELIM&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+
+</div>
+</div>
+
+</div>
+
+<button class="toggle-btn" onclick="flipCard()">Ön / Arka Çevir</button>
+</div>
+
+<script>
+function flipCard(){
+ document.getElementById('stage').classList.toggle('flip');
+}
+</script>
+
+</body>
+</html>
