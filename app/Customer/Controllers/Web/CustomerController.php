@@ -3,9 +3,13 @@
 namespace App\Customer\Controllers\Web;
 
 use App\Core\Services\ExportService;
+use App\Customer\Requests\StoreCustomerRequest;
+use App\Customer\Requests\UpdateCustomerRequest;
+use App\Enums\AddressType;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\FavoriteAddress;
+use App\Models\TaxOffice;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -50,13 +54,19 @@ class CustomerController extends Controller
             ->orderBy('name')
             ->get();
 
-        $headers = ['Müşteri Adı', 'E-posta', 'Telefon', 'Vergi No', 'Adres', 'Durum', 'Oluşturulma'];
+        $headers = ['Müşteri Kodu', 'Müşteri Adı', 'Müşteri Türü', 'Öncelik', 'E-posta', 'Telefon', 'Vergi No', 'Vergi Dairesi', 'Adres', 'Durum', 'Oluşturulma'];
+
+        $customers->load('taxOffice');
 
         $rows = $customers->map(fn ($c) => [
+            $c->customer_code ?? $c->id,
             $c->name,
+            $c->customer_type ?? '-',
+            $c->priority_level ?? '-',
             $c->email ?? '-',
             $c->phone ?? '-',
             $c->tax_number ?? '-',
+            $c->taxOffice?->name ?? $c->tax_office ?? '-',
             $c->address ?? '-',
             $c->status ? 'Aktif' : 'Pasif',
             $c->created_at->format('d.m.Y H:i'),
@@ -74,24 +84,17 @@ class CustomerController extends Controller
      */
     public function create(): View
     {
-        return view('admin.customers.create');
+        $taxOffices = TaxOffice::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+
+        return view('admin.customers.create', compact('taxOffices'));
     }
 
     /**
      * Store a newly created customer.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreCustomerRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'tax_number' => 'nullable|string|max:50',
-            'address' => 'nullable|string|max:1000',
-            'status' => 'required|integer|in:0,1',
-        ]);
-
-        $customer = Customer::create($validated);
+        $customer = Customer::create($request->validated());
 
         return redirect()->route('admin.customers.show', $customer)
             ->with('success', 'Müşteri başarıyla oluşturuldu.');
@@ -103,6 +106,7 @@ class CustomerController extends Controller
     public function show(int $id): View
     {
         $customer = Customer::with([
+            'taxOffice',
             'orders',
             'favoriteAddresses' => fn ($q) => $q->orderBy('sort_order')->orderBy('name'),
         ])->findOrFail($id);
@@ -116,29 +120,23 @@ class CustomerController extends Controller
     public function edit(int $id): View
     {
         $customer = Customer::with([
+            'taxOffice',
             'favoriteAddresses' => fn ($q) => $q->orderBy('sort_order')->orderBy('name'),
         ])->findOrFail($id);
 
-        return view('admin.customers.edit', compact('customer'));
+        $taxOffices = TaxOffice::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+
+        return view('admin.customers.edit', compact('customer', 'taxOffices'));
     }
 
     /**
      * Update the specified customer.
      */
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(UpdateCustomerRequest $request, int $id): RedirectResponse
     {
         $customer = Customer::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'tax_number' => 'nullable|string|max:50',
-            'address' => 'nullable|string|max:1000',
-            'status' => 'required|integer|in:0,1',
-        ]);
-
-        $customer->update($validated);
+        $customer->update($request->validated());
 
         return redirect()->route('admin.customers.show', $customer)
             ->with('success', 'Müşteri başarıyla güncellendi.');
@@ -163,7 +161,7 @@ class CustomerController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|string|in:pickup,delivery,both',
+            'type' => 'required|string|in:'.implode(',', AddressType::values()),
             'address' => 'required|string|max:1000',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
@@ -171,6 +169,8 @@ class CustomerController extends Controller
             'contact_phone' => 'nullable|string|max:20',
             'notes' => 'nullable|string',
             'sort_order' => 'nullable|integer|min:0',
+            'working_days' => 'nullable|array',
+            'working_days.*' => 'string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
         ]);
 
         $customer->favoriteAddresses()->create(array_merge($validated, [
@@ -192,7 +192,7 @@ class CustomerController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|string|in:pickup,delivery,both',
+            'type' => 'required|string|in:'.implode(',', AddressType::values()),
             'address' => 'required|string|max:1000',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
@@ -200,6 +200,8 @@ class CustomerController extends Controller
             'contact_phone' => 'nullable|string|max:20',
             'notes' => 'nullable|string',
             'sort_order' => 'nullable|integer|min:0',
+            'working_days' => 'nullable|array',
+            'working_days.*' => 'string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
         ]);
 
         $favoriteAddress->update(array_merge($validated, [

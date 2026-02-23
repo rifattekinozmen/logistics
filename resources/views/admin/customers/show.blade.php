@@ -3,15 +3,54 @@
 @section('title', 'Müşteri Detayı - Logistics')
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-        <h2 class="h3 fw-bold text-dark mb-1">Müşteri Detayı</h2>
-        <p class="text-secondary mb-0">{{ $customer->name }}</p>
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3">
+        <div class="rounded-circle bg-primary-200 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+            <span class="material-symbols-outlined text-primary" style="font-size: 1.75rem;">person</span>
+        </div>
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">{{ $customer->name }}</h2>
+            <p class="text-secondary mb-0 small">Müşteri bilgilerini görüntüleyin ve yönetin</p>
+            <div class="d-flex align-items-center gap-2 mt-1">
+                @if($customer->status == 1)
+                    <span class="badge bg-success-200 text-success px-3 py-1 rounded-pill fw-semibold small">Aktif</span>
+                @else
+                    <span class="badge bg-danger-200 text-danger px-3 py-1 rounded-pill fw-semibold small">Pasif</span>
+                @endif
+                @if($customer->phone)
+                    <a href="tel:{{ preg_replace('/\s+/', '', $customer->phone) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1" title="Ara">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">call</span>
+                        Ara
+                    </a>
+                @endif
+                @if($customer->phone)
+                    <a href="sms:{{ preg_replace('/\s+/', '', $customer->phone) }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" title="SMS">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">sms</span>
+                        SMS
+                    </a>
+                @endif
+                @if($customer->phone)
+                    <a href="https://wa.me/90{{ preg_replace('/\D/', '', $customer->phone) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1" title="WhatsApp">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">chat</span>
+                        WhatsApp
+                    </a>
+                @endif
+                @if($customer->email)
+                    <a href="mailto:{{ $customer->email }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" title="Mail">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">mail</span>
+                        Mail
+                    </a>
+                @endif
+            </div>
+        </div>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('admin.customers.edit', $customer->id) }}" class="btn btn-primary">
-            <span class="material-symbols-outlined" style="font-size: 1.25rem;">edit</span>
-            Düzenle
+        <a href="{{ route('admin.customers.edit', $customer->id) }}#favorite-addresses" class="btn btn-primary d-inline-flex align-items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
+            Adres Ekle
+        </a>
+        <a href="{{ route('admin.customers.edit', $customer->id) }}#favorite-addresses" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+            Adresler
         </a>
         <a href="{{ route('admin.customers.index') }}" class="btn btn-light d-inline-flex align-items-center gap-2">
             <span class="material-symbols-outlined">arrow_back</span>
@@ -22,12 +61,29 @@
 
 <div class="row g-4">
     <div class="col-lg-8">
+        {{-- Temel Bilgiler --}}
         <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4" style="border-color: var(--bs-customers-200);">
-            <h3 class="h4 fw-bold text-dark mb-4">Müşteri Bilgileri</h3>
+            <h3 class="h4 fw-bold text-dark mb-4">Temel Bilgiler</h3>
             <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Müşteri Kodu</label>
+                    <p class="fw-bold text-dark mb-0">{{ $customer->customer_code ?? $customer->id }}</p>
+                </div>
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Müşteri Adı</label>
                     <p class="fw-bold text-dark mb-0">{{ $customer->name }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Müşteri Türü</label>
+                    <p class="text-dark mb-0">{{ $customer->customer_type ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Öncelik Seviyesi</label>
+                    <p class="text-dark mb-0">{{ $customer->priority_level ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">İletişim Kişisi</label>
+                    <p class="text-dark mb-0">{{ $customer->contact_person ?? '-' }}</p>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Durum</label>
@@ -39,17 +95,35 @@
                         @endif
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label small fw-semibold text-secondary">E-posta</label>
-                    <p class="text-dark mb-0">{{ $customer->email ?? '-' }}</p>
-                </div>
+            </div>
+        </div>
+
+        {{-- İletişim Bilgileri --}}
+        <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4" style="border-color: var(--bs-customers-200);">
+            <h3 class="h4 fw-bold text-dark mb-4">İletişim Bilgileri</h3>
+            <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Telefon</label>
                     <p class="text-dark mb-0">{{ $customer->phone ?? '-' }}</p>
                 </div>
                 <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">E-posta</label>
+                    <p class="text-dark mb-0">{{ $customer->email ?? '-' }}</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Vergi Bilgileri --}}
+        <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4" style="border-color: var(--bs-customers-200);">
+            <h3 class="h4 fw-bold text-dark mb-4">Vergi Bilgileri</h3>
+            <div class="row g-3">
+                <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Vergi Numarası</label>
                     <p class="text-dark mb-0">{{ $customer->tax_number ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Vergi Dairesi</label>
+                    <p class="text-dark mb-0">{{ $customer->taxOffice?->name ?? $customer->tax_office ?? '-' }}</p>
                 </div>
                 <div class="col-md-12">
                     <label class="form-label small fw-semibold text-secondary">Adres</label>
@@ -61,7 +135,7 @@
         <div id="favorite-addresses" class="bg-white rounded-3xl shadow-sm border p-4 mb-4" style="border-color: var(--bs-customers-200);">
             @php $addrsWithCoords = $customer->favoriteAddresses->filter(fn($a) => $a->latitude !== null && $a->longitude !== null); @endphp
             <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-                <h3 class="h4 fw-bold text-dark mb-0">Favori / Teslimat Adresleri</h3>
+                <h3 class="h4 fw-bold text-dark mb-0">Adresler</h3>
                 <div class="d-flex align-items-center gap-2">
                     @if($addrsWithCoords->isNotEmpty())
                         <button type="button" id="adminBtnShowMap" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2">
@@ -69,7 +143,7 @@
                             Haritada Görüntüle
                         </button>
                     @endif
-                    <span class="badge bg-primary-200 text-primary px-3 py-2 rounded-pill fw-semibold">{{ $customer->favoriteAddresses->count() }} Adres</span>
+                    <a href="{{ route('admin.customers.edit', $customer->id) }}#favorite-addresses" class="btn btn-outline-secondary btn-sm">Tümünü Görüntüle</a>
                 </div>
             </div>
             @if($customer->favoriteAddresses->count() > 0)
@@ -79,29 +153,36 @@
                 </div>
                 <script>window.ADMIN_FAVORITE_ADDRESSES_MAP_DATA = @json($addrsWithCoords->map(function ($a) { return ['name' => $a->name, 'lat' => (float) $a->latitude, 'lng' => (float) $a->longitude]; })->values());</script>
                 @endif
-                <div class="d-flex flex-column gap-3">
+                <div class="row g-3">
                     @foreach($customer->favoriteAddresses as $addr)
-                        <div class="border rounded-3xl p-3 bg-light">
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="fw-bold text-dark">{{ $addr->name }}</span>
-                                <span class="badge bg-primary-200 text-primary rounded-pill px-2 py-1 small">
-                                    {{ match($addr->type) { 'pickup' => 'Alış', 'delivery' => 'Teslimat', 'both' => 'Her İkisi', default => $addr->type } }}
-                                </span>
-                            </div>
-                            <p class="text-secondary small mb-1">{{ $addr->address }}</p>
-                            @if($addr->latitude !== null && $addr->longitude !== null)
-                                <p class="text-secondary small mb-0">
-                                    <span class="material-symbols-outlined align-middle" style="font-size: 0.75rem;">location_on</span>
-                                    {{ number_format((float) $addr->latitude, 6) }}, {{ number_format((float) $addr->longitude, 6) }}
-                                </p>
-                                <div class="d-flex flex-wrap gap-2 mt-2">
-                                    <a href="https://www.google.com/maps?q={{ (float) $addr->latitude }},{{ (float) $addr->longitude }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">Google Maps</a>
-                                    <a href="https://www.openstreetmap.org/?mlat={{ (float) $addr->latitude }}&mlon={{ (float) $addr->longitude }}&zoom=17" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">OpenStreetMap</a>
+                        <div class="col-md-6">
+                            <div class="border rounded-3xl p-3 bg-light h-100">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="fw-bold text-dark">{{ $addr->name }}</span>
+                                    <span class="badge bg-primary-200 text-primary rounded-pill px-2 py-1 small">
+                                        {{ \App\Enums\AddressType::labelFor($addr->type) }}
+                                    </span>
                                 </div>
-                            @endif
-                            @if($addr->contact_name || $addr->contact_phone)
-                                <p class="text-secondary small mb-0">{{ $addr->contact_name ?? '' }}{{ $addr->contact_name && $addr->contact_phone ? ' · ' : '' }}{{ $addr->contact_phone ?? '' }}</p>
-                            @endif
+                                <p class="text-secondary small mb-1">{{ $addr->address }}</p>
+                                @if($addr->latitude !== null && $addr->longitude !== null)
+                                    <p class="text-secondary small mb-1">
+                                        <span class="material-symbols-outlined align-middle" style="font-size: 0.75rem;">location_on</span>
+                                        Konum mevcut
+                                    </p>
+                                    <div class="d-flex flex-wrap gap-2 mb-2">
+                                        <a href="https://www.google.com/maps?q={{ (float) $addr->latitude }},{{ (float) $addr->longitude }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">Google Maps</a>
+                                    </div>
+                                @endif
+                                @if($addr->working_days_formatted)
+                                    <p class="text-secondary small mb-0">
+                                        <span class="material-symbols-outlined align-middle" style="font-size: 0.75rem;">calendar_today</span>
+                                        {{ $addr->working_days_formatted }}
+                                    </p>
+                                @endif
+                                @if($addr->contact_name || $addr->contact_phone)
+                                    <p class="text-secondary small mb-0 mt-1">{{ $addr->contact_name ?? '' }}{{ $addr->contact_name && $addr->contact_phone ? ' · ' : '' }}{{ $addr->contact_phone ?? '' }}</p>
+                                @endif
+                            </div>
                         </div>
                     @endforeach
                 </div>
@@ -109,6 +190,7 @@
                 <div class="text-center py-4">
                     <span class="material-symbols-outlined text-secondary" style="font-size: 2rem;">location_off</span>
                     <p class="text-secondary mb-0 small">Bu müşteriye ait favori veya teslimat adresi yok.</p>
+                    <a href="{{ route('admin.customers.edit', $customer->id) }}#favorite-addresses" class="btn btn-primary btn-sm mt-2">+ Yeni Adres Ekle</a>
                 </div>
             @endif
         </div>
@@ -164,18 +246,20 @@
 
     <div class="col-lg-4">
         <div class="bg-white rounded-3xl shadow-sm border p-4" style="border-color: var(--bs-customers-200);">
-            <h3 class="h4 fw-bold text-dark mb-4">Hızlı İşlemler</h3>
+            <h3 class="h4 fw-bold text-dark mb-4">İşlemler</h3>
             <div class="d-flex flex-column gap-2">
-                <a href="{{ route('admin.customers.edit', $customer->id) }}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2">
+                <a href="{{ route('admin.customers.edit', $customer->id) }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
                     <span class="material-symbols-outlined">edit</span>
-                    Düzenle
+                    Müşteriyi Düzenle
                 </a>
+                <a href="{{ route('admin.customers.edit', $customer->id) }}#favorite-addresses" class="text-primary text-decoration-none small">Adresleri Yönet</a>
+                <a href="{{ route('admin.customers.edit', $customer->id) }}#favorite-addresses" class="text-primary text-decoration-none small">+ Yeni Adres Ekle</a>
                 <form action="{{ route('admin.customers.destroy', $customer->id) }}" method="POST" onsubmit="return confirm('Bu müşteriyi silmek istediğinize emin misiniz?');">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2">
                         <span class="material-symbols-outlined">delete</span>
-                        Sil
+                        Müşteriyi Sil
                     </button>
                 </form>
             </div>
@@ -183,19 +267,35 @@
 
         <div class="bg-white rounded-3xl shadow-sm border p-4 mt-4" style="border-color: var(--bs-info-200);">
             <h3 class="h4 fw-bold text-dark mb-4">İstatistikler</h3>
-            <div class="d-flex flex-column gap-3">
-                <div>
-                    <label class="form-label small fw-semibold text-secondary mb-1">Toplam Sipariş</label>
-                    <p class="h5 fw-bold text-dark mb-0">{{ $customer->orders->count() }}</p>
+            <div class="d-flex flex-wrap gap-3">
+                <div class="bg-light rounded-3 p-3 flex-grow-1" style="min-width: 100px;">
+                    <label class="form-label small fw-semibold text-secondary mb-0">Adres</label>
+                    <p class="h4 fw-bold text-dark mb-0">{{ $customer->favoriteAddresses->count() }}</p>
                 </div>
-                <div>
-                    <label class="form-label small fw-semibold text-secondary mb-1">Kayıt Tarihi</label>
-                    <p class="text-dark mb-0">{{ $customer->created_at ? $customer->created_at->format('d.m.Y H:i') : '-' }}</p>
+                <div class="bg-light rounded-3 p-3 flex-grow-1" style="min-width: 100px;">
+                    <label class="form-label small fw-semibold text-secondary mb-0">Sipariş</label>
+                    <p class="h4 fw-bold text-dark mb-0">{{ $customer->orders->count() }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-sm border p-4 mt-4" style="border-color: var(--bs-customers-200);">
+            <h3 class="h4 fw-bold text-dark mb-4">Bilgi</h3>
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary" style="font-size: 1.25rem;">calendar_today</span>
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary mb-0">Kayıt</label>
+                        <p class="text-dark mb-0">{{ $customer->created_at ? $customer->created_at->format('d.m.Y H:i') : '-' }}</p>
+                    </div>
                 </div>
                 @if($customer->updated_at)
-                <div>
-                    <label class="form-label small fw-semibold text-secondary mb-1">Son Güncelleme</label>
-                    <p class="text-dark mb-0">{{ $customer->updated_at->format('d.m.Y H:i') }}</p>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary" style="font-size: 1.25rem;">schedule</span>
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary mb-0">Güncelleme</label>
+                        <p class="text-dark mb-0">{{ $customer->updated_at->format('d.m.Y H:i') }}</p>
+                    </div>
                 </div>
                 @endif
             </div>

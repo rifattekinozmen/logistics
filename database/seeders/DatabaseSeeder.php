@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             CustomPermissionSeeder::class,
             RolePermissionSeeder::class,
             LocationSeeder::class,
+            TaxOfficeSeeder::class,
             CompanySeeder::class,
             FullTestDataSeeder::class,
         ]);

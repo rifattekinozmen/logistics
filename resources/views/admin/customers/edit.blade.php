@@ -19,56 +19,75 @@
         @csrf
         @method('PUT')
 
-        <div class="row g-4">
+        {{-- Temel Bilgiler --}}
+        <h4 class="h5 fw-bold text-dark mb-3">Temel Bilgiler</h4>
+        <div class="row g-4 mb-4">
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">Müşteri Adı <span class="text-danger">*</span></label>
-                <input type="text" name="name" value="{{ old('name', $customer->name) }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('name') is-invalid border-danger @enderror" required>
-                @error('name')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <x-form.input name="customer_code" label="Müşteri Kodu" :value="old('customer_code', $customer->customer_code)" placeholder="Opsiyonel" />
             </div>
-
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">E-posta</label>
-                <input type="email" name="email" value="{{ old('email', $customer->email) }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('email') is-invalid border-danger @enderror">
-                @error('email')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <x-form.input name="name" label="Müşteri Adı" :value="old('name', $customer->name)" required />
             </div>
-
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">Telefon</label>
-                <input type="text" name="phone" value="{{ old('phone', $customer->phone) }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('phone') is-invalid border-danger @enderror">
-                @error('phone')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <x-form.select
+                    name="customer_type"
+                    label="Müşteri Türü"
+                    :options="\App\Enums\CustomerType::options()"
+                    :value="old('customer_type', $customer->customer_type)"
+                    placeholder="Seçiniz..."
+                />
             </div>
-
             <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">Vergi Numarası</label>
-                <input type="text" name="tax_number" value="{{ old('tax_number', $customer->tax_number) }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('tax_number') is-invalid border-danger @enderror">
-                @error('tax_number')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <x-form.select
+                    name="priority_level"
+                    label="Öncelik Seviyesi"
+                    :options="\App\Enums\CustomerPriority::options()"
+                    :value="old('priority_level', $customer->priority_level)"
+                    placeholder="Seçiniz..."
+                />
             </div>
+            <div class="col-md-6">
+                <x-form.input name="contact_person" label="İletişim Kişisi" :value="old('contact_person', $customer->contact_person)" placeholder="533 123 45 67" />
+            </div>
+            <div class="col-md-6">
+                <x-form.select
+                    name="status"
+                    label="Durum"
+                    :options="[1 => 'Aktif', 0 => 'Pasif']"
+                    :value="old('status', $customer->status)"
+                    required
+                />
+            </div>
+        </div>
 
+        {{-- İletişim Bilgileri --}}
+        <h4 class="h5 fw-bold text-dark mb-3">İletişim Bilgileri</h4>
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <x-form.input name="phone" type="tel" label="Telefon" :value="old('phone', $customer->phone)" placeholder="530 136 38 01" />
+            </div>
+            <div class="col-md-6">
+                <x-form.input name="email" type="email" label="E-posta" :value="old('email', $customer->email)" />
+            </div>
+        </div>
+
+        {{-- Vergi Bilgileri --}}
+        <h4 class="h5 fw-bold text-dark mb-3">Vergi Bilgileri</h4>
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <x-form.input name="tax_number" label="Vergi Numarası" :value="old('tax_number', $customer->tax_number)" placeholder="1234567890" />
+            </div>
+            <div class="col-md-6">
+                <x-form.select
+                    name="tax_office_id"
+                    label="Vergi Dairesi"
+                    :options="$taxOffices ?? []"
+                    :value="old('tax_office_id', $customer->tax_office_id)"
+                    placeholder="Seçiniz..."
+                />
+            </div>
             <div class="col-md-12">
-                <label class="form-label fw-semibold text-dark">Adres</label>
-                <textarea name="address" class="form-control border-info-200 focus:border-info focus:ring-info @error('address') is-invalid border-danger @enderror" rows="3">{{ old('address', $customer->address) }}</textarea>
-                @error('address')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-semibold text-dark">Durum <span class="text-danger">*</span></label>
-                <select name="status" class="form-select border-info-200 focus:border-info focus:ring-info @error('status') is-invalid border-danger @enderror" required>
-                    <option value="1" {{ old('status', $customer->status) == '1' ? 'selected' : '' }}>Aktif</option>
-                    <option value="0" {{ old('status', $customer->status) == '0' ? 'selected' : '' }}>Pasif</option>
-                </select>
-                @error('status')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <x-form.textarea name="address" label="Adres" :value="old('address', $customer->address)" :rows="3" />
             </div>
         </div>
 
@@ -104,7 +123,7 @@
                     <tr>
                         <td class="align-middle">
                             <span class="fw-semibold text-dark">{{ $addr->name }}</span>
-                            <span class="badge bg-primary-200 text-primary rounded-pill px-2 py-1 small ms-1">{{ match($addr->type) { 'pickup' => 'Alış', 'delivery' => 'Teslimat', 'both' => 'Her İkisi', default => $addr->type } }}</span>
+                            <span class="badge bg-primary-200 text-primary rounded-pill px-2 py-1 small ms-1">{{ \App\Enums\AddressType::labelFor($addr->type) }}</span>
                         </td>
                         <td class="align-middle small text-secondary">{{ Str::limit($addr->address, 50) }}</td>
                         <td class="align-middle small text-secondary">
@@ -115,7 +134,7 @@
                             @endif
                         </td>
                         <td class="align-middle text-end">
-                            <button type="button" class="btn btn-sm bg-primary-200 text-primary border-0" title="Düzenle" data-bs-toggle="modal" data-bs-target="#editFavoriteAddressModal" data-addr-update-url="{{ route('admin.customers.favorite-addresses.update', [$customer, $addr]) }}" data-addr-name="{{ e($addr->name) }}" data-addr-type="{{ $addr->type }}" data-addr-address="{{ e($addr->address) }}" data-addr-lat="{{ $addr->latitude }}" data-addr-lon="{{ $addr->longitude }}" data-addr-contact-name="{{ e($addr->contact_name ?? '') }}" data-addr-contact-phone="{{ e($addr->contact_phone ?? '') }}" data-addr-notes="{{ e($addr->notes ?? '') }}" data-addr-sort-order="{{ $addr->sort_order }}">
+                            <button type="button" class="btn btn-sm bg-primary-200 text-primary border-0" title="Düzenle" data-bs-toggle="modal" data-bs-target="#editFavoriteAddressModal" data-addr-update-url="{{ route('admin.customers.favorite-addresses.update', [$customer, $addr]) }}" data-addr-name="{{ e($addr->name) }}" data-addr-type="{{ $addr->type }}" data-addr-address="{{ e($addr->address) }}" data-addr-lat="{{ $addr->latitude }}" data-addr-lon="{{ $addr->longitude }}" data-addr-contact-name="{{ e($addr->contact_name ?? '') }}" data-addr-contact-phone="{{ e($addr->contact_phone ?? '') }}" data-addr-notes="{{ e($addr->notes ?? '') }}" data-addr-sort-order="{{ $addr->sort_order }}" data-addr-working-days="{{ is_array($addr->working_days) ? json_encode($addr->working_days) : '[]' }}">
                                 <span class="material-symbols-outlined" style="font-size: 1rem;">edit</span>
                             </button>
                             <form action="{{ route('admin.customers.favorite-addresses.destroy', [$customer, $addr]) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu adresi silmek istediğinize emin misiniz?');">
@@ -153,10 +172,12 @@
                             <select id="fa_name_select" class="form-select">
                                 <option value="Ev">Ev</option>
                                 <option value="İş">İş</option>
+                                <option value="Merkez">Merkez</option>
                                 <option value="Ofis">Ofis</option>
                                 <option value="Depo">Depo</option>
                                 <option value="Fabrika">Fabrika</option>
                                 <option value="Şube">Şube</option>
+                                <option value="Liman">Liman</option>
                                 <option value="Showroom">Showroom</option>
                                 <option value="">Diğer</option>
                             </select>
@@ -169,9 +190,9 @@
                         <div class="col-md-6">
                             <label for="fa_type" class="form-label fw-semibold text-dark">Tür <span class="text-danger">*</span></label>
                             <select name="type" id="fa_type" class="form-select" required>
-                                <option value="pickup">Alış Adresi</option>
-                                <option value="delivery">Teslimat Adresi</option>
-                                <option value="both">Her İkisi</option>
+                                @foreach(\App\Enums\AddressType::options() as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-12">
@@ -202,6 +223,17 @@
                         <div class="col-md-6">
                             <label for="fa_sort_order" class="form-label fw-semibold text-dark">Sıra</label>
                             <input type="number" name="sort_order" id="fa_sort_order" class="form-control" value="0" min="0">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-dark">Çalışma Günleri</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                @foreach(['monday' => 'Pazartesi', 'tuesday' => 'Salı', 'wednesday' => 'Çarşamba', 'thursday' => 'Perşembe', 'friday' => 'Cuma', 'saturday' => 'Cumartesi', 'sunday' => 'Pazar'] as $dayVal => $dayLabel)
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="working_days[]" id="fa_wd_{{ $dayVal }}" value="{{ $dayVal }}">
+                                        <label class="form-check-label" for="fa_wd_{{ $dayVal }}">{{ $dayLabel }}</label>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                         <div class="col-12">
                             <label for="fa_notes" class="form-label fw-semibold text-dark">Notlar</label>
@@ -236,10 +268,12 @@
                             <select id="fe_name_select" class="form-select">
                                 <option value="Ev">Ev</option>
                                 <option value="İş">İş</option>
+                                <option value="Merkez">Merkez</option>
                                 <option value="Ofis">Ofis</option>
                                 <option value="Depo">Depo</option>
                                 <option value="Fabrika">Fabrika</option>
                                 <option value="Şube">Şube</option>
+                                <option value="Liman">Liman</option>
                                 <option value="Showroom">Showroom</option>
                                 <option value="">Diğer</option>
                             </select>
@@ -252,9 +286,9 @@
                         <div class="col-md-6">
                             <label for="fe_type" class="form-label fw-semibold text-dark">Tür <span class="text-danger">*</span></label>
                             <select name="type" id="fe_type" class="form-select" required>
-                                <option value="pickup">Alış Adresi</option>
-                                <option value="delivery">Teslimat Adresi</option>
-                                <option value="both">Her İkisi</option>
+                                @foreach(\App\Enums\AddressType::options() as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-12">
@@ -285,6 +319,17 @@
                         <div class="col-md-6">
                             <label for="fe_sort_order" class="form-label fw-semibold text-dark">Sıra</label>
                             <input type="number" name="sort_order" id="fe_sort_order" class="form-control" min="0">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-dark">Çalışma Günleri</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                @foreach(['monday' => 'Pazartesi', 'tuesday' => 'Salı', 'wednesday' => 'Çarşamba', 'thursday' => 'Perşembe', 'friday' => 'Cuma', 'saturday' => 'Cumartesi', 'sunday' => 'Pazar'] as $dayVal => $dayLabel)
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="working_days[]" id="fe_wd_{{ $dayVal }}" value="{{ $dayVal }}">
+                                        <label class="form-check-label" for="fe_wd_{{ $dayVal }}">{{ $dayLabel }}</label>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                         <div class="col-12">
                             <label for="fe_notes" class="form-label fw-semibold text-dark">Notlar</label>
@@ -391,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var feOther = document.getElementById('fe_name_other');
             var feWrap = document.getElementById('fe_name_other_wrap');
             if (feSel) {
-                if (['Ev', 'İş', 'Ofis', 'Depo', 'Fabrika', 'Şube', 'Showroom'].indexOf(addrName) >= 0) {
+                if (['Ev', 'İş', 'Merkez', 'Ofis', 'Depo', 'Fabrika', 'Şube', 'Liman', 'Showroom'].indexOf(addrName) >= 0) {
                     feSel.value = addrName;
                     if (feWrap) feWrap.classList.add('d-none');
                     if (feOther) feOther.value = '';
@@ -410,6 +455,13 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('fe_contact_phone').value = btn.dataset.addrContactPhone || '';
             document.getElementById('fe_notes').value = btn.dataset.addrNotes || '';
             document.getElementById('fe_sort_order').value = btn.dataset.addrSortOrder || '0';
+            var workingDays = [];
+            try {
+                workingDays = JSON.parse(btn.dataset.addrWorkingDays || '[]');
+            } catch (e) {}
+            document.querySelectorAll('#editFavoriteAddressModal input[name="working_days[]"]').forEach(function(cb) {
+                cb.checked = workingDays.indexOf(cb.value) >= 0;
+            });
             var fePaste = document.getElementById('fe_coordinates_paste');
             if (fePaste) fePaste.value = '';
         });

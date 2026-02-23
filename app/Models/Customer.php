@@ -17,8 +17,14 @@ class Customer extends Model
     protected $fillable = [
         'business_partner_id',
         'company_id',
+        'customer_code',
+        'customer_type',
+        'priority_level',
+        'contact_person',
         'name',
         'tax_number',
+        'tax_office',
+        'tax_office_id',
         'phone',
         'email',
         'address',
@@ -35,6 +41,11 @@ class Customer extends Model
     public function businessPartner(): BelongsTo
     {
         return $this->belongsTo(BusinessPartner::class);
+    }
+
+    public function taxOffice(): BelongsTo
+    {
+        return $this->belongsTo(TaxOffice::class);
     }
 
     /**

@@ -22,6 +22,7 @@ class FavoriteAddress extends Model
         'contact_phone',
         'notes',
         'sort_order',
+        'working_days',
     ];
 
     protected function casts(): array
@@ -30,7 +31,32 @@ class FavoriteAddress extends Model
             'latitude' => 'decimal:8',
             'longitude' => 'decimal:8',
             'sort_order' => 'integer',
+            'working_days' => 'array',
         ];
+    }
+
+    /**
+     * Get working days as formatted Turkish string.
+     */
+    public function getWorkingDaysFormattedAttribute(): string
+    {
+        $map = [
+            'monday' => 'Pazartesi',
+            'tuesday' => 'Salı',
+            'wednesday' => 'Çarşamba',
+            'thursday' => 'Perşembe',
+            'friday' => 'Cuma',
+            'saturday' => 'Cumartesi',
+            'sunday' => 'Pazar',
+        ];
+
+        if (! is_array($this->working_days) || empty($this->working_days)) {
+            return '';
+        }
+
+        $labels = array_map(fn ($day) => $map[$day] ?? $day, $this->working_days);
+
+        return implode(', ', $labels);
     }
 
     /**
