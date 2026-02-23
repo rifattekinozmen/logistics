@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Personel extends Model
 {
@@ -17,9 +19,17 @@ class Personel extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'personel_kodu',
         'ad_soyad',
+        'photo_path',
         'tckn',
         'kimlik_seri_no',
+        'cilt_no',
+        'aile_sira_no',
+        'sira_no',
+        'cuzdan_kayit_no',
+        'verilis_tarihi',
+        'son_gecerlilik_tarihi',
         'email',
         'telefon',
         'mobil_telefon',
@@ -29,11 +39,38 @@ class Personel extends Model
         'dogum_tarihi',
         'dogum_yeri',
         'medeni_durum',
+        'kan_grubu',
+        'cinsiyet',
+        'cocuk_sayisi',
+        'adres_satir_1',
+        'country_id',
+        'city_id',
+        'district_id',
+        'bulvar',
+        'sokak',
+        'dis_kapi',
+        'ic_kapi',
+        'posta_kodu',
         'departman',
         'pozisyon',
         'ise_baslama_tarihi',
+        'sgk_baslangic_tarihi',
         'maas',
+        'tahsil_durumu',
+        'mezun_okul',
+        'mezun_bolum',
+        'mezuniyet_tarihi',
+        'bildigi_dil',
+        'askerlik_durumu',
+        'sgk_yaslilik_ayligi',
+        'sgk_30_gunden_az',
+        'banka_adi',
+        'sube_kodu',
+        'hesap_no',
+        'maas_odeme_turu',
+        'iban',
         'aktif',
+        'notlar',
     ];
 
     /**
@@ -46,9 +83,60 @@ class Personel extends Model
         return [
             'ise_baslama_tarihi' => 'date',
             'dogum_tarihi' => 'date',
+            'sgk_baslangic_tarihi' => 'date',
+            'verilis_tarihi' => 'date',
+            'son_gecerlilik_tarihi' => 'date',
+            'mezuniyet_tarihi' => 'date',
             'maas' => 'decimal:2',
             'aktif' => 'boolean',
+            'sgk_yaslilik_ayligi' => 'boolean',
+            'sgk_30_gunden_az' => 'boolean',
         ];
+    }
+
+    /**
+     * Kimlik kartı için ad (soyad hariç).
+     */
+    public function getAdiAttribute(): string
+    {
+        $parts = preg_split('/\s+/u', trim($this->attributes['ad_soyad'] ?? ''), -1, PREG_SPLIT_NO_EMPTY);
+        if (count($parts) <= 1) {
+            return $this->attributes['ad_soyad'] ?? '';
+        }
+        return implode(' ', array_slice($parts, 0, -1));
+    }
+
+    /**
+     * Kimlik kartı için soyad (son kelime).
+     */
+    public function getSoyadiAttribute(): string
+    {
+        $parts = preg_split('/\s+/u', trim($this->attributes['ad_soyad'] ?? ''), -1, PREG_SPLIT_NO_EMPTY);
+        return $parts ? end($parts) : ($this->attributes['ad_soyad'] ?? '');
+    }
+
+    /**
+     * Get the country of the address.
+     */
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    /**
+     * Get the city of the address.
+     */
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    /**
+     * Get the district of the address.
+     */
+    public function district(): BelongsTo
+    {
+        return $this->belongsTo(District::class);
     }
 
     /**
@@ -57,5 +145,13 @@ class Personel extends Model
     public function personnelAttendances(): HasMany
     {
         return $this->hasMany(PersonnelAttendance::class);
+    }
+
+    /**
+     * Get the documents for the personel.
+     */
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
     }
 }

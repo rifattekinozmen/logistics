@@ -14,10 +14,11 @@ class DocumentController extends Controller
      */
     public function index(Request $request): View
     {
-        $filters = $request->only(['type', 'documentable_type', 'expiry_date_from', 'expiry_date_to']);
+        $filters = $request->only(['type', 'documentable_type', 'documentable_id', 'expiry_date_from', 'expiry_date_to']);
         $documents = \App\Models\Document::query()
             ->when($filters['type'] ?? null, fn ($q, $type) => $q->where('category', $type))
             ->when($filters['documentable_type'] ?? null, fn ($q, $type) => $q->where('documentable_type', $type))
+            ->when($filters['documentable_id'] ?? null, fn ($q, $id) => $q->where('documentable_id', $id))
             ->when($filters['expiry_date_from'] ?? null, fn ($q, $date) => $q->whereDate('valid_until', '>=', $date))
             ->when($filters['expiry_date_to'] ?? null, fn ($q, $date) => $q->whereDate('valid_until', '<=', $date))
             ->orderBy('valid_until', 'asc')

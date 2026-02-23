@@ -5,12 +5,53 @@ namespace App\Employee\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePersonelRequest;
 use App\Http\Requests\UpdatePersonelRequest;
+use App\Models\Country;
+use App\Models\Department;
 use App\Models\Personel;
+use App\Models\Position;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class PersonelController extends Controller
 {
+    /**
+     * Form için gerekli referans verileri.
+     *
+     * @return array<string, mixed>
+     */
+    private function getFormData(): array
+    {
+        $key = 'personnel_form_data';
+        if (app()->environment('testing')) {
+            return $this->buildFormData();
+        }
+
+        return Cache::remember($key, 300, fn () => $this->buildFormData());
+    }
+
+    /**
+     * Form referans verilerini oluşturur.
+     *
+     * @return array<string, mixed>
+     */
+    private function buildFormData(): array
+    {
+        $countries = Country::where('is_active', true)->orderBy('name_tr')->get();
+        $cities = \App\Models\City::where('is_active', true)->orderBy('name_tr')->get(['id', 'name_tr', 'country_id']);
+        $districts = \App\Models\District::where('is_active', true)->orderBy('name_tr')->get(['id', 'name_tr', 'city_id']);
+
+        return [
+            'countries' => $countries,
+            'cities' => $cities,
+            'districts' => $districts,
+            'departments' => Department::select('name')->distinct()->orderBy('name')->pluck('name', 'name'),
+            'positions' => Position::select('name')->distinct()->orderBy('name')->pluck('name', 'name'),
+            'banks' => config('personnel.banks', []),
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -41,7 +82,7 @@ class PersonelController extends Controller
      */
     public function create(): View
     {
-        return view('admin.personnel.create');
+        return view('admin.personnel.create', $this->getFormData());
     }
 
     /**
@@ -49,7 +90,13 @@ class PersonelController extends Controller
      */
     public function store(StorePersonelRequest $request): RedirectResponse
     {
-        Personel::create($request->validated());
+        $data = $request->validated();
+        if ($request->hasFile('photo')) {
+            $data['photo_path'] = $request->file('photo')->store('personnel-photos', 'public');
+        }
+        unset($data['photo']);
+
+        Personel::create($data);
 
         return redirect()->route('admin.personnel.index')
             ->with('success', 'Personel başarıyla oluşturuldu.');
@@ -60,6 +107,9 @@ class PersonelController extends Controller
      */
     public function show(Personel $personnel): View
     {
+        $personnel->load(['country', 'city', 'district']);
+        $personnel->loadCount(['documents', 'personnelAttendances']);
+
         return view('admin.personnel.show', compact('personnel'));
     }
 
@@ -68,7 +118,13 @@ class PersonelController extends Controller
      */
     public function edit(Personel $personnel): View
     {
-        return view('admin.personnel.edit', compact('personnel'));
+        $personnel->load(['country', 'city', 'district']);
+        $personnel->loadCount(['documents', 'personnelAttendances']);
+
+        return view('admin.personnel.edit', array_merge(
+            $this->getFormData(),
+            ['personnel' => $personnel]
+        ));
     }
 
     /**
@@ -76,7 +132,16 @@ class PersonelController extends Controller
      */
     public function update(UpdatePersonelRequest $request, Personel $personnel): RedirectResponse
     {
-        $personnel->update($request->validated());
+        $data = $request->validated();
+        if ($request->hasFile('photo')) {
+            if ($personnel->photo_path) {
+                Storage::disk('public')->delete($personnel->photo_path);
+            }
+            $data['photo_path'] = $request->file('photo')->store('personnel-photos', 'public');
+        }
+        unset($data['photo']);
+
+        $personnel->update($data);
 
         return redirect()->route('admin.personnel.index')
             ->with('success', 'Personel başarıyla güncellendi.');

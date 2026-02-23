@@ -1191,8 +1191,6 @@ aside.sidebar-light .custom-scrollbar::-webkit-scrollbar-track {
 .personel-preview-card {
     background: linear-gradient(165deg, var(--bs-white) 0%, var(--bs-primary-200) 40%, var(--bs-soft-bg) 100%);
     padding: 1.5rem 1.75rem;
-    position: sticky;
-    top: 1rem;
 }
 .personel-live-badge {
     display: inline-flex;
@@ -1235,6 +1233,78 @@ aside.sidebar-light .custom-scrollbar::-webkit-scrollbar-track {
 .personel-id-card .personel-id-value {
     font-weight: 600;
     text-align: right;
+}
+/* Genişletilmiş kimlik kartı – tek sütun, geniş alan */
+.personel-id-card-expanded {
+    min-width: 100%;
+    padding: 1.5rem 1.75rem;
+}
+.personel-id-card-expanded .personel-id-card-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+}
+.personel-id-card-expanded .personel-id-photo-col {
+    flex-shrink: 0;
+    align-self: center;
+}
+.personel-id-card-expanded .personel-id-photo,
+.personel-id-card-expanded .personel-id-photo-placeholder {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.personel-id-card-expanded .personel-id-photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+}
+.personel-id-card-expanded .personel-id-photo-placeholder .material-symbols-outlined {
+    font-size: 36px;
+}
+.personel-id-card-expanded .personel-id-fields-col {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+}
+.personel-id-card-expanded .personel-id-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.personel-id-card-expanded .personel-id-grid .personel-id-row {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 0.75rem 1rem;
+    align-items: baseline;
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+.personel-id-card-expanded .personel-id-grid .personel-id-label {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.personel-id-card-expanded .personel-id-grid .personel-id-value {
+    word-break: break-word;
+    text-align: right;
+}
+/* İletişim butonları hizalama */
+.personnel-contact-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    line-height: 1;
+}
+.personnel-contact-btn .material-symbols-outlined {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.cursor-pointer {
+    cursor: pointer;
 }
 .personel-footer-info {
     display: flex;

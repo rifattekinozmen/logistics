@@ -176,7 +176,8 @@
             aside.show { transform: translateX(0); }
         }
     </style>
-    
+
+    @yield('styles')
     @stack('styles')
 </head>
 <body class="min-vh-100">

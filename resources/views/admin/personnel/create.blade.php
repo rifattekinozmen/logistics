@@ -2,6 +2,10 @@
 
 @section('title', 'Yeni Personel - Logistics')
 
+@section('styles')
+@include('admin.personnel._personnel_styles')
+@endsection
+
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
@@ -15,46 +19,11 @@
 </div>
 
 <div class="bg-white rounded-3xl shadow-sm border p-4" style="border-color: var(--bs-primary-200);">
-    <form action="{{ route('admin.personnel.store') }}" method="POST">
+    <form action="{{ route('admin.personnel.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
-        <div class="row g-4">
-            <div class="col-md-6">
-                <x-form.input name="ad_soyad" label="Ad Soyad" :value="old('ad_soyad')" required />
-            </div>
-            <div class="col-md-6">
-                <x-form.input name="email" type="email" label="E-posta" :value="old('email')" required />
-            </div>
-            <div class="col-md-6">
-                <x-form.input name="telefon" label="Telefon" :value="old('telefon')" />
-            </div>
-            <div class="col-md-6">
-                <x-form.input name="mobil_telefon" label="Mobil Telefon" :value="old('mobil_telefon')" />
-            </div>
-            <div class="col-md-6">
-                <x-form.input name="departman" label="Departman" :value="old('departman')" required />
-            </div>
-            <div class="col-md-6">
-                <x-form.input name="pozisyon" label="Pozisyon" :value="old('pozisyon')" required />
-            </div>
-            <div class="col-md-6">
-                <x-form.input name="ise_baslama_tarihi" type="date" label="İşe Başlama Tarihi" :value="old('ise_baslama_tarihi')" required />
-            </div>
-            <div class="col-md-6">
-                <x-form.input name="maas" type="number" label="Maaş" :value="old('maas')" />
-            </div>
-            <div class="col-md-6">
-                <x-form.select
-                    name="aktif"
-                    label="Durum"
-                    :options="[1 => 'Aktif', 0 => 'Pasif']"
-                    :value="old('aktif', 1)"
-                />
-            </div>
-            <div class="col-md-6">
-                <x-form.input name="tckn" label="T.C. Kimlik No" :value="old('tckn')" />
-            </div>
-        </div>
+        @include('admin.personnel._header', ['personnel' => null, 'editable' => true])
+        @include('admin.personnel._form')
 
         <div class="d-flex align-items-center justify-content-end gap-3 mt-4 pt-4 border-top" style="border-color: var(--bs-primary-200);">
             <a href="{{ route('admin.personnel.index') }}" class="btn bg-secondary-200 text-secondary border-0 hover:bg-secondary hover:text-white transition-all">İptal</a>
@@ -62,4 +31,29 @@
         </div>
     </form>
 </div>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var photoInput = document.getElementById('personnel-photo-input-header');
+    if (photoInput) {
+        photoInput.addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    var placeholder = document.getElementById('personnel-header-avatar-placeholder');
+                    var img = document.getElementById('personnel-header-avatar-img');
+                    if (img) {
+                        img.src = ev.target.result;
+                    } else if (placeholder) {
+                        placeholder.outerHTML = '<img src="' + ev.target.result + '" alt="" class="rounded-circle object-fit-cover personnel-avatar-preview" style="width: 80px; height: 80px;" id="personnel-header-avatar-img">';
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endsection
