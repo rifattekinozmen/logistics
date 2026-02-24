@@ -29,7 +29,13 @@ class AdvanceController extends Controller
 
         $advances = $query->latest('requested_date')->paginate(25);
 
-        return view('admin.advances.index', compact('advances'));
+        $stats = [
+            'total' => Advance::count(),
+            'pending' => Advance::where('status', 'pending')->count(),
+            'approved' => Advance::whereIn('status', ['approved', 'paid'])->count(),
+        ];
+
+        return view('admin.advances.index', compact('advances', 'stats'));
     }
 
     /**

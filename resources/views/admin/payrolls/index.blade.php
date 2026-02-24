@@ -14,6 +14,11 @@
     </a>
 </div>
 
+<div class="row g-4 mb-4">
+    <x-index-stat-card title="Toplam" :value="$stats['total'] ?? 0" icon="receipt_long" color="primary" col="col-md-6" />
+    <x-index-stat-card title="Bu Ay" :value="$stats['this_month'] ?? 0" icon="calendar_month" color="info" col="col-md-6" />
+</div>
+
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
     <form method="GET" action="{{ route('admin.payrolls.index') }}" class="row g-3">
         <div class="col-md-3">

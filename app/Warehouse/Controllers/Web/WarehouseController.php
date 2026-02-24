@@ -46,7 +46,12 @@ class WarehouseController extends Controller
 
         $branches = \App\Models\Branch::where('company_id', $companyId)->where('status', 1)->orderBy('name')->get();
 
-        return view('admin.warehouses.index', compact('warehouses', 'branches'));
+        $stats = [
+            'total' => \App\Models\Warehouse::where('company_id', $companyId)->count(),
+            'active' => \App\Models\Warehouse::where('company_id', $companyId)->where('status', 1)->count(),
+        ];
+
+        return view('admin.warehouses.index', compact('warehouses', 'branches', 'stats'));
     }
 
     /**

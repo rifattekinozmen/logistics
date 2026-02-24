@@ -36,6 +36,12 @@
     </div>
 </div>
 
+<div class="row g-4 mb-4">
+    <x-index-stat-card title="Toplam" :value="$stats['total'] ?? 0" icon="inventory_2" color="primary" col="col-md-4" />
+    <x-index-stat-card title="Yolda / Beklemede" :value="$stats['active'] ?? 0" icon="schedule" color="warning" col="col-md-4" />
+    <x-index-stat-card title="Teslim Edildi" :value="$stats['delivered'] ?? 0" icon="local_shipping" color="success" col="col-md-4" />
+</div>
+
 <div class="filter-area filter-area-shipments rounded-3xl shadow-sm border p-4 mb-4">
     <form method="GET" action="{{ route('admin.shipments.index') }}" class="row g-3">
         <div class="col-md-3">

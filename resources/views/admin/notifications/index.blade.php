@@ -18,30 +18,10 @@
 </div>
 
 <div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="bg-white rounded-3xl shadow-sm border p-3">
-            <div class="small text-secondary mb-1">Toplam</div>
-            <div class="fw-bold text-dark fs-4">{{ $stats['total'] }}</div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="bg-white rounded-3xl shadow-sm border p-3">
-            <div class="small text-secondary mb-1">Bekleyen</div>
-            <div class="fw-bold text-warning fs-4">{{ $stats['pending'] }}</div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="bg-white rounded-3xl shadow-sm border p-3">
-            <div class="small text-secondary mb-1">Gönderildi</div>
-            <div class="fw-bold text-success fs-4">{{ $stats['sent'] }}</div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="bg-white rounded-3xl shadow-sm border p-3">
-            <div class="small text-secondary mb-1">Okunmamış</div>
-            <div class="fw-bold text-primary fs-4">{{ $stats['unread'] }}</div>
-        </div>
-    </div>
+    <x-index-stat-card title="Toplam" :value="$stats['total'] ?? 0" icon="notifications" color="primary" />
+    <x-index-stat-card title="Bekleyen" :value="$stats['pending'] ?? 0" icon="schedule" color="warning" />
+    <x-index-stat-card title="Gönderildi" :value="$stats['sent'] ?? 0" icon="send" color="success" />
+    <x-index-stat-card title="Okunmamış" :value="$stats['unread'] ?? 0" icon="mark_email_unread" color="info" />
 </div>
 
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">

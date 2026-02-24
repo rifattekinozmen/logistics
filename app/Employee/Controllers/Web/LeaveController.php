@@ -29,7 +29,13 @@ class LeaveController extends Controller
 
         $leaves = $query->latest('start_date')->paginate(25);
 
-        return view('admin.leaves.index', compact('leaves'));
+        $stats = [
+            'total' => Leave::count(),
+            'pending' => Leave::where('status', 'pending')->count(),
+            'approved' => Leave::where('status', 'approved')->count(),
+        ];
+
+        return view('admin.leaves.index', compact('leaves', 'stats'));
     }
 
     /**

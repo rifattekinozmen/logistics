@@ -42,7 +42,21 @@ class OrderController extends Controller
 
         $orders = $this->orderService->getPaginated($filters);
 
-        return view('admin.orders.index', compact('orders'));
+        $orderStats = Order::query()->selectRaw("
+            COUNT(*) as total,
+            COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
+            COUNT(CASE WHEN status = 'delivered' THEN 1 END) as delivered,
+            COUNT(CASE WHEN status = 'cancelled' THEN 1 END) as cancelled
+        ")->first();
+
+        $stats = [
+            'total' => (int) ($orderStats->total ?? 0),
+            'pending' => (int) ($orderStats->pending ?? 0),
+            'delivered' => (int) ($orderStats->delivered ?? 0),
+            'cancelled' => (int) ($orderStats->cancelled ?? 0),
+        ];
+
+        return view('admin.orders.index', compact('orders', 'stats'));
     }
 
     /**

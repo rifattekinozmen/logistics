@@ -14,6 +14,10 @@
     </a>
 </div>
 
+<div class="row g-4 mb-4">
+    <x-index-stat-card title="Toplam Kayıt" :value="$stats['total'] ?? 0" icon="local_gas_station" color="primary" col="col-md-12" />
+</div>
+
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
     <form method="GET" action="{{ route('admin.fuel-prices.index') }}" class="row g-3">
         <div class="col-md-3">

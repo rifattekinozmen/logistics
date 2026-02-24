@@ -26,7 +26,11 @@ class ShiftController extends Controller
         $employees = \App\Models\Employee::where('status', 1)->orderBy('first_name')->get();
         $templates = \App\Models\ShiftTemplate::orderBy('name')->get();
 
-        return view('admin.shifts.index', compact('shifts', 'employees', 'templates'));
+        $stats = [
+            'total' => \App\Models\ShiftSchedule::count(),
+        ];
+
+        return view('admin.shifts.index', compact('shifts', 'employees', 'templates', 'stats'));
     }
 
     /**

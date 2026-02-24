@@ -29,7 +29,13 @@ class ShipmentController extends Controller
 
         $shipments = $this->buildQuery($filters)->paginate(25);
 
-        return view('admin.shipments.index', compact('shipments'));
+        $stats = [
+            'total' => \App\Models\Shipment::count(),
+            'active' => \App\Models\Shipment::whereIn('status', ['pending', 'in_transit'])->count(),
+            'delivered' => \App\Models\Shipment::where('status', 'delivered')->count(),
+        ];
+
+        return view('admin.shipments.index', compact('shipments', 'stats'));
     }
 
     /**

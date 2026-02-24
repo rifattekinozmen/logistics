@@ -40,9 +40,14 @@ class FuelPriceController extends Controller
 
         $prices = $query->latest('price_date')->paginate(30);
 
+        $stats = [
+            'total' => FuelPrice::where('company_id', $company->id)->count(),
+        ];
+
         return view('admin.fuel-prices.index', [
             'prices' => $prices,
             'filters' => $request->only(['date_from', 'date_to', 'price_type']),
+            'stats' => $stats,
         ]);
     }
 

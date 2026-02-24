@@ -24,7 +24,11 @@ class DocumentController extends Controller
             ->orderBy('valid_until', 'asc')
             ->paginate(25);
 
-        return view('admin.documents.index', compact('documents'));
+        $stats = [
+            'total' => \App\Models\Document::count(),
+        ];
+
+        return view('admin.documents.index', compact('documents', 'stats'));
     }
 
     /**

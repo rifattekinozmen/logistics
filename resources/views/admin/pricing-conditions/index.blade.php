@@ -14,6 +14,11 @@
     </a>
 </div>
 
+<div class="row g-4 mb-4">
+    <x-index-stat-card title="Toplam" :value="$stats['total'] ?? 0" icon="price_check" color="primary" col="col-md-6" />
+    <x-index-stat-card title="Aktif" :value="$stats['active'] ?? 0" icon="check_circle" color="success" col="col-md-6" />
+</div>
+
 <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
     <form method="GET" action="{{ route('admin.pricing-conditions.index') }}" class="row g-3">
         <div class="col-md-3">

@@ -14,6 +14,12 @@
     </a>
 </div>
 
+<div class="row g-4 mb-4">
+    <x-index-stat-card title="Toplam" :value="$stats['total'] ?? 0" icon="upload_file" color="primary" col="col-md-4" />
+    <x-index-stat-card title="Tamamlandı" :value="$stats['completed'] ?? 0" icon="check_circle" color="success" col="col-md-4" />
+    <x-index-stat-card title="Hatalı" :value="$stats['failed'] ?? 0" icon="error" color="danger" col="col-md-4" />
+</div>
+
 <form method="GET" action="{{ route('admin.delivery-imports.index') }}" class="mb-4">
     <div class="bg-white rounded-3xl shadow-sm border p-3">
         <div class="row g-3 align-items-end">

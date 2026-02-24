@@ -43,7 +43,12 @@ class UserController extends Controller
         $customerRoles = CustomRole::whereIn('name', ['customer', 'customer_user', 'customer_viewer'])->get();
         $systemRoles = CustomRole::whereNotIn('name', ['customer', 'customer_user', 'customer_viewer'])->get();
 
-        return view('admin.users.index', compact('users', 'roles', 'customerRoles', 'systemRoles'));
+        $stats = [
+            'total' => User::count(),
+            'active' => User::where('status', 1)->count(),
+        ];
+
+        return view('admin.users.index', compact('users', 'roles', 'customerRoles', 'systemRoles', 'stats'));
     }
 
     /**

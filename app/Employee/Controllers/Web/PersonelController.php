@@ -74,7 +74,12 @@ class PersonelController extends Controller
 
         $personels = $query->latest()->paginate(15);
 
-        return view('admin.personnel.index', compact('personels'));
+        $stats = [
+            'total' => Personel::count(),
+            'active' => Personel::where('aktif', 1)->count(),
+        ];
+
+        return view('admin.personnel.index', compact('personels', 'stats'));
     }
 
     /**

@@ -38,7 +38,14 @@ class PayrollController extends Controller
 
         $payrolls = $query->latest('period_start')->paginate(25);
 
-        return view('admin.payrolls.index', compact('payrolls'));
+        $stats = [
+            'total' => Payroll::count(),
+            'this_month' => Payroll::whereMonth('period_start', now()->month)
+                ->whereYear('period_start', now()->year)
+                ->count(),
+        ];
+
+        return view('admin.payrolls.index', compact('payrolls', 'stats'));
     }
 
     /**

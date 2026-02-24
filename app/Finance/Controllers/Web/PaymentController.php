@@ -33,7 +33,14 @@ class PaymentController extends Controller
             Customer::class => ['businessPartner.company'],
         ]);
 
-        return view('admin.payments.index', compact('payments'));
+        $stats = [
+            'total_amount' => (float) \App\Models\Payment::sum('amount'),
+            'pending' => \App\Models\Payment::where('status', \App\Models\Payment::STATUS_PENDING)->count(),
+            'paid' => \App\Models\Payment::where('status', \App\Models\Payment::STATUS_PAID)->count(),
+            'overdue' => \App\Models\Payment::where('status', \App\Models\Payment::STATUS_OVERDUE)->count(),
+        ];
+
+        return view('admin.payments.index', compact('payments', 'stats'));
     }
 
     /**

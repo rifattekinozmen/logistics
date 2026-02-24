@@ -40,7 +40,13 @@ class CustomerController extends Controller
             ->orderBy('name')
             ->paginate(25);
 
-        return view('admin.customers.index', compact('customers'));
+        $stats = [
+            'total' => Customer::count(),
+            'active' => Customer::where('status', 1)->count(),
+            'inactive' => Customer::where('status', 0)->count(),
+        ];
+
+        return view('admin.customers.index', compact('customers', 'stats'));
     }
 
     /**

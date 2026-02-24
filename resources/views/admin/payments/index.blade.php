@@ -36,6 +36,13 @@
     </div>
 </div>
 
+<div class="row g-4 mb-4">
+    <x-index-stat-card title="Toplam Tutar (₺)" :value="number_format($stats['total_amount'] ?? 0, 2, ',', '.')" icon="payments" color="primary" />
+    <x-index-stat-card title="Bekleyen" :value="$stats['pending'] ?? 0" icon="schedule" color="warning" />
+    <x-index-stat-card title="Ödendi" :value="$stats['paid'] ?? 0" icon="check_circle" color="success" />
+    <x-index-stat-card title="Gecikmiş" :value="$stats['overdue'] ?? 0" icon="warning" color="danger" />
+</div>
+
 <div class="filter-area filter-area-payments rounded-3xl shadow-sm border p-4 mb-4">
     <form method="GET" action="{{ route('admin.payments.index') }}" class="row g-3">
         <div class="col-md-3">

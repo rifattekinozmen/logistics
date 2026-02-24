@@ -34,7 +34,13 @@ class VehicleController extends Controller
         $vehicles = $this->vehicleService->getPaginated($filters);
         $branches = \App\Models\Branch::where('status', 1)->orderBy('name')->get();
 
-        return view('admin.vehicles.index', compact('vehicles', 'branches'));
+        $stats = [
+            'total' => \App\Models\Vehicle::count(),
+            'active' => \App\Models\Vehicle::where('status', 1)->count(),
+            'maintenance' => \App\Models\Vehicle::where('status', 2)->count(),
+        ];
+
+        return view('admin.vehicles.index', compact('vehicles', 'branches', 'stats'));
     }
 
     /**

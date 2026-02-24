@@ -14,6 +14,12 @@
     </a>
 </div>
 
+<div class="row g-4 mb-4">
+    <x-index-stat-card title="Toplam" :value="$stats['total'] ?? 0" icon="event_available" color="primary" col="col-md-4" />
+    <x-index-stat-card title="Onay Bekleyen" :value="$stats['pending'] ?? 0" icon="schedule" color="warning" col="col-md-4" />
+    <x-index-stat-card title="Onaylandı" :value="$stats['approved'] ?? 0" icon="check_circle" color="success" col="col-md-4" />
+</div>
+
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
     <form method="GET" action="{{ route('admin.leaves.index') }}" class="row g-3">
         <div class="col-md-4">

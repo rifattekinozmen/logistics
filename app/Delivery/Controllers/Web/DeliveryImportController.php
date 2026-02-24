@@ -43,7 +43,13 @@ class DeliveryImportController extends Controller
 
         $batches = $query->withCount('reportRows')->paginate(20)->withQueryString();
 
-        return view('admin.delivery-imports.index', compact('batches'));
+        $stats = [
+            'total' => DeliveryImportBatch::count(),
+            'completed' => DeliveryImportBatch::where('status', 'completed')->count(),
+            'failed' => DeliveryImportBatch::where('status', 'failed')->count(),
+        ];
+
+        return view('admin.delivery-imports.index', compact('batches', 'stats'));
     }
 
     /**

@@ -28,7 +28,13 @@ class WorkOrderController extends Controller
         $vehicles = \App\Models\Vehicle::where('status', 1)->orderBy('plate')->get();
         $serviceProviders = \App\Models\ServiceProvider::where('status', 1)->orderBy('name')->get();
 
-        return view('admin.work-orders.index', compact('workOrders', 'vehicles', 'serviceProviders'));
+        $stats = [
+            'total' => \App\Models\WorkOrder::count(),
+            'pending' => \App\Models\WorkOrder::where('status', 'pending')->count(),
+            'completed' => \App\Models\WorkOrder::where('status', 'completed')->count(),
+        ];
+
+        return view('admin.work-orders.index', compact('workOrders', 'vehicles', 'serviceProviders', 'stats'));
     }
 
     /**

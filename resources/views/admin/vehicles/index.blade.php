@@ -36,6 +36,12 @@
     </div>
 </div>
 
+<div class="row g-4 mb-4">
+    <x-index-stat-card title="Toplam" :value="$stats['total'] ?? 0" icon="local_shipping" color="primary" col="col-md-4" />
+    <x-index-stat-card title="Aktif" :value="$stats['active'] ?? 0" icon="check_circle" color="success" col="col-md-4" />
+    <x-index-stat-card title="Bakımda" :value="$stats['maintenance'] ?? 0" icon="build" color="warning" col="col-md-4" />
+</div>
+
 <div class="filter-area filter-area-vehicles rounded-3xl shadow-sm border p-4 mb-4">
     <form method="GET" action="{{ route('admin.vehicles.index') }}" class="row g-3">
         <div class="col-md-3">

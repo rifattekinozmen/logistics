@@ -21,7 +21,12 @@ class BusinessPartnerController extends Controller
         $filters = $request->only(['partner_type', 'search']);
         $partners = $this->partnerService->getPaginated($filters);
 
-        return view('admin.business-partners.index', compact('partners'));
+        $stats = [
+            'total' => BusinessPartner::count(),
+            'active' => BusinessPartner::where('status', 1)->count(),
+        ];
+
+        return view('admin.business-partners.index', compact('partners', 'stats'));
     }
 
     public function create(): View

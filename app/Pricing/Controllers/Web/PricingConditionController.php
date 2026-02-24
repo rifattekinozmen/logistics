@@ -21,7 +21,12 @@ class PricingConditionController extends Controller
         $filters = $request->only(['condition_type', 'status', 'company_id']);
         $conditions = $this->pricingService->getPaginated($filters);
 
-        return view('admin.pricing-conditions.index', compact('conditions'));
+        $stats = [
+            'total' => PricingCondition::count(),
+            'active' => PricingCondition::where('status', 1)->count(),
+        ];
+
+        return view('admin.pricing-conditions.index', compact('conditions', 'stats'));
     }
 
     public function create(): View
