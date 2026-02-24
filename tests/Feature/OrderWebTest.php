@@ -157,3 +157,20 @@ it('requires authentication to access order routes', function () {
     $this->get(route('admin.orders.show', $order))
         ->assertRedirect('/login');
 });
+
+it('filters orders by workflow shortcut', function () {
+    [$user, $company] = createAdminUser();
+    $deliveredOrder = Order::factory()->create(['status' => 'delivered']);
+    $pendingOrder = Order::factory()->create(['status' => 'pending']);
+
+    $response = $this->actingAs($user)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('admin.orders.index', ['workflow' => 'delivered']));
+
+    $response->assertSuccessful()
+        ->assertViewHas('orders', function ($orders) use ($deliveredOrder, $pendingOrder) {
+            $ids = $orders->getCollection()->pluck('id');
+
+            return $ids->contains($deliveredOrder->id) && ! $ids->contains($pendingOrder->id);
+        });
+});

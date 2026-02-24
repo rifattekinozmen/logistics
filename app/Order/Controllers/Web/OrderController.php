@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Order\Requests\StoreOrderRequest;
 use App\Order\Requests\UpdateOrderRequest;
 use App\Order\Services\OrderService;
+use App\Order\Services\OrderWorkflowGuardService;
 use App\Order\Services\OrderStatusTransitionService;
 use DomainException;
 use Illuminate\Http\JsonResponse;
@@ -27,6 +28,7 @@ class OrderController extends Controller
         protected OrderService $orderService,
         protected ExportService $exportService,
         protected ExcelImportService $excelImportService,
+        protected OrderWorkflowGuardService $workflowGuardService,
         protected OrderStatusTransitionService $transitionService
     ) {}
 
@@ -35,7 +37,18 @@ class OrderController extends Controller
      */
     public function index(Request $request): View|StreamedResponse|Response
     {
-        $filters = $request->only(['status', 'customer_id', 'date_from', 'date_to']);
+        $filters = $request->only(['status', 'customer_id', 'date_from', 'date_to', 'workflow']);
+
+        if ($request->filled('workflow')) {
+            $filters['status'] = match ($request->string('workflow')->toString()) {
+                'waiting_payment' => ['pending'],
+                'preparing' => ['planned'],
+                'ready_for_shipment' => ['assigned'],
+                'shipped' => ['loaded', 'in_transit'],
+                'delivered' => ['delivered'],
+                default => $filters['status'] ?? null,
+            };
+        }
 
         if ($request->has('export')) {
             return $this->export($filters, $request->get('export'));
@@ -328,8 +341,10 @@ class OrderController extends Controller
     public function show(int $id): View
     {
         $order = \App\Models\Order::with(['customer', 'shipments.vehicle', 'shipments.driver', 'creator'])->findOrFail($id);
+        $timelineSteps = $this->workflowGuardService->buildLinearTimeline($order);
+        $paymentConfirmed = $this->workflowGuardService->hasConfirmedPayment($order);
 
-        return view('admin.orders.show', compact('order'));
+        return view('admin.orders.show', compact('order', 'timelineSteps', 'paymentConfirmed'));
     }
 
     /**
@@ -348,6 +363,9 @@ class OrderController extends Controller
     public function update(UpdateOrderRequest $request, int $id): RedirectResponse
     {
         $order = \App\Models\Order::findOrFail($id);
+        if ($order->status === 'invoiced') {
+            abort(403, 'Faturalanmış sipariş değiştirilemez.');
+        }
 
         $this->orderService->update($order, $request->validated());
 
@@ -380,6 +398,10 @@ class OrderController extends Controller
         ]);
 
         try {
+            if ($request->input('status') === 'invoiced' && ! $this->workflowGuardService->canCreateInvoice($order)) {
+                throw new DomainException('Teslim edilmeyen sipariş faturalanamaz.');
+            }
+
             $this->transitionService->transition($order, $request->input('status'), $request->user());
         } catch (DomainException $e) {
             return back()->withErrors(['transition' => $e->getMessage()]);

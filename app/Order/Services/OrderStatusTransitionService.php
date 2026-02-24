@@ -67,6 +67,7 @@ class OrderStatusTransitionService
 
         match ($newStatus) {
             'planned' => $updates['planned_at'] = now(),
+            'loaded' => $updates['actual_pickup_date'] = now(),
             'delivered' => $updates['delivered_at'] = now(),
             'invoiced' => $updates['invoiced_at'] = now(),
             default => null,

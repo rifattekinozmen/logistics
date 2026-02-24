@@ -45,7 +45,9 @@ class OrderService
         $query = Order::query()->with(['customer', 'creator']);
 
         if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
+            is_array($filters['status'])
+                ? $query->whereIn('status', $filters['status'])
+                : $query->where('status', $filters['status']);
         }
 
         if (isset($filters['customer_id'])) {
@@ -71,7 +73,9 @@ class OrderService
         $query = Order::query()->with(['customer', 'creator']);
 
         if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
+            is_array($filters['status'])
+                ? $query->whereIn('status', $filters['status'])
+                : $query->where('status', $filters['status']);
         }
 
         if (isset($filters['customer_id'])) {

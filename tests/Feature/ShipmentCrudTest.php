@@ -2,6 +2,7 @@
 
 use App\Models\Employee;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Shipment;
 use App\Models\Vehicle;
 
@@ -15,6 +16,10 @@ it('can create a shipment', function () {
     $order = Order::factory()->create();
     $vehicle = Vehicle::factory()->create();
     $driver = Employee::factory()->create();
+    Payment::factory()->paid()->create([
+        'related_type' => \App\Models\Customer::class,
+        'related_id' => $order->customer_id,
+    ]);
 
     $shipmentData = [
         'order_id' => $order->id,
@@ -29,6 +34,20 @@ it('can create a shipment', function () {
 
     $response->assertRedirect();
     expect(Shipment::count())->toBe(1);
+});
+
+it('blocks shipment creation when payment is not confirmed', function () {
+    $order = Order::factory()->create(['status' => 'pending']);
+    $vehicle = Vehicle::factory()->create();
+
+    $response = $this->post(route('admin.shipments.store'), [
+        'order_id' => $order->id,
+        'vehicle_id' => $vehicle->id,
+        'status' => 'pending',
+        'pickup_date' => now()->addDay()->format('Y-m-d H:i:s'),
+    ]);
+
+    $response->assertForbidden();
 });
 
 it('can list shipments', function () {
@@ -91,4 +110,16 @@ it('tracks shipment status transitions', function () {
 
     $shipment->update(['status' => 'delivered']);
     expect($shipment->status)->toBe('delivered');
+});
+
+it('filters shipments by workflow shortcut', function () {
+    Shipment::factory()->create(['status' => 'delivered']);
+    Shipment::factory()->create(['status' => 'pending']);
+
+    $response = $this->get(route('admin.shipments.index', ['workflow' => 'delivered']));
+
+    $response->assertSuccessful()
+        ->assertViewHas('shipments', function ($shipments) {
+            return $shipments->getCollection()->every(fn ($shipment) => $shipment->status === 'delivered');
+        });
 });

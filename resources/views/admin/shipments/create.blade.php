@@ -24,7 +24,7 @@
                 <select name="order_id" class="form-select border-primary-200 focus:border-primary focus:ring-primary @error('order_id') is-invalid border-danger @enderror" required>
                     <option value="">Sipariş Seçin</option>
                     @foreach($orders ?? [] as $order)
-                    <option value="{{ $order->id }}" {{ old('order_id') == $order->id ? 'selected' : '' }}>
+                    <option value="{{ $order->id }}" {{ old('order_id', $orderId ?? null) == $order->id ? 'selected' : '' }}>
                         #{{ $order->order_number }} - {{ $order->customer->name ?? '' }}
                     </option>
                     @endforeach

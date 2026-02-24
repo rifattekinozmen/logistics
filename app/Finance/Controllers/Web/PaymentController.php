@@ -3,8 +3,11 @@
 namespace App\Finance\Controllers\Web;
 
 use App\Core\Services\ExportService;
+use App\Events\OrderPaid;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\Order;
+use App\Models\Payment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -89,11 +92,15 @@ class PaymentController extends Controller
     /**
      * Show the form for creating a new payment.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
-        $companies = \App\Models\Company::active()->orderBy('name')->get();
+        $customerId = $request->integer('customer_id');
+        $orderId = $request->integer('from_order');
+        $order = $orderId ? Order::with('customer')->find($orderId) : null;
+        $customers = Customer::where('status', 1)->orderBy('name')->get();
+        $selectedCustomer = $customerId ? Customer::find($customerId) : ($order?->customer ?? $customers->first());
 
-        return view('admin.payments.create', compact('companies'));
+        return view('admin.payments.create', compact('customers', 'selectedCustomer', 'order'));
     }
 
     /**
@@ -113,6 +120,16 @@ class PaymentController extends Controller
 
         $validated['created_by'] = $request->user()?->id;
         $payment = \App\Models\Payment::create($validated);
+
+        if ((int) $payment->status === Payment::STATUS_PAID && $payment->related_type === Customer::class) {
+            $this->dispatchOrderPaidForCustomer((int) $payment->related_id);
+        }
+
+        $orderId = $request->integer('from_order');
+        if ($orderId) {
+            return redirect()->route('admin.orders.show', $orderId)
+                ->with('success', 'Ödeme başarıyla oluşturuldu. Sevkiyat oluşturabilirsiniz.');
+        }
 
         return redirect()->route('admin.payments.show', $payment)
             ->with('success', 'Ödeme başarıyla oluşturuldu.');
@@ -148,6 +165,7 @@ class PaymentController extends Controller
     public function update(Request $request, int $id): RedirectResponse
     {
         $payment = \App\Models\Payment::findOrFail($id);
+        $wasPaid = (int) $payment->status === Payment::STATUS_PAID;
 
         $validated = $request->validate([
             'related_type' => 'required|string|in:'.implode(',', [\App\Models\Customer::class]),
@@ -160,6 +178,10 @@ class PaymentController extends Controller
         ]);
 
         $payment->update($validated);
+
+        if (! $wasPaid && (int) $payment->status === Payment::STATUS_PAID && $payment->related_type === Customer::class) {
+            $this->dispatchOrderPaidForCustomer((int) $payment->related_id);
+        }
 
         return redirect()->route('admin.payments.show', $payment)
             ->with('success', 'Ödeme başarıyla güncellendi.');
@@ -175,5 +197,18 @@ class PaymentController extends Controller
 
         return redirect()->route('admin.payments.index')
             ->with('success', 'Ödeme başarıyla silindi.');
+    }
+
+    protected function dispatchOrderPaidForCustomer(int $customerId): void
+    {
+        $order = Order::query()
+            ->where('customer_id', $customerId)
+            ->whereIn('status', ['pending', 'planned'])
+            ->latest('id')
+            ->first();
+
+        if ($order) {
+            event(new OrderPaid($order));
+        }
     }
 }

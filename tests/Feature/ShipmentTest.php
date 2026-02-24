@@ -2,12 +2,17 @@
 
 use App\Models\Employee;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Shipment;
 use App\Models\Vehicle;
 
 it('can create a shipment', function () {
     [$user, $company] = createAdminUser();
     $order = Order::factory()->create(['status' => 'pending']);
+    Payment::factory()->paid()->create([
+        'related_type' => \App\Models\Customer::class,
+        'related_id' => $order->customer_id,
+    ]);
     $vehicle = Vehicle::factory()->create();
     $driver = Employee::factory()->create();
 

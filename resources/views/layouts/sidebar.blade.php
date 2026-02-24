@@ -48,6 +48,14 @@
                         <span class="fw-semibold" style="font-size: 14px;">Siparişler</span>
                     </a>
                 </li>
+                <li class="mb-2 ps-4">
+                    <div class="d-flex flex-column gap-1">
+                        <a href="{{ route('admin.orders.index', ['workflow' => 'waiting_payment']) }}" class="small text-decoration-none {{ request('workflow') === 'waiting_payment' ? 'text-primary fw-semibold' : 'text-secondary' }}">• Ödeme Bekleyenler</a>
+                        <a href="{{ route('admin.orders.index', ['workflow' => 'preparing']) }}" class="small text-decoration-none {{ request('workflow') === 'preparing' ? 'text-primary fw-semibold' : 'text-secondary' }}">• Hazırlanan Siparişler</a>
+                        <a href="{{ route('admin.orders.index', ['workflow' => 'ready_for_shipment']) }}" class="small text-decoration-none {{ request('workflow') === 'ready_for_shipment' ? 'text-primary fw-semibold' : 'text-secondary' }}">• Sevkiyata Hazır</a>
+                        <a href="{{ route('admin.orders.index', ['workflow' => 'delivered']) }}" class="small text-decoration-none {{ request('workflow') === 'delivered' ? 'text-primary fw-semibold' : 'text-secondary' }}">• Teslim Edilenler</a>
+                    </div>
+                </li>
                 @endif
                 @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('customer.view'))
                 <li class="mb-1">
@@ -85,11 +93,63 @@
                         <span class="fw-semibold" style="font-size: 14px;">Sevkiyatlar</span>
                     </a>
                 </li>
+                <li class="mb-2 ps-4">
+                    <div class="d-flex flex-column gap-1">
+                        <a href="{{ route('admin.shipments.index', ['workflow' => 'planned']) }}" class="small text-decoration-none {{ request('workflow') === 'planned' ? 'text-primary fw-semibold' : 'text-secondary' }}">• Planlanan</a>
+                        <a href="{{ route('admin.shipments.index', ['workflow' => 'loading']) }}" class="small text-decoration-none {{ request('workflow') === 'loading' ? 'text-primary fw-semibold' : 'text-secondary' }}">• Yüklemede</a>
+                        <a href="{{ route('admin.shipments.index', ['workflow' => 'in_transit']) }}" class="small text-decoration-none {{ request('workflow') === 'in_transit' ? 'text-primary fw-semibold' : 'text-secondary' }}">• Yolda Olanlar</a>
+                        <a href="{{ route('admin.shipments.index', ['workflow' => 'delivered']) }}" class="small text-decoration-none {{ request('workflow') === 'delivered' ? 'text-primary fw-semibold' : 'text-secondary' }}">• Teslim Edilenler</a>
+                    </div>
+                </li>
                 @endif
                 <li class="mb-1">
                     <a href="{{ route('admin.delivery-imports.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.delivery-imports.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">upload_file</span>
                         <span class="fw-semibold" style="font-size: 14px;">Teslimat Raporları</span>
+                    </a>
+                </li>
+
+                <!-- 5. Finans & Belgeler -->
+                <li class="mb-2 mt-3">
+                    <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Finans & Belgeler</p>
+                </li>
+                @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('payment.view'))
+                <li class="mb-1">
+                    <a href="{{ route('admin.payments.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.payments.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">payments</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Finans</span>
+                    </a>
+                </li>
+                @endif
+                @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('document.view'))
+                <li class="mb-1">
+                    <a href="{{ route('admin.documents.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.documents.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">description</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Belgeler</span>
+                    </a>
+                </li>
+                @endif
+
+                <!-- 6. Analitik & Raporlama -->
+                <li class="mb-2 mt-3">
+                    <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Analitik & Raporlama</p>
+                </li>
+                <li class="mb-1">
+                    <a href="{{ route('admin.analytics.finance') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.analytics.finance') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">analytics</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Finans Analitik</span>
+                    </a>
+                </li>
+                <li class="mb-1">
+                    <a href="{{ route('admin.analytics.operations') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.analytics.operations') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">donut_small</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Operasyon Analitik</span>
+                    </a>
+                </li>
+                <li class="mb-1">
+                    <a href="{{ route('admin.analytics.fleet') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.analytics.fleet') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">speed</span>
+                        <span class="fw-semibold" style="font-size: 14px;">Filo Analitik</span>
                     </a>
                 </li>
 
@@ -160,50 +220,6 @@
                     <a href="{{ route('admin.payrolls.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.payrolls.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">receipt_long</span>
                         <span class="fw-semibold" style="font-size: 14px;">Bordrolar</span>
-                    </a>
-                </li>
-
-                <!-- 5. Finans & Belgeler -->
-                <li class="mb-2 mt-3">
-                    <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Finans & Belgeler</p>
-                </li>
-                @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('payment.view'))
-                <li class="mb-1">
-                    <a href="{{ route('admin.payments.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.payments.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">payments</span>
-                        <span class="fw-semibold" style="font-size: 14px;">Finans</span>
-                    </a>
-                </li>
-                @endif
-                @if(!$sidebarUser || !method_exists($sidebarUser, 'hasPermission') || $sidebarUser->hasPermission('document.view'))
-                <li class="mb-1">
-                    <a href="{{ route('admin.documents.index') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.documents.*') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">description</span>
-                        <span class="fw-semibold" style="font-size: 14px;">Belgeler</span>
-                    </a>
-                </li>
-                @endif
-
-                <!-- 6. Analitik & Raporlama -->
-                <li class="mb-2 mt-3">
-                    <p class="small text-muted fw-bold mb-1 px-3 sidebar-group-heading" style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Analitik & Raporlama</p>
-                </li>
-                <li class="mb-1">
-                    <a href="{{ route('admin.analytics.finance') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.analytics.finance') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">analytics</span>
-                        <span class="fw-semibold" style="font-size: 14px;">Finans Analitik</span>
-                    </a>
-                </li>
-                <li class="mb-1">
-                    <a href="{{ route('admin.analytics.operations') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.analytics.operations') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">donut_small</span>
-                        <span class="fw-semibold" style="font-size: 14px;">Operasyon Analitik</span>
-                    </a>
-                </li>
-                <li class="mb-1">
-                    <a href="{{ route('admin.analytics.fleet') }}" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3xl text-decoration-none transition-all sidebar-link {{ request()->routeIs('admin.analytics.fleet') ? 'bg-primary text-white shadow-sm' : 'text-secondary' }}">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">speed</span>
-                        <span class="fw-semibold" style="font-size: 14px;">Filo Analitik</span>
                     </a>
                 </li>
 

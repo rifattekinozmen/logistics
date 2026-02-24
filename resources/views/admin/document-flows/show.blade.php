@@ -6,12 +6,34 @@
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
         <h2 class="h3 fw-bold text-dark mb-1">Doküman Akışı</h2>
-        <p class="text-secondary mb-0">Sipariş #{{ $order->order_number }} — SAP Belge Zinciri</p>
+        <p class="text-secondary mb-0">Sipariş #{{ $order->order_number }} — {{ $order->customer?->name ?? 'Müşteri' }}</p>
     </div>
     <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-light d-inline-flex align-items-center gap-2">
         <span class="material-symbols-outlined">arrow_back</span>
         Siparişe Dön
     </a>
+</div>
+
+{{-- Sipariş Özeti --}}
+<div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
+    <h4 class="h6 fw-bold text-dark mb-3">Sipariş Özeti</h4>
+    <div class="row g-3 small">
+        <div class="col-md-6">
+            <span class="text-secondary">Müşteri:</span>
+            <span class="fw-semibold ms-1">{{ $order->customer?->name ?? '-' }}</span>
+        </div>
+        <div class="col-md-6">
+            <span class="text-secondary">Alış:</span>
+            <span class="ms-1 text-break">{{ Str::limit($order->pickup_address, 50) }}</span>
+        </div>
+        <div class="col-md-6">
+            <span class="text-secondary">Teslimat:</span>
+            <span class="ms-1 text-break">{{ Str::limit($order->delivery_address, 50) }}</span>
+        </div>
+        <div class="col-md-6">
+            <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary">Sipariş Detayı</a>
+        </div>
+    </div>
 </div>
 
 <div class="bg-white rounded-3xl shadow-sm border p-4">
@@ -54,15 +76,33 @@
                                 <div class="small text-secondary mt-1">
                                     <span class="me-3">
                                         <strong>Kaynak:</strong>
-                                        {{ $modelLabels[$flow->source_type] ?? class_basename($flow->source_type) }} #{{ $flow->source_id }}
+                                        @if($flow->source_type === \App\Models\Order::class)
+                                            <a href="{{ route('admin.orders.show', $flow->source_id) }}">{{ $modelLabels[$flow->source_type] ?? 'Sipariş' }} #{{ $order->order_number }}</a>
+                                        @else
+                                            {{ $modelLabels[$flow->source_type] ?? class_basename($flow->source_type) }} #{{ $flow->source_id }}
+                                        @endif
                                     </span>
                                     @if($flow->target_type)
                                     <span>
                                         <strong>Hedef:</strong>
-                                        {{ $modelLabels[$flow->target_type] ?? class_basename($flow->target_type) }} #{{ $flow->target_id }}
+                                        @if($flow->target_type === \App\Models\Shipment::class && isset($shipments[$flow->target_id]))
+                                            <a href="{{ route('admin.shipments.show', $flow->target_id) }}">Sevkiyat #{{ $flow->target_id }}</a>
+                                        @else
+                                            {{ $modelLabels[$flow->target_type] ?? class_basename($flow->target_type) }} #{{ $flow->target_id }}
+                                        @endif
                                     </span>
                                     @endif
                                 </div>
+                                @if($flow->step === 'delivery_assigned' && $flow->target_type === \App\Models\Shipment::class && isset($shipments[$flow->target_id]))
+                                @php $shipment = $shipments[$flow->target_id]; @endphp
+                                <div class="small mt-2 p-2 rounded bg-secondary-200">
+                                    <div><strong>Araç:</strong> {{ $shipment->vehicle?->plate ?? '-' }} {{ $shipment->vehicle ? "({$shipment->vehicle->brand} {$shipment->vehicle->model})" : '' }}</div>
+                                    <div><strong>Şoför:</strong> {{ $shipment->driver ? trim($shipment->driver->first_name . ' ' . $shipment->driver->last_name) : '-' }}</div>
+                                    @if($shipment->qr_code)
+                                    <div><strong>QR:</strong> <code>{{ $shipment->qr_code }}</code></div>
+                                    @endif
+                                </div>
+                                @endif
                                 @if($flow->source_sap_doc_number || $flow->target_sap_doc_number)
                                 <div class="small mt-1">
                                     @if($flow->source_sap_doc_number)

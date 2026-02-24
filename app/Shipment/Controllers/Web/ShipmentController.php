@@ -3,7 +3,11 @@
 namespace App\Shipment\Controllers\Web;
 
 use App\Core\Services\ExportService;
+use App\DocumentFlow\Services\DocumentFlowService;
+use App\Events\ShipmentDelivered;
 use App\Http\Controllers\Controller;
+use App\Order\Services\OrderStatusTransitionService;
+use App\Order\Services\OrderWorkflowGuardService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -13,7 +17,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ShipmentController extends Controller
 {
     public function __construct(
-        protected ExportService $exportService
+        protected ExportService $exportService,
+        protected DocumentFlowService $documentFlowService,
+        protected OrderWorkflowGuardService $workflowGuardService,
+        protected OrderStatusTransitionService $orderStatusTransitionService
     ) {}
 
     /**
@@ -21,7 +28,16 @@ class ShipmentController extends Controller
      */
     public function index(Request $request): View|StreamedResponse|Response
     {
-        $filters = $request->only(['status', 'order_id', 'vehicle_id', 'date_from', 'date_to']);
+        $filters = $request->only(['status', 'order_id', 'vehicle_id', 'date_from', 'date_to', 'workflow']);
+
+        if ($request->filled('workflow')) {
+            $filters['status'] = match ($request->string('workflow')->toString()) {
+                'planned', 'loading' => 'pending',
+                'in_transit' => 'in_transit',
+                'delivered' => 'delivered',
+                default => $filters['status'] ?? null,
+            };
+        }
 
         if ($request->has('export')) {
             return $this->export($filters, $request->get('export'));
@@ -89,13 +105,14 @@ class ShipmentController extends Controller
     /**
      * Show the form for creating a new shipment.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
+        $orderId = $request->integer('order_id');
         $orders = \App\Models\Order::where('status', '!=', 'cancelled')->orderBy('id', 'desc')->get();
         $vehicles = \App\Models\Vehicle::where('status', 1)->orderBy('plate')->get();
         $employees = \App\Models\Employee::where('status', 1)->orderBy('first_name')->orderBy('last_name')->get();
 
-        return view('admin.shipments.create', compact('orders', 'vehicles', 'employees'));
+        return view('admin.shipments.create', compact('orders', 'vehicles', 'employees', 'orderId'));
     }
 
     /**
@@ -112,7 +129,23 @@ class ShipmentController extends Controller
             'status' => 'required|string|max:50',
         ]);
 
+        $order = \App\Models\Order::findOrFail($validated['order_id']);
+        if (! $this->workflowGuardService->canCreateShipment($order)) {
+            abort(403, 'Ödeme onaylanmadan veya uygun sipariş durumuna gelmeden sevkiyat oluşturulamaz.');
+        }
+
         $shipment = \App\Models\Shipment::create($validated);
+
+        $this->documentFlowService->recordDeliveryStep($order, $shipment);
+
+        if (in_array($order->status, ['pending', 'planned'], true)
+            && $this->orderStatusTransitionService->isValidTransition($order->status, 'assigned')) {
+            $this->orderStatusTransitionService->transition($order, 'assigned', $request->user());
+        }
+
+        if ($shipment->status === 'delivered') {
+            event(new ShipmentDelivered($shipment));
+        }
 
         return redirect()->route('admin.shipments.show', $shipment)
             ->with('success', 'Sevkiyat başarıyla oluşturuldu.');
@@ -157,7 +190,21 @@ class ShipmentController extends Controller
             'status' => 'required|string|max:50',
         ]);
 
+        $order = \App\Models\Order::findOrFail($validated['order_id']);
+        $targetStatus = $validated['status'];
+
+        if ($targetStatus === 'delivered' && ! $this->workflowGuardService->canMarkDelivered($order, $shipment)) {
+            return back()->withErrors([
+                'status' => 'Teslim işaretlemek için sevkiyatın önce yolda olması gerekir.',
+            ])->withInput();
+        }
+
+        $previousStatus = $shipment->status;
         $shipment->update($validated);
+
+        if ($previousStatus !== 'delivered' && $shipment->fresh()->status === 'delivered') {
+            event(new ShipmentDelivered($shipment->fresh()));
+        }
 
         return redirect()->route('admin.shipments.show', $shipment)
             ->with('success', 'Sevkiyat başarıyla güncellendi.');
