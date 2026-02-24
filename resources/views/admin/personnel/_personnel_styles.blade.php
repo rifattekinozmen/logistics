@@ -300,9 +300,12 @@
     border-radius: 6px;
     padding: 6px 8px;
     font-family: ui-monospace, monospace;
-    font-size: 7px;
-    letter-spacing: 1px;
+    font-size: clamp(8px, 3.5vw, 12px);
+    letter-spacing: 0.06em;
     white-space: pre;
+    overflow: hidden;
+    line-height: 1.35;
+    box-sizing: border-box;
 }
 
 /* Flip butonu */

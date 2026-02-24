@@ -13,17 +13,15 @@
     $hasPhoto = (bool) ($personnel?->photo_path ?? false);
     $photoSrc = $hasPhoto ? Storage::url($personnel->photo_path) : '';
 
-    // MRZ (TD1) için ham değerler - her satır 30 karakter
-    $docNo = strtoupper(preg_replace('/[^A-Z0-9]/', '', $personnel?->kimlik_seri_no ?? ''));
-    $docNoPadded = str_pad(substr($docNo, 0, 9), 9, '<') . str_repeat('<', 15);
+    // MRZ (TD1) ICAO 9303 - her satır 30 karakter
+    $docNo = $personnel?->kimlik_seri_no ?? '';
+    $tckn = $personnel?->tckn ?? null;
     $dob = $personnel?->dogum_tarihi ? $personnel->dogum_tarihi->format('ymd') : '000000';
     $sex = ($personnel?->cinsiyet ?? '') === 'Kadın' ? 'F' : 'M';
     $expiry = $personnel?->son_gecerlilik_tarihi ? $personnel->son_gecerlilik_tarihi->format('ymd') : '000000';
-    $mrzSurname = strtoupper(preg_replace('/[^A-Za-z]/', '', \Illuminate\Support\Str::ascii($soyadi ?: 'XXX')));
-    $mrzGiven = strtoupper(preg_replace('/[^A-Za-z]/', '', \Illuminate\Support\Str::ascii($adi ?: 'XXX')));
-    $mrzLine1 = 'I<TUR' . substr($docNoPadded, 0, 26);
-    $mrzLine2 = $dob . $sex . $expiry . $uyrukCode . str_repeat('<', 7) . '2';
-    $mrzLine3 = str_pad(substr($mrzSurname . '<<' . $mrzGiven, 0, 30), 30, '<');
+    [$mrzLine1, $mrzLine2, $mrzLine3] = \App\Helpers\MrzHelper::td1Lines(
+        $docNo, $tckn, $dob, $sex, $expiry, $uyrukCode, $soyadi, $adi
+    );
 @endphp
 
 <div class="tr-id-stage" id="tr-id-stage-{{ $live ? 'edit' : 'show' }}">
