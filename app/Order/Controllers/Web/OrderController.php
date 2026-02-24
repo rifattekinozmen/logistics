@@ -12,6 +12,7 @@ use App\Order\Requests\UpdateOrderRequest;
 use App\Order\Services\OrderService;
 use App\Order\Services\OrderStatusTransitionService;
 use DomainException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -238,6 +239,65 @@ class OrderController extends Controller
     }
 
     /**
+     * Müşteri adreslerini JSON olarak döner (sipariş formu için).
+     */
+    public function customerAddresses(Request $request): JsonResponse
+    {
+        $customerId = $request->integer('customer_id');
+        if ($customerId < 1) {
+            return response()->json([
+                'pickup' => $this->getCompanyAddressesForPickup(),
+                'delivery' => [],
+            ]);
+        }
+
+        $customer = Customer::with('favoriteAddresses')->find($customerId);
+        if (! $customer) {
+            return response()->json(['pickup' => [], 'delivery' => []]);
+        }
+
+        $pickupAddresses = $this->getCompanyAddressesForPickup();
+        $deliveryAddresses = [];
+
+        foreach ($customer->favoriteAddresses as $addr) {
+            $item = ['id' => $addr->id, 'name' => $addr->name, 'address' => $addr->address];
+            if (in_array($addr->type, ['pickup', 'both'], true)) {
+                $pickupAddresses[] = $item;
+            }
+            if (in_array($addr->type, ['delivery', 'both'], true)) {
+                $deliveryAddresses[] = $item;
+            }
+        }
+
+        return response()->json([
+            'pickup' => $pickupAddresses,
+            'delivery' => $deliveryAddresses,
+        ]);
+    }
+
+    /**
+     * @return array<int, array{id: string, name: string, address: string}>
+     */
+    protected function getCompanyAddressesForPickup(): array
+    {
+        $companyId = session('active_company_id');
+        if (! $companyId) {
+            return [];
+        }
+
+        $addresses = \App\Models\CompanyAddress::where('company_id', $companyId)
+            ->orderByRaw('is_default DESC')
+            ->orderBy('title')
+            ->get();
+
+        return $addresses->map(fn ($a) => [
+            'id' => 'company_' . $a->id,
+            'name' => $a->title ?: $a->address,
+            'address' => $a->address,
+        ])->all();
+    }
+
+    /**
      * Show the form for creating a new order.
      */
     public function create(): View
@@ -252,7 +312,11 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request): RedirectResponse
     {
-        $order = $this->orderService->create($request->validated(), $request->user());
+        $data = $request->validated();
+        $data['company_id'] = session('active_company_id')
+            ?? Customer::find($data['customer_id'])?->company_id;
+
+        $order = $this->orderService->create($data, $request->user());
 
         return redirect()->route('admin.orders.show', $order)
             ->with('success', 'Sipariş başarıyla oluşturuldu.');

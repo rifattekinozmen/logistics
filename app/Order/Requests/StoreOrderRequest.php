@@ -3,6 +3,7 @@
 namespace App\Order\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -19,7 +20,11 @@ class StoreOrderRequest extends FormRequest
             'pickup_address' => 'required|string|max:1000',
             'delivery_address' => 'required|string|max:1000',
             'planned_pickup_date' => 'nullable|date',
-            'planned_delivery_date' => 'nullable|date|after:planned_pickup_date',
+            'planned_delivery_date' => [
+                'nullable',
+                'date',
+                Rule::when($this->filled('planned_pickup_date'), 'after:planned_pickup_date'),
+            ],
             'total_weight' => 'nullable|numeric|min:0',
             'total_volume' => 'nullable|numeric|min:0',
             'is_dangerous' => 'boolean',

@@ -30,6 +30,7 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
 
     // Orders – import routes first (so "import" is not captured by resource {order})
     Route::middleware('permission:order.view')->get('orders/import', [OrderController::class, 'importForm'])->name('orders.import');
+    Route::middleware('permission:order.view')->get('orders/customer-addresses', [OrderController::class, 'customerAddresses'])->name('orders.customer-addresses');
     Route::middleware('permission:order.view')->get('orders/import-template', [OrderController::class, 'importTemplate'])->name('orders.import-template');
     Route::middleware('permission:order.view')->post('orders/import', [OrderController::class, 'importStore'])->name('orders.import.store');
     Route::middleware('permission:order.view')->resource('orders', OrderController::class);

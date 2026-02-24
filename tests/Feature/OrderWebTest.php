@@ -106,6 +106,27 @@ it('can delete an order', function () {
     expect(Order::count())->toBe(0);
 });
 
+it('returns customer addresses as json for order form', function () {
+    [$user, $company] = createAdminUser();
+    $customer = Customer::factory()->create(['status' => 1]);
+    \App\Models\FavoriteAddress::create([
+        'customer_id' => $customer->id,
+        'type' => 'pickup',
+        'address' => 'Müşteri Alış Adresi',
+        'name' => 'Depo',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('admin.orders.customer-addresses', ['customer_id' => $customer->id]));
+
+    $response->assertSuccessful();
+    $data = $response->json();
+    expect($data)->toHaveKeys(['pickup', 'delivery']);
+    expect($data['pickup'])->toBeArray();
+    expect($data['delivery'])->toBeArray();
+});
+
 it('can access order import form', function () {
     [$user, $company] = createAdminUser();
 

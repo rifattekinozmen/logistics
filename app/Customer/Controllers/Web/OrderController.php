@@ -87,8 +87,19 @@ class OrderController extends Controller
     public function createOrder(): View
     {
         $this->authorizeCustomerPermission('customer.portal.orders.create');
+        $customer = $this->resolveCustomer();
 
-        return view('customer.orders.create');
+        $pickupAddresses = $customer->favoriteAddresses()
+            ->whereIn('type', ['pickup', 'both'])
+            ->orderBy('sort_order')
+            ->get();
+
+        $deliveryAddresses = $customer->favoriteAddresses()
+            ->whereIn('type', ['delivery', 'both'])
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('customer.orders.create', compact('pickupAddresses', 'deliveryAddresses'));
     }
 
     public function storeOrder(Request $request): RedirectResponse
