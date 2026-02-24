@@ -27,7 +27,7 @@
 
 <!-- Filtreleme -->
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
-    <form method="GET" action="{{ route('customer.notifications.index') }}" class="row g-3">
+    <form method="GET" action="{{ route('customer.notifications.index') }}" class="row g-3 align-items-end">
         <div class="col-md-4">
             <label class="form-label small fw-semibold text-dark">Durum</label>
             <select name="is_read" class="form-select">
@@ -36,7 +36,7 @@
                 <option value="1" {{ request('is_read') === '1' ? 'selected' : '' }}>Okunmuş</option>
             </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <label class="form-label small fw-semibold text-dark">Bildirim Türü</label>
             <select name="notification_type" class="form-select">
                 <option value="">Tümü</option>
@@ -46,8 +46,8 @@
                 <option value="general" {{ request('notification_type') === 'general' ? 'selected' : '' }}>Genel</option>
             </select>
         </div>
-        <div class="col-md-4 d-flex align-items-end">
-            <button type="submit" class="btn btn-filter btn-filter-primary w-100">Filtrele</button>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>
 </div>

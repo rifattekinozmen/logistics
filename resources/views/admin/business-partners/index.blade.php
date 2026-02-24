@@ -19,9 +19,9 @@
     <x-index-stat-card title="Aktif" :value="$stats['active'] ?? 0" icon="check_circle" color="success" col="col-md-6" />
 </div>
 
-<div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
-    <form method="GET" action="{{ route('admin.business-partners.index') }}" class="row g-3">
-        <div class="col-md-3">
+<div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
+    <form method="GET" action="{{ route('admin.business-partners.index') }}" class="row g-3 align-items-end">
+        <div class="col-md-4">
             <label class="form-label small fw-semibold text-dark">Tür</label>
             <select name="partner_type" class="form-select">
                 <option value="">Tümü</option>
@@ -31,12 +31,12 @@
                 <option value="both"     {{ request('partner_type') === 'both'     ? 'selected' : '' }}>Müşteri & Tedarikçi</option>
             </select>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-6">
             <label class="form-label small fw-semibold text-dark">Arama</label>
             <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Ad, BP no veya vergi no...">
         </div>
         <div class="col-md-2 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">Filtrele</button>
+            <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>
 </div>

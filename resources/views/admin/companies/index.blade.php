@@ -22,8 +22,8 @@
 
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
     <form method="GET" action="{{ route('admin.companies.index') }}" class="row g-3 align-items-end">
-        <div class="col-md-6 col-lg-4">
-            <label class="form-label fw-semibold text-dark">Ara</label>
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold text-dark">Ara</label>
             <input
                 type="text"
                 name="search"
@@ -33,8 +33,8 @@
             >
         </div>
 
-        <div class="col-md-4 col-lg-3">
-            <label class="form-label fw-semibold text-dark">Durum</label>
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold text-dark">Durum</label>
             <select name="status" class="form-select">
                 <option value="">Tümü</option>
                 <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
@@ -42,16 +42,16 @@
             </select>
         </div>
 
-        <div class="col-md-2 col-lg-2 d-flex gap-2">
-            <button type="submit" class="btn btn-filter btn-filter-primary w-100 d-flex align-items-center justify-content-center gap-2">
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all d-flex align-items-center justify-content-center gap-2">
                 <span class="material-symbols-outlined" style="font-size: 18px;">search</span>
                 Filtrele
             </button>
         </div>
 
         @if(request()->hasAny(['search', 'status']) && (request('search') || request('status')))
-        <div class="col-md-2 col-lg-2">
-            <a href="{{ route('admin.companies.index') }}" class="btn btn-light w-100 d-flex align-items-center justify-content-center gap-2">
+        <div class="col-md-2 d-flex align-items-end">
+            <a href="{{ route('admin.companies.index') }}" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
                 <span class="material-symbols-outlined" style="font-size: 18px;">filter_alt_off</span>
                 Temizle
             </a>

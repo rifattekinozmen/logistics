@@ -48,9 +48,9 @@
     </div>
 
     {{-- Filtre alanı: Sevkiyatlar ile aynı mobil uyumlu yapı (row + col-md-*) --}}
-    <div class="filter-area filter-area-attendance rounded-3xl shadow-sm border p-3 p-md-4 mb-4">
+    <div class="filter-area filter-area-attendance rounded-3xl shadow-sm border p-4 mb-4">
         <div class="row g-3 align-items-end">
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-4">
                 <label class="form-label small fw-semibold text-dark">Ay</label>
                 <div class="d-flex align-items-center gap-2">
                     <input type="month" x-model="month" @change="fetchTableAjax()" class="form-control" id="attendance-month">
@@ -61,7 +61,7 @@
                 <label class="form-label small fw-semibold text-dark">Personel Ara</label>
                 <input type="text" x-model="search" placeholder="Personel ara..." class="form-control">
             </div>
-            <div class="col-12 col-md-3 d-flex align-items-end">
+            <div class="col-12 col-md-2 d-flex align-items-end">
                 <button type="button" class="btn btn-filter btn-filter-attendance w-100 shadow-sm hover:shadow-md transition-all" disabled>Ay / arama yukarıdan</button>
             </div>
         </div>

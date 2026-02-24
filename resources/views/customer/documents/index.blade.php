@@ -26,7 +26,7 @@
 
 <!-- Filtreleme ve Arama -->
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
-    <form method="GET" action="{{ route('customer.documents.index') }}" class="row g-3">
+    <form method="GET" action="{{ route('customer.documents.index') }}" class="row g-3 align-items-end">
         <div class="col-md-4">
             <label class="form-label small fw-semibold text-dark">Kategori</label>
             <select name="category" class="form-select">
@@ -38,7 +38,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label class="form-label small fw-semibold text-dark">Sipariş No</label>
             <select name="order_id" class="form-select">
                 <option value="">Tüm Siparişler</option>
@@ -49,12 +49,12 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label class="form-label small fw-semibold text-dark">Arama</label>
-            <div class="input-group">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Belge adı veya kategori ara..." class="form-control">
-                <button type="submit" class="btn btn-filter btn-filter-primary">Ara</button>
-            </div>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Belge adı veya kategori ara..." class="form-control">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all">Ara</button>
         </div>
     </form>
 </div>

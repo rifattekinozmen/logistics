@@ -52,8 +52,8 @@
 
 <!-- Filtreleme -->
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
-    <form method="GET" action="{{ route('customer.payments.index') }}" class="row g-3">
-        <div class="col-md-3">
+    <form method="GET" action="{{ route('customer.payments.index') }}" class="row g-3 align-items-end">
+        <div class="col-md-4">
             <label class="form-label small fw-semibold text-dark">Durum</label>
             <select name="status" class="form-select">
                 <option value="">Tümü</option>
@@ -62,7 +62,7 @@
                 <option value="2" {{ request('status') === '2' ? 'selected' : '' }}>Gecikti</option>
             </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label class="form-label small fw-semibold text-dark">Ödeme Türü</label>
             <select name="payment_type" class="form-select">
                 <option value="">Tümü</option>
@@ -78,7 +78,7 @@
             <input type="date" name="due_date_to" value="{{ request('due_date_to') }}" class="form-control">
         </div>
         <div class="col-md-2 d-flex align-items-end">
-            <button type="submit" class="btn btn-filter btn-filter-primary w-100">Filtrele</button>
+            <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>
 </div>

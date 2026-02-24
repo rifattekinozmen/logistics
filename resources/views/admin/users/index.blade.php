@@ -20,7 +20,7 @@
 </div>
 
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
-    <form method="GET" action="{{ route('admin.users.index') }}" class="row g-3">
+    <form method="GET" action="{{ route('admin.users.index') }}" class="row g-3 align-items-end">
         <div class="col-md-3">
             <label class="form-label small fw-semibold text-dark">Durum</label>
             <select name="status" class="form-select">
@@ -29,7 +29,7 @@
                 <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Pasif</option>
             </select>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <label class="form-label small fw-semibold text-dark">Kullanıcı Tipi</label>
             <select name="user_type" class="form-select">
                 <option value="">Tümü</option>
@@ -46,7 +46,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label class="form-label small fw-semibold text-dark">Arama</label>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Ad, e-posta veya kullanıcı adı ile ara..." class="form-control">
         </div>

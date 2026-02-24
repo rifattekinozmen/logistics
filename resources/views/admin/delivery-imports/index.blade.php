@@ -20,34 +20,34 @@
     <x-index-stat-card title="Hatalı" :value="$stats['failed'] ?? 0" icon="error" color="danger" col="col-md-4" />
 </div>
 
-<form method="GET" action="{{ route('admin.delivery-imports.index') }}" class="mb-4">
-    <div class="bg-white rounded-3xl shadow-sm border p-3">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-2">
-                <label for="status" class="form-label small text-secondary mb-0">Durum</label>
-                <select name="status" id="status" class="form-select form-select-sm">
-                    <option value="">Tümü</option>
-                    <option value="pending" @selected(request('status') === 'pending')>Beklemede</option>
-                    <option value="processing" @selected(request('status') === 'processing')>İşleniyor</option>
-                    <option value="completed" @selected(request('status') === 'completed')>Tamamlandı</option>
-                    <option value="failed" @selected(request('status') === 'failed')>Hata</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="date_from" class="form-label small text-secondary mb-0">Başlangıç</label>
-                <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" class="form-control form-control-sm">
-            </div>
-            <div class="col-md-2">
-                <label for="date_to" class="form-label small text-secondary mb-0">Bitiş</label>
-                <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" class="form-control form-control-sm">
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-sm btn-outline-primary">Filtrele</button>
-                <a href="{{ route('admin.delivery-imports.index') }}" class="btn btn-sm btn-outline-secondary">Temizle</a>
-            </div>
+<div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
+    <form method="GET" action="{{ route('admin.delivery-imports.index') }}" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label for="status" class="form-label small fw-semibold text-dark">Durum</label>
+            <select name="status" id="status" class="form-select">
+                <option value="">Tümü</option>
+                <option value="pending" @selected(request('status') === 'pending')>Beklemede</option>
+                <option value="processing" @selected(request('status') === 'processing')>İşleniyor</option>
+                <option value="completed" @selected(request('status') === 'completed')>Tamamlandı</option>
+                <option value="failed" @selected(request('status') === 'failed')>Hata</option>
+            </select>
         </div>
-    </div>
-</form>
+        <div class="col-md-3">
+            <label for="date_from" class="form-label small fw-semibold text-dark">Başlangıç</label>
+            <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <label for="date_to" class="form-label small fw-semibold text-dark">Bitiş</label>
+            <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" class="form-control">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <a href="{{ route('admin.delivery-imports.index') }}" class="btn btn-outline-secondary w-100">Temizle</a>
+        </div>
+    </form>
+</div>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden" style="border-color: var(--bs-primary-200);">
     <div class="table-responsive">

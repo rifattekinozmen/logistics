@@ -42,7 +42,7 @@
 </div>
 
 <div class="filter-area filter-area-warehouses rounded-3xl shadow-sm border p-4 mb-4">
-    <form method="GET" action="{{ route('admin.warehouses.index') }}" class="row g-3">
+    <form method="GET" action="{{ route('admin.warehouses.index') }}" class="row g-3 align-items-end">
         <div class="col-md-4">
             <label class="form-label small fw-semibold text-dark">Durum</label>
             <select name="status" class="form-select">
@@ -51,7 +51,7 @@
                 <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Pasif</option>
             </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <label class="form-label small fw-semibold text-dark">Şube</label>
             <select name="branch_id" class="form-select">
                 <option value="">Tümü</option>
@@ -60,7 +60,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-4 d-flex align-items-end">
+        <div class="col-md-2 d-flex align-items-end">
             <button type="submit" class="btn btn-filter btn-filter-warehouses w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>

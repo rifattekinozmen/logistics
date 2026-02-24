@@ -43,7 +43,7 @@
 </div>
 
 <div class="filter-area filter-area-customers rounded-3xl shadow-sm border p-4 mb-4">
-    <form method="GET" action="{{ route('admin.customers.index') }}" class="row g-3">
+    <form method="GET" action="{{ route('admin.customers.index') }}" class="row g-3 align-items-end">
         <div class="col-md-4">
             <label class="form-label small fw-semibold text-dark">Durum</label>
             <select name="status" class="form-select">

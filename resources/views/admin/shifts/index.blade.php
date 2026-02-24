@@ -25,8 +25,8 @@
 </div>
 
 <div class="filter-area filter-area-shifts rounded-3xl shadow-sm border p-4 mb-4">
-    <form method="GET" action="{{ route('admin.shifts.index') }}" class="row g-3">
-        <div class="col-md-3">
+    <form method="GET" action="{{ route('admin.shifts.index') }}" class="row g-3 align-items-end">
+        <div class="col-md-4">
             <label class="form-label small fw-semibold text-dark">Personel</label>
             <select name="employee_id" class="form-select">
                 <option value="">Tümü</option>
@@ -43,7 +43,7 @@
             <label class="form-label small fw-semibold text-dark">Tarih Bitiş</label>
             <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-control">
         </div>
-        <div class="col-md-3 d-flex align-items-end">
+        <div class="col-md-2 d-flex align-items-end">
             <button type="submit" class="btn btn-filter btn-filter-shifts w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>

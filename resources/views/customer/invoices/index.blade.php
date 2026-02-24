@@ -15,13 +15,13 @@
 
 <!-- Filtreleme -->
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
-    <form method="GET" action="{{ route('customer.invoices.index') }}" class="row g-3">
-        <div class="col-md-4">
+    <form method="GET" action="{{ route('customer.invoices.index') }}" class="row g-3 align-items-end">
+        <div class="col-md-10">
             <label class="form-label small fw-semibold text-dark">Sipariş No</label>
             <input type="text" name="order_id" value="{{ request('order_id') }}" placeholder="Sipariş ID girin" class="form-control">
         </div>
-        <div class="col-md-4 d-flex align-items-end">
-            <button type="submit" class="btn btn-filter btn-filter-primary w-100">Filtrele</button>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>
 </div>

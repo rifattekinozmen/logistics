@@ -21,8 +21,8 @@
 </div>
 
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
-    <form method="GET" action="{{ route('admin.advances.index') }}" class="row g-3">
-        <div class="col-md-4">
+    <form method="GET" action="{{ route('admin.advances.index') }}" class="row g-3 align-items-end">
+        <div class="col-md-10">
             <label class="form-label small fw-semibold text-dark">Durum</label>
             <select name="status" class="form-select">
                 <option value="">Tümü</option>
@@ -32,7 +32,7 @@
                 <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Reddedildi</option>
             </select>
         </div>
-        <div class="col-md-4 d-flex align-items-end">
+        <div class="col-md-2 d-flex align-items-end">
             <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>
