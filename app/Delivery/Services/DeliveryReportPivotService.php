@@ -1492,9 +1492,9 @@ class DeliveryReportPivotService
             foreach ($metrics as $metricIndex => $metricType) {
                 $label = $metricLabels[$metricIndex] ?? ('Metrik '.$metricIndex);
                 if ($metricIndex === 'rows') {
-                    $out[$label] = $row['_count_rows'] ?? 0;
+                    $out[$label] = (int) ($row['_count_rows'] ?? 0);
                 } else {
-                    $out[$label] = $row['_sum_'.$metricIndex] ?? 0;
+                    $out[$label] = (float) ($row['_sum_'.$metricIndex] ?? 0);
                 }
             }
             $result[] = $out;

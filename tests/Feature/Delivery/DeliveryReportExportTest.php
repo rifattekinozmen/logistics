@@ -8,8 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
-    [$user, $company] = createAdminUser();
-    $this->actingAs($user)->withSession(['active_company_id' => $company->id]);
+    [$this->user, $this->company] = createAdminUser();
 });
 
 function createDokmeCimentoBatchWithRows(): DeliveryImportBatch
@@ -58,7 +57,9 @@ function createDokmeCimentoBatchWithRows(): DeliveryImportBatch
 it('exports pivot summary as CSV', function (): void {
     $batch = createDokmeCimentoBatchWithRows();
 
-    $response = $this->get(route('admin.delivery-imports.pivot-export', $batch));
+    $response = $this->actingAs($this->user)
+        ->withSession(['active_company_id' => $this->company->id])
+        ->get(route('admin.delivery-imports.pivot-export', $batch));
 
     $response->assertSuccessful();
     $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
@@ -72,7 +73,9 @@ it('exports pivot summary as CSV', function (): void {
 it('exports grouped invoice lines as CSV', function (): void {
     $batch = createDokmeCimentoBatchWithRows();
 
-    $response = $this->get(route('admin.delivery-imports.invoice-lines-export', [$batch, 'group' => 1]));
+    $response = $this->actingAs($this->user)
+        ->withSession(['active_company_id' => $this->company->id])
+        ->get(route('admin.delivery-imports.invoice-lines-export', [$batch, 'group' => 1]));
 
     $response->assertSuccessful();
     $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
