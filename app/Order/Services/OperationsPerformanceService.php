@@ -49,20 +49,22 @@ class OperationsPerformanceService
      */
     protected function calculateDeliveryPerformanceScore(): float
     {
-        $deliveredOrders = Order::where('status', 'delivered')
+        $total = Order::where('status', 'delivered')
             ->whereNotNull('planned_delivery_date')
             ->whereNotNull('delivered_at')
-            ->get();
+            ->count();
 
-        if ($deliveredOrders->isEmpty()) {
-            return 100.0; // Varsayılan: mükemmel
+        if ($total === 0) {
+            return 100.0;
         }
 
-        $onTimeCount = $deliveredOrders->filter(function ($order) {
-            return $order->delivered_at <= $order->planned_delivery_date;
-        })->count();
+        $onTimeCount = Order::where('status', 'delivered')
+            ->whereNotNull('planned_delivery_date')
+            ->whereNotNull('delivered_at')
+            ->whereColumn('delivered_at', '<=', 'planned_delivery_date')
+            ->count();
 
-        return round(($onTimeCount / $deliveredOrders->count()) * 100, 2);
+        return round(($onTimeCount / $total) * 100, 2);
     }
 
     /**
@@ -124,19 +126,26 @@ class OperationsPerformanceService
      */
     protected function calculateAverageDeliveryTime(): ?float
     {
-        $deliveredOrders = Order::where('status', 'delivered')
+        $driver = Order::query()->getConnection()->getDriverName();
+        $baseQuery = Order::where('status', 'delivered')
             ->whereNotNull('actual_pickup_date')
-            ->whereNotNull('delivered_at')
-            ->get();
+            ->whereNotNull('delivered_at');
 
-        if ($deliveredOrders->isEmpty()) {
+        if ($driver === 'sqlsrv') {
+            $result = (clone $baseQuery)->selectRaw('COUNT(*) as cnt, SUM(DATEDIFF(SECOND, actual_pickup_date, delivered_at) / 3600.0) as total_hours')->first();
+        } elseif ($driver === 'sqlite') {
+            $result = (clone $baseQuery)->selectRaw('COUNT(*) as cnt, SUM((julianday(delivered_at) - julianday(actual_pickup_date)) * 24) as total_hours')->first();
+        } else {
+            $result = (clone $baseQuery)->selectRaw('COUNT(*) as cnt, SUM(TIMESTAMPDIFF(SECOND, actual_pickup_date, delivered_at) / 3600.0) as total_hours')->first();
+        }
+
+        $cnt = (int) ($result->cnt ?? 0);
+        if ($cnt === 0) {
             return null;
         }
 
-        $totalHours = $deliveredOrders->sum(function ($order) {
-            return $order->actual_pickup_date->diffInHours($order->delivered_at);
-        });
+        $totalHours = (float) ($result->total_hours ?? 0);
 
-        return round($totalHours / $deliveredOrders->count(), 2);
+        return round($totalHours / $cnt, 2);
     }
 }

@@ -323,6 +323,7 @@ class DeliveryReportImportService
                 continue;
             }
         }
+        $value = $this->normalizeDateTimeStringForParse($value);
         try {
             $parsed = \Carbon\Carbon::parse($value);
             if ($isTime) {
@@ -337,6 +338,21 @@ class DeliveryReportImportService
         } catch (Throwable $e) {
             return (string) $value;
         }
+    }
+
+    /**
+     * ISO benzeri tarih string'lerinde boşlukla ayrılmış timezone'u (+ ile) Carbon'ın parse edebilmesi için düzeltir.
+     * Örn: "2026-01-26T00:00:00 03:00" -> "2026-01-26T00:00:00+03:00"
+     */
+    protected function normalizeDateTimeStringForParse(mixed $value): mixed
+    {
+        $str = is_string($value) ? trim($value) : (string) $value;
+        if ($str === '') {
+            return $value;
+        }
+        $normalized = preg_replace('/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\s+(\d{2}:?\d{2})\s*$/u', '$1+$2', $str);
+
+        return $normalized !== null ? $normalized : $value;
     }
 
     /**

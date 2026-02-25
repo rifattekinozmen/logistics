@@ -34,7 +34,29 @@
     function ensureModal() {
         const el = document.getElementById('globalDeleteModal');
         if (!el) return null;
+        if (typeof bootstrap === 'undefined') {
+            console.warn('Bootstrap henüz yüklenmedi.');
+            return null;
+        }
         return bootstrap.Modal.getOrCreateInstance(el);
+    }
+
+    function whenBootstrapReady(cb) {
+        if (typeof bootstrap !== 'undefined') {
+            cb();
+            return;
+        }
+        var attempts = 0;
+        var t = setInterval(function() {
+            attempts++;
+            if (typeof bootstrap !== 'undefined') {
+                clearInterval(t);
+                cb();
+            } else if (attempts > 100) {
+                clearInterval(t);
+                console.error('Bootstrap 5 saniye içinde yüklenemedi.');
+            }
+        }, 50);
     }
 
     function setBusy(isBusy) {
@@ -47,22 +69,24 @@
     }
 
     window.showDeleteConfirm = function(options) {
-        const name = options?.name || '';
-        const id = options?.id;
-        const nameEl = document.getElementById('globalDeleteItemName');
-        if (nameEl) {
-            nameEl.textContent = `"${name}"`;
-        }
+        whenBootstrapReady(function() {
+            const name = options?.name || '';
+            const id = options?.id;
+            const nameEl = document.getElementById('globalDeleteItemName');
+            if (nameEl) {
+                nameEl.textContent = `"${name}"`;
+            }
 
-        current = {
-            id,
-            name,
-            buildUrl: typeof options?.buildUrl === 'function' ? options.buildUrl : null,
-            onConfirm: typeof options?.onConfirm === 'function' ? options.onConfirm : null
-        };
+            current = {
+                id,
+                name,
+                buildUrl: typeof options?.buildUrl === 'function' ? options.buildUrl : null,
+                onConfirm: typeof options?.onConfirm === 'function' ? options.onConfirm : null
+            };
 
-        const modal = ensureModal();
-        modal && modal.show();
+            const modal = ensureModal();
+            modal && modal.show();
+        });
     };
 
     window.datatableDeleteModal = function(id, name) {
@@ -122,8 +146,10 @@
                     }
                 }
                 const modalEl = document.getElementById('globalDeleteModal');
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                modal && modal.hide();
+                if (typeof bootstrap !== 'undefined') {
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal && modal.hide();
+                }
             } catch (err) {
                 console.error('Global delete error:', err);
                 if (window.showError) window.showError('Silme sırasında hata oluştu');

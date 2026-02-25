@@ -63,8 +63,14 @@ class DashboardController extends Controller
             'shipments_count' => (int) ($shipmentStats->total ?? 0),
             'shipments_active' => (int) ($shipmentStats->active ?? 0),
             'vehicles_count' => Vehicle::where('status', 1)->count(),
-            'vehicles_active' => Vehicle::where('status', 1)
-                ->whereNotIn('id', Shipment::whereIn('status', ['pending', 'in_transit'])->select('vehicle_id'))
+            'vehicles_active' => Vehicle::query()
+                ->where('vehicles.status', 1)
+                ->whereNotIn('vehicles.id', function ($q) {
+                    $q->select('vehicle_id')
+                        ->from('shipments')
+                        ->whereIn('status', ['pending', 'in_transit'])
+                        ->whereNotNull('vehicle_id');
+                })
                 ->count(),
             'employees_count' => Employee::where('status', 1)->count(),
             'customers_count' => Customer::where('status', 1)->count(),

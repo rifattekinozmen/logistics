@@ -22,64 +22,79 @@ class FinanceDashboardService
 
         $today = Carbon::today();
 
-        // Geciken ödemeler
-        $overduePayments = $query->clone()
-            ->where('status', 0) // Bekliyor
-            ->where('due_date', '<', $today)
-            ->get();
-
-        // Bugün vadesi gelenler
-        $dueToday = $query->clone()
+        $overdueQuery = $query->clone()
             ->where('status', 0)
-            ->whereDate('due_date', $today)
-            ->get();
+            ->where('due_date', '<', $today);
+        $overdueCount = $overdueQuery->count();
+        $overdueTotal = $overdueQuery->sum('amount');
+        $overduePaymentsList = $query->clone()
+            ->where('status', 0)
+            ->where('due_date', '<', $today)
+            ->orderBy('due_date')
+            ->limit(5)
+            ->get()
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'amount' => $p->amount,
+                'due_date' => $p->due_date->format('d.m.Y'),
+                'type' => $p->payment_type,
+            ])->toArray();
 
-        // 7 gün içinde vadesi gelecekler
-        $dueIn7Days = $query->clone()
+        $dueTodayCount = $query->clone()->where('status', 0)->whereDate('due_date', $today)->count();
+        $dueTodayTotal = $query->clone()->where('status', 0)->whereDate('due_date', $today)->sum('amount');
+
+        $dueIn7Count = $query->clone()
             ->where('status', 0)
             ->whereBetween('due_date', [$today->copy()->addDay(), $today->copy()->addDays(7)])
-            ->get();
+            ->count();
+        $dueIn7Total = $query->clone()
+            ->where('status', 0)
+            ->whereBetween('due_date', [$today->copy()->addDay(), $today->copy()->addDays(7)])
+            ->sum('amount');
 
-        // Bu ay ödenenler
-        $paidThisMonth = $query->clone()
-            ->where('status', 1) // Ödendi
+        $paidThisMonthCount = $query->clone()
+            ->where('status', 1)
             ->whereMonth('paid_date', $today->month)
             ->whereYear('paid_date', $today->year)
-            ->get();
+            ->count();
+        $paidThisMonthTotal = $query->clone()
+            ->where('status', 1)
+            ->whereMonth('paid_date', $today->month)
+            ->whereYear('paid_date', $today->year)
+            ->sum('amount');
 
-        // Bu ay bekleyenler
-        $pendingThisMonth = $query->clone()
+        $pendingThisMonthCount = $query->clone()
             ->where('status', 0)
             ->whereMonth('due_date', $today->month)
             ->whereYear('due_date', $today->year)
-            ->get();
+            ->count();
+        $pendingThisMonthTotal = $query->clone()
+            ->where('status', 0)
+            ->whereMonth('due_date', $today->month)
+            ->whereYear('due_date', $today->year)
+            ->sum('amount');
 
         return [
             'overdue' => [
-                'count' => $overduePayments->count(),
-                'total_amount' => $overduePayments->sum('amount'),
-                'payments' => $overduePayments->take(5)->map(fn ($p) => [
-                    'id' => $p->id,
-                    'amount' => $p->amount,
-                    'due_date' => $p->due_date->format('d.m.Y'),
-                    'type' => $p->payment_type,
-                ])->toArray(),
+                'count' => $overdueCount,
+                'total_amount' => $overdueTotal,
+                'payments' => $overduePaymentsList,
             ],
             'due_today' => [
-                'count' => $dueToday->count(),
-                'total_amount' => $dueToday->sum('amount'),
+                'count' => $dueTodayCount,
+                'total_amount' => $dueTodayTotal,
             ],
             'due_in_7_days' => [
-                'count' => $dueIn7Days->count(),
-                'total_amount' => $dueIn7Days->sum('amount'),
+                'count' => $dueIn7Count,
+                'total_amount' => $dueIn7Total,
             ],
             'paid_this_month' => [
-                'count' => $paidThisMonth->count(),
-                'total_amount' => $paidThisMonth->sum('amount'),
+                'count' => $paidThisMonthCount,
+                'total_amount' => $paidThisMonthTotal,
             ],
             'pending_this_month' => [
-                'count' => $pendingThisMonth->count(),
-                'total_amount' => $pendingThisMonth->sum('amount'),
+                'count' => $pendingThisMonthCount,
+                'total_amount' => $pendingThisMonthTotal,
             ],
         ];
     }
