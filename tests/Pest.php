@@ -62,7 +62,7 @@ function createAdminUser(): array
     $company = \App\Models\Company::factory()->create();
     $user = \App\Models\User::factory()->create();
     $user->companies()->attach($company->id, ['role' => 'admin', 'is_default' => true]);
-    $user->roles()->attach($role->id);
+    $user->roles()->sync([$role->id]);
 
     return [$user, $company];
 }

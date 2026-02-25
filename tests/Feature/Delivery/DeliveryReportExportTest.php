@@ -3,7 +3,6 @@
 use App\Delivery\Services\DeliveryReportPivotService;
 use App\Models\DeliveryImportBatch;
 use App\Models\DeliveryReportRow;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -52,8 +51,8 @@ function createDokmeCimentoBatchWithRows(): DeliveryImportBatch
 }
 
 it('exports pivot summary as CSV', function (): void {
-    $user = User::factory()->create();
-    $this->actingAs($user);
+    [$user, $company] = createAdminUser();
+    $this->actingAs($user)->withSession(['active_company_id' => $company->id]);
 
     $batch = createDokmeCimentoBatchWithRows();
 
@@ -69,8 +68,8 @@ it('exports pivot summary as CSV', function (): void {
 });
 
 it('exports grouped invoice lines as CSV', function (): void {
-    $user = User::factory()->create();
-    $this->actingAs($user);
+    [$user, $company] = createAdminUser();
+    $this->actingAs($user)->withSession(['active_company_id' => $company->id]);
 
     $batch = createDokmeCimentoBatchWithRows();
 
