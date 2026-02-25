@@ -5,9 +5,14 @@
 @section('content')
 <div class="mb-5">
     <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h1 class="h2 fw-bold text-dark mb-1">Hoş Geldiniz, {{ Auth::user()->name }}!</h1>
-            <p class="text-secondary mb-0">Logistics yönetim paneline hoş geldiniz. İşte bugünün özeti.</p>
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle bg-primary-200 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                <span class="material-symbols-outlined text-primary" style="font-size: 1.75rem;">dashboard</span>
+            </div>
+            <div>
+                <h1 class="h2 fw-bold text-dark mb-1">Hoş Geldiniz, {{ Auth::user()->name }}!</h1>
+                <p class="text-secondary mb-0">Logistics yönetim paneline hoş geldiniz. İşte bugünün özeti.</p>
+            </div>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('admin.dashboard.export') }}" class="btn btn-outline-primary d-flex align-items-center gap-2 text-decoration-none" style="border-color: var(--bs-primary); color: var(--bs-primary);">

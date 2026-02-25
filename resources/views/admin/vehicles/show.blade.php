@@ -23,7 +23,10 @@
 <div class="row g-4">
     <div class="col-lg-8">
         <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
-            <h3 class="h4 fw-bold text-dark mb-4">Genel Bilgiler</h3>
+            <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">info</span>
+                Genel Bilgiler
+            </h3>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Plaka</label>
@@ -77,7 +80,10 @@
 
     <div class="col-lg-4">
         <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
-            <h3 class="h4 fw-bold text-dark mb-4">Kapasite Bilgileri</h3>
+            <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">straighten</span>
+                Kapasite Bilgileri
+            </h3>
             <div class="d-flex flex-column gap-3">
                 <div>
                     <label class="form-label small fw-semibold text-secondary">Kapasite (kg)</label>
@@ -95,7 +101,10 @@
         </div>
 
         <div class="bg-white rounded-3xl shadow-sm border p-4">
-            <h3 class="h4 fw-bold text-dark mb-4">Hızlı İşlemler</h3>
+            <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">settings</span>
+                Hızlı İşlemler
+            </h3>
             <div class="d-flex flex-column gap-2">
                 <a href="{{ route('admin.vehicles.edit', $vehicle->id) }}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2">
                     <span class="material-symbols-outlined">edit</span>

@@ -20,7 +20,10 @@
         @method('PUT')
 
         {{-- Temel Bilgiler --}}
-        <h4 class="h5 fw-bold text-dark mb-3">Temel Bilgiler</h4>
+        <h4 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-primary">info</span>
+            Temel Bilgiler
+        </h4>
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <x-form.input name="customer_code" label="Müşteri Kodu" :value="old('customer_code', $customer->customer_code)" placeholder="Opsiyonel" />
@@ -61,7 +64,10 @@
         </div>
 
         {{-- İletişim Bilgileri --}}
-        <h4 class="h5 fw-bold text-dark mb-3">İletişim Bilgileri</h4>
+        <h4 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-primary">call</span>
+            İletişim Bilgileri
+        </h4>
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <x-form.input name="phone" type="tel" label="Telefon" :value="old('phone', $customer->phone)" placeholder="530 136 38 01" />
@@ -72,7 +78,10 @@
         </div>
 
         {{-- Vergi Bilgileri --}}
-        <h4 class="h5 fw-bold text-dark mb-3">Vergi Bilgileri</h4>
+        <h4 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-primary">receipt_long</span>
+            Vergi Bilgileri
+        </h4>
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <x-form.input name="tax_number" label="Vergi Numarası" :value="old('tax_number', $customer->tax_number)" placeholder="1234567890" />
@@ -101,7 +110,10 @@
 {{-- Favori / Teslimat Adresleri --}}
 <div id="favorite-addresses" class="bg-white rounded-3xl shadow-sm border p-4 mt-4" style="border-color: var(--bs-customers-200);">
     <div class="d-flex align-items-center justify-content-between mb-4">
-        <h3 class="h4 fw-bold text-dark mb-0">Favori / Teslimat Adresleri</h3>
+        <h3 class="h4 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-primary">location_on</span>
+            Favori / Teslimat Adresleri
+        </h3>
         <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addFavoriteAddressModal">
             <span class="material-symbols-outlined" style="font-size: 1rem;">add</span>
             Yeni Adres Ekle

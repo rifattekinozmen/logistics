@@ -19,6 +19,10 @@
         @csrf
         @method('PUT')
 
+        <h4 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-primary">shopping_cart</span>
+            Sipariş Bilgileri
+        </h4>
         <div class="row g-4">
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Sipariş No</label>

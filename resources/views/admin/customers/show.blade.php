@@ -63,7 +63,10 @@
     <div class="col-lg-8">
         {{-- Temel Bilgiler --}}
         <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4" style="border-color: var(--bs-customers-200);">
-            <h3 class="h4 fw-bold text-dark mb-4">Temel Bilgiler</h3>
+            <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">info</span>
+                Temel Bilgiler
+            </h3>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Müşteri Kodu</label>
@@ -100,7 +103,10 @@
 
         {{-- İletişim Bilgileri --}}
         <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4" style="border-color: var(--bs-customers-200);">
-            <h3 class="h4 fw-bold text-dark mb-4">İletişim Bilgileri</h3>
+            <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">call</span>
+                İletişim Bilgileri
+            </h3>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Telefon</label>
@@ -115,7 +121,10 @@
 
         {{-- Vergi Bilgileri --}}
         <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4" style="border-color: var(--bs-customers-200);">
-            <h3 class="h4 fw-bold text-dark mb-4">Vergi Bilgileri</h3>
+            <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">receipt_long</span>
+                Vergi Bilgileri
+            </h3>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Vergi Numarası</label>
@@ -135,7 +144,10 @@
         <div id="favorite-addresses" class="bg-white rounded-3xl shadow-sm border p-4 mb-4" style="border-color: var(--bs-customers-200);">
             @php $addrsWithCoords = $customer->favoriteAddresses->filter(fn($a) => $a->latitude !== null && $a->longitude !== null); @endphp
             <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-                <h3 class="h4 fw-bold text-dark mb-0">Adresler</h3>
+                <h3 class="h4 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">location_on</span>
+                    Adresler
+                </h3>
                 <div class="d-flex align-items-center gap-2">
                     @if($addrsWithCoords->isNotEmpty())
                         <button type="button" id="adminBtnShowMap" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2">
@@ -197,7 +209,10 @@
 
         <div class="bg-white rounded-3xl shadow-sm border p-4" style="border-color: var(--bs-info-200);">
             <div class="d-flex align-items-center justify-content-between mb-4">
-                <h3 class="h4 fw-bold text-dark mb-0">Siparişler</h3>
+                <h3 class="h4 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">shopping_cart</span>
+                    Siparişler
+                </h3>
                 <span class="badge bg-info-200 text-info px-3 py-2 rounded-pill fw-semibold">{{ $customer->orders->count() }} Sipariş</span>
             </div>
             @if($customer->orders->count() > 0)
@@ -249,16 +264,22 @@
             <h3 class="h4 fw-bold text-dark mb-4">İşlemler</h3>
             <div class="d-flex flex-column gap-2">
                 <a href="{{ route('admin.customers.edit', $customer->id) }}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
-                    <span class="material-symbols-outlined">edit</span>
+                    <span class="material-symbols-outlined" style="font-size: 1.25rem;">edit</span>
                     Müşteriyi Düzenle
                 </a>
-                <a href="{{ route('admin.customers.edit', $customer->id) }}#favorite-addresses" class="text-primary text-decoration-none small">Adresleri Yönet</a>
-                <a href="{{ route('admin.customers.edit', $customer->id) }}#favorite-addresses" class="text-primary text-decoration-none small">+ Yeni Adres Ekle</a>
+                <a href="{{ route('admin.customers.edit', $customer->id) }}#favorite-addresses" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+                    <span class="material-symbols-outlined" style="font-size: 1.25rem;">map</span>
+                    Adresleri Yönet
+                </a>
+                <a href="{{ route('admin.customers.edit', $customer->id) }}#favorite-addresses" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+                    <span class="material-symbols-outlined" style="font-size: 1.25rem;">add_location_alt</span>
+                    Yeni Adres Ekle
+                </a>
                 <form action="{{ route('admin.customers.destroy', $customer->id) }}" method="POST" onsubmit="return confirm('Bu müşteriyi silmek istediğinize emin misiniz?');">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2">
-                        <span class="material-symbols-outlined">delete</span>
+                        <span class="material-symbols-outlined" style="font-size: 1.25rem;">delete</span>
                         Müşteriyi Sil
                     </button>
                 </form>
@@ -282,16 +303,16 @@
         <div class="bg-white rounded-3xl shadow-sm border p-4 mt-4" style="border-color: var(--bs-customers-200);">
             <h3 class="h4 fw-bold text-dark mb-4">Bilgi</h3>
             <div class="d-flex flex-column gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="material-symbols-outlined text-secondary" style="font-size: 1.25rem;">calendar_today</span>
+                <div class="d-flex gap-2 align-items-start">
+                    <span class="material-symbols-outlined text-secondary mt-1" style="font-size: 1.25rem;">calendar_today</span>
                     <div>
                         <label class="form-label small fw-semibold text-secondary mb-0">Kayıt</label>
                         <p class="text-dark mb-0">{{ $customer->created_at ? $customer->created_at->format('d.m.Y H:i') : '-' }}</p>
                     </div>
                 </div>
                 @if($customer->updated_at)
-                <div class="d-flex align-items-center gap-2">
-                    <span class="material-symbols-outlined text-secondary" style="font-size: 1.25rem;">schedule</span>
+                <div class="d-flex gap-2 align-items-start">
+                    <span class="material-symbols-outlined text-secondary mt-1" style="font-size: 1.25rem;">schedule</span>
                     <div>
                         <label class="form-label small fw-semibold text-secondary mb-0">Güncelleme</label>
                         <p class="text-dark mb-0">{{ $customer->updated_at->format('d.m.Y H:i') }}</p>

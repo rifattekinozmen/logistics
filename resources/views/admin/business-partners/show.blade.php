@@ -20,7 +20,10 @@
 <div class="row g-4">
     <div class="col-lg-8">
         <div class="bg-white rounded-3xl shadow-sm border p-4">
-            <h3 class="h5 fw-bold text-dark mb-4">Genel Bilgiler</h3>
+            <h3 class="h5 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">info</span>
+                Genel Bilgiler
+            </h3>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">BP No</label>
@@ -56,7 +59,10 @@
 
         @if($partner->customers->isNotEmpty())
         <div class="bg-white rounded-3xl shadow-sm border p-4 mt-4">
-            <h3 class="h5 fw-bold text-dark mb-3">Bağlı Müşteriler</h3>
+            <h3 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">people</span>
+                Bağlı Müşteriler
+            </h3>
             <ul class="list-group list-group-flush">
                 @foreach($partner->customers as $customer)
                 <li class="list-group-item d-flex align-items-center justify-content-between px-0">
@@ -71,7 +77,10 @@
 
     <div class="col-lg-4">
         <div class="bg-white rounded-3xl shadow-sm border p-4">
-            <h3 class="h5 fw-bold text-dark mb-4">Ticari Koşullar</h3>
+            <h3 class="h5 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">price_check</span>
+                Ticari Koşullar
+            </h3>
             <div class="d-flex flex-column gap-3">
                 <div>
                     <label class="form-label small fw-semibold text-secondary">Para Birimi</label>

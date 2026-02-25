@@ -19,7 +19,10 @@
         @csrf
 
         {{-- Temel Bilgiler --}}
-        <h4 class="h5 fw-bold text-dark mb-3">Temel Bilgiler</h4>
+        <h4 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-primary">info</span>
+            Temel Bilgiler
+        </h4>
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <x-form.input name="customer_code" label="Müşteri Kodu" :value="old('customer_code')" placeholder="Opsiyonel" />
@@ -60,7 +63,10 @@
         </div>
 
         {{-- İletişim Bilgileri --}}
-        <h4 class="h5 fw-bold text-dark mb-3">İletişim Bilgileri</h4>
+        <h4 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-primary">call</span>
+            İletişim Bilgileri
+        </h4>
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <x-form.input name="phone" type="tel" label="Telefon" :value="old('phone')" placeholder="530 136 38 01" />
@@ -71,7 +77,10 @@
         </div>
 
         {{-- Vergi Bilgileri --}}
-        <h4 class="h5 fw-bold text-dark mb-3">Vergi Bilgileri</h4>
+        <h4 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-primary">receipt_long</span>
+            Vergi Bilgileri
+        </h4>
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <x-form.input name="tax_number" label="Vergi Numarası" :value="old('tax_number')" placeholder="1234567890" />

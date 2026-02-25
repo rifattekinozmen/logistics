@@ -130,8 +130,11 @@
             <div class="tab-content" id="companySettingsTabsContent">
                 <!-- General Tab -->
                 <div class="tab-pane fade show active" id="general" role="tabpanel">
-                    <h4 class="h5 fw-bold text-dark mb-4">Genel Bilgiler</h4>
-                    
+                    <h4 class="h5 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">info</span>
+                        Genel Bilgiler
+                    </h4>
+
                     <form action="{{ route('admin.companies.settings.general.update', $company) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
@@ -482,7 +485,10 @@
                 <!-- Addresses Tab -->
                 <div class="tab-pane fade" id="addresses" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="h5 fw-bold text-dark mb-0">İletişim & Adresler</h4>
+                        <h4 class="h5 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">location_on</span>
+                            İletişim & Adresler
+                        </h4>
                         <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addressModal" onclick="openAddressModal()">
                             <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
                             Yeni Adres Ekle
@@ -528,8 +534,11 @@
 
                 <!-- Settings Tab -->
                 <div class="tab-pane fade" id="settings" role="tabpanel">
-                    <h4 class="h5 fw-bold text-dark mb-4">Sistem Ayarları</h4>
-                    
+                    <h4 class="h5 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">settings</span>
+                        Sistem Ayarları
+                    </h4>
+
                     <form action="{{ route('admin.companies.settings.update', $company) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -594,7 +603,10 @@
                 <!-- Digital Services Tab -->
                 <div class="tab-pane fade" id="digital-services" role="tabpanel" aria-labelledby="digital-services-tab">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="h5 fw-bold text-dark mb-0">Dijital Mali Hizmetlerim</h4>
+                        <h4 class="h5 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">receipt_long</span>
+                            Dijital Mali Hizmetlerim
+                        </h4>
                     </div>
 
                     @if($digitalServices->isEmpty())

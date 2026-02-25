@@ -22,7 +22,10 @@
 
 {{-- Lineer Sipariş Akışı --}}
 <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
-    <h3 class="h5 fw-bold text-dark mb-4">Sipariş Yaşam Döngüsü</h3>
+    <h3 class="h5 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+        <span class="material-symbols-outlined text-primary">timeline</span>
+        Sipariş Yaşam Döngüsü
+    </h3>
     <div class="d-flex align-items-start justify-content-between gap-2 flex-wrap">
         @foreach(($timelineSteps ?? []) as $index => $step)
             @php
@@ -55,7 +58,10 @@
 <div class="row g-4">
     <div class="col-lg-8">
         <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
-            <h3 class="h4 fw-bold text-dark mb-4">Genel Bilgiler</h3>
+            <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">info</span>
+                Genel Bilgiler
+            </h3>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Sipariş No</label>
@@ -113,7 +119,10 @@
         </div>
 
         <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
-            <h3 class="h4 fw-bold text-dark mb-4">Adres Bilgileri</h3>
+            <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">location_on</span>
+                Adres Bilgileri
+            </h3>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Alış Adresi</label>

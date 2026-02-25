@@ -23,7 +23,10 @@
 <div class="row g-4">
     <div class="col-lg-8">
         <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
-            <h3 class="h4 fw-bold text-dark mb-4">Genel Bilgiler</h3>
+            <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">info</span>
+                Genel Bilgiler
+            </h3>
             <dl class="row mb-0">
                 <dt class="col-sm-4">Sipariş</dt>
                 <dd class="col-sm-8">

@@ -4,9 +4,14 @@
 
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-        <h2 class="h3 fw-bold text-dark mb-1">Kullanıcılar</h2>
-        <p class="text-secondary mb-0">Tüm kullanıcıları görüntüleyin ve yönetin</p>
+    <div class="d-flex align-items-center gap-3">
+        <div class="rounded-circle bg-primary-200 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+            <span class="material-symbols-outlined text-primary" style="font-size: 1.5rem;">group</span>
+        </div>
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">Kullanıcılar</h2>
+            <p class="text-secondary mb-0">Tüm kullanıcıları görüntüleyin ve yönetin</p>
+        </div>
     </div>
     <a href="{{ route('admin.users.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
         <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
