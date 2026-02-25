@@ -5,13 +5,20 @@ Technical documentation for the Logistics ERP + CRM + Fleet Management system.
 
 ---
 
+## 5N1K Index
+
+**[INDEX-5N1K.md](INDEX-5N1K.md)** — Doküman envanteri ve 5N1K cevapları (Ne, Neden, Nerede, Ne zaman, Nasıl, Kim). İsimlendirme ve yerleştirme prosedürü bu dosyada tanımlıdır.
+
+---
+
 ## Cursor AI Autopilot
 
 **`docs/ai/AI_AUTOPILOT.md`** — Cursor IDE'nin projeyi otomatik anlamasını sağlar.
 
 **Kullanım:** `README.md` (root) veya `docs/ai/AI_AUTOPILOT.md` dosyasını chat'e sürükle → `/session` yaz.
 
-Detaylı workflow rehberi: [AI Workflow & Cursor Kullanım](ai/README.md)
+- Session belleği ve modül matrisi: [docs/ai/SESSION_CONTROL.md](ai/SESSION_CONTROL.md)
+- Detaylı workflow rehberi: [AI Workflow & Cursor Kullanım](ai/README.md)
 
 ---
 
@@ -74,9 +81,21 @@ The `.ai/` folder is the AI workflow system. Load these before starting any codi
 
 ---
 
+## Compliance
+
+| Document | Contents |
+|---|---|
+| [TCMB Ödeme Rehberleri](compliance/tcmb_pay/) | TCMB uyumlu B2B ödeme mimarisi (v2, v3, rehber) — lisanssız model, veritabanı, güvenlik |
+
+---
+
 ## Sessions
 
-`docs/sessions/` — archived session summaries, created by docs-agent after completing significant features.
+`docs/sessions/` — Önemli özellik tamamlandığında eklenen oturum özetleri. Prosedüre göre dosya adı: `YYYY-MM-DD-kısa-başlık.md`.
+
+Örnekler:
+- `2026-02-21-vite-integration-and-project-gaps.md` — Vite entegrasyonu ve proje boşluk analizi
+- `2026-02-25-docs-and-backlog-alignment.md` — Dokümantasyon hizalaması ve Faz 2/Faz 3 backlog çıkarımı
 
 ---
 
@@ -103,13 +122,16 @@ The `.ai/` folder is the AI workflow system. Load these before starting any codi
 
 | Dosya | Konum | Açıklama |
 |-------|-------|----------|
+| **INDEX-5N1K.md** | `docs/INDEX-5N1K.md` | Doküman envanteri, 5N1K cevapları ve dokümantasyon prosedürü |
 | **README.md** | `README.md` (root) | Ana proje girişi — GitHub/Git varsayılan |
 | **ROADMAP.md** | `docs/ROADMAP.md` | Yol haritası, tamamlanan görevler |
 | **AI_AUTOPILOT.md** | `docs/ai/AI_AUTOPILOT.md` | Cursor AI autopilot kuralları |
+| **SESSION_CONTROL.md** | `docs/ai/SESSION_CONTROL.md` | Session belleği, modül matrisi, git kuralları |
+| **TCMB ödeme rehberleri** | `docs/compliance/tcmb_pay/` | TCMB uyumlu B2B ödeme mimarisi |
 | **AGENTS.md** | `AGENTS.md` (root) | Cursor agent kuralları (otomatik yüklenir) |
 
 Root'taki `AI_AUTOPILOT.md` ve `ROADMAP.md` sadece yönlendirme stub'ıdır.
 
 ---
 
-**Last updated:** 2026-02-21
+**Last updated:** 2026-02-25

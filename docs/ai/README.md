@@ -22,6 +22,16 @@ Böylece Cursor:
 - Sadece gerekli dosyayı açar
 - Gereksiz token harcamaz
 
+### Güncel Akış (Önerilen)
+
+1. `docs/ai/SESSION_CONTROL.md` dosyasını chat'e sürükleyip `/session` komutunu çalıştır (aktif odak, modül matrisi ve korunan alanlar için tek kaynak).
+2. Gerekirse `docs/ROADMAP.md` ve `.ai/session.md` dosyalarını ekleyerek production durumu ve backlog'u oku.
+3. İlgili konuya göre mimari dokümanları aç:
+   - Logistics akışları için `docs/architecture/01-project-overview.md`
+   - DB için `docs/architecture/02-database-schema.md`
+   - Modül detayları için `docs/modules/04-modules-documentation.md`
+4. Kod değişikliklerinde sadece istenen dosyaya odaklan; geniş taramadan kaçın.
+
 ---
 
 ## .ai/ Klasörü (Operasyonel Beyin)
@@ -58,4 +68,4 @@ Do not modify controller.
 
 ## Son Güncelleme
 
-2026-02-21
+2026-02-25

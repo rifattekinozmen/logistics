@@ -16,6 +16,18 @@
         @endif
     </div>
     <div class="d-flex flex-wrap align-items-center gap-2">
+        @if(!empty($pivot['rows'] ?? []))
+            <a href="{{ route('admin.delivery-imports.pivot-export', $batch) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:1rem">download</span>
+                Pivot CSV
+            </a>
+        @endif
+        @if(!empty($pivot['fatura_rota_gruplari'] ?? []))
+            <a href="{{ route('admin.delivery-imports.invoice-lines-export', [$batch, 'group' => 1]) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:1rem">download</span>
+                Fatura Kalemleri CSV
+            </a>
+        @endif
         <a href="{{ route('admin.delivery-imports.show', $batch) }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
             <span class="material-symbols-outlined">arrow_back</span>
             Rapor Detayı

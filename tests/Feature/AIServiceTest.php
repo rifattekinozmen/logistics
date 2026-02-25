@@ -1,10 +1,14 @@
 <?php
 
+use App\AI\Jobs\RunAIAnalysisJob;
+use App\AI\Services\AIFinanceService;
 use App\AI\Services\AIFleetService;
 use App\AI\Services\AIHRService;
+use App\Models\AiReport;
 use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Employee;
+use App\Models\Payment;
 use App\Models\Vehicle;
 
 it('can predict vehicle maintenance needs', function () {
@@ -79,4 +83,84 @@ it('provides actionable recommendations', function () {
     expect($prediction)->toHaveKey('recommendations');
     expect($prediction['recommendations'])->toBeArray();
     expect(count($prediction['recommendations']))->toBeGreaterThan(0);
+});
+
+it('AIFinanceService detectOverdueAnomaly returns null when no overdue payments', function () {
+    Payment::query()->forceDelete();
+    Payment::factory()->paid()->count(3)->create([
+        'paid_date' => now()->subDays(10),
+        'amount' => 10000,
+    ]);
+
+    $financeService = app(AIFinanceService::class);
+    $result = $financeService->detectOverdueAnomaly();
+
+    expect($result)->toBeNull();
+});
+
+it('AIFinanceService detectOverdueAnomaly returns report when overdue exceeds 1.5x avg monthly paid', function () {
+    Payment::query()->forceDelete();
+    Payment::factory()->paid()->count(3)->create([
+        'paid_date' => now()->subDays(15),
+        'amount' => 10000,
+    ]);
+    Payment::factory()->overdue()->create([
+        'due_date' => now()->subDays(5),
+        'amount' => 25000,
+    ]);
+
+    $financeService = app(AIFinanceService::class);
+    $result = $financeService->detectOverdueAnomaly();
+
+    expect($result)->toBeArray();
+    expect($result)->toHaveKeys(['type', 'summary_text', 'severity', 'data_snapshot', 'generated_at']);
+    expect($result['type'])->toBe('finance');
+    expect($result['data_snapshot'])->toHaveKey('ratio');
+    expect($result['data_snapshot']['ratio'])->toBeGreaterThanOrEqual(1.5);
+});
+
+it('AIFleetService analyze returns array of reports with correct shape', function () {
+    $company = Company::factory()->create();
+    $branch = Branch::factory()->create(['company_id' => $company->id]);
+    Vehicle::factory()->count(3)->create(['branch_id' => $branch->id]);
+
+    $fleetService = app(AIFleetService::class);
+    $reports = $fleetService->analyze($company->id);
+
+    expect($reports)->toBeArray();
+    foreach ($reports as $report) {
+        expect($report)->toHaveKeys(['type', 'summary_text', 'severity', 'data_snapshot', 'generated_at']);
+        expect($report['type'])->toBe('fleet');
+    }
+});
+
+it('AIFleetService analyze includes utilization anomaly when half or more vehicles are idle', function () {
+    $company = Company::factory()->create();
+    $branch = Branch::factory()->create(['company_id' => $company->id]);
+    Vehicle::factory()->count(4)->create(['branch_id' => $branch->id]);
+
+    $fleetService = app(AIFleetService::class);
+    $reports = $fleetService->analyze($company->id);
+
+    $utilizationReport = collect($reports)->first(fn ($r) => str_contains($r['summary_text'], 'atıl'));
+    expect($utilizationReport)->not->toBeNull();
+    expect($utilizationReport['data_snapshot'])->toHaveKey('idle_count');
+});
+
+it('RunAIAnalysisJob persists fleet reports to ai_reports when company has ai_enabled', function () {
+    $company = Company::factory()->create(['is_active' => true]);
+    $company->setSetting('ai_enabled', 'true');
+    $branch = Branch::factory()->create(['company_id' => $company->id]);
+    Vehicle::factory()->count(3)->create(['branch_id' => $branch->id]);
+
+    $initialCount = AiReport::count();
+    (new RunAIAnalysisJob($company))->handle(
+        app(\App\AI\Services\AIOperationsService::class),
+        app(AIFinanceService::class),
+        app(AIHRService::class),
+        app(AIFleetService::class)
+    );
+
+    expect(AiReport::count())->toBeGreaterThan($initialCount);
+    expect(AiReport::where('type', 'fleet')->exists())->toBeTrue();
 });

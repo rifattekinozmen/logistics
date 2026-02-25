@@ -279,7 +279,7 @@ AI/
 
 ## MASTER TODO LİSTESİ
 
-> **Not:** Bu liste referans amaçlıdır. Güncel proje durumu ve tamamlanan görevler için [docs/ROADMAP.md](../ROADMAP.md) dosyasına bakın. Proje %95+ tamamlanmış, production ready durumdadır.
+> **Not:** Bu liste referans amaçlıdır. Güncel proje durumu ve tamamlanan görevler için [docs/ROADMAP.md](../ROADMAP.md) dosyasına bakın. Proje çekirdek modüller için production ready durumdadır; ileri seviye AI, Analytics ve entegrasyonlar Faz 2/Faz 3 backlog'unda yer alır.
 
 ### 1. PROJE TEMEL KURULUMU
 - [ ] Laravel 12 kurulumu ve yapılandırması
@@ -422,6 +422,26 @@ AI/
 - [ ] Bildirim yönetim paneli (web)
 - [ ] Otomatik mail bildirimleri
 - [ ] Cronjob durumu takibi
+
+---
+
+## GÜNCEL BACKLOG (2026-02-25 — Kısa Sprint Listesi)
+
+Bu bölüm, ROADMAP ve `.ai/session.md` ile uyumlu olarak **yakın vadeli geliştirme işleri** için kısa bir referans sağlar.
+
+### Delivery Import & Pivot
+- [ ] `DeliveryReportPivotService` için edge-case senaryolarını (farklı rapor tipleri, eksik/bozuk header'lar, null alanlar) kapsayan ek Pest testleri yaz.
+- [ ] Fatura kalemi üretiminde (buildInvoiceLines) gruplanmış kalemler için validasyon ve hata raporlama mekanizmasını güçlendir.
+- [ ] Pivot ve fatura kalemi çıktılarının Excel/CSV export akışını tamamla ve Delivery rapor detay ekranına entegre et.
+
+### AI & Analytics
+- [ ] `AnalyticsDashboardService` içinde fleet ve operations metriklerini genişlet (ör. utilization, on-time delivery, breakdown oranları).
+- [ ] Analytics dashboard için mevcut Chart.js grafiklerine ek olarak seçilen 1–2 yeni grafik türü (ör. stacked bar, line+bar kombinasyonu) ekle.
+- [ ] `AIFleetService`, `AIFinanceService` ve `AIDocumentService` için en az birer basit anomaly detection kuralı tanımla ve sonuçları `ai_reports` üzerinden raporla.
+
+### PythonBridge & Queue
+- [ ] `PythonBridgeService` için minimal bir POC akışı tanımla: hangi veri seti (ör. weekly fuel price + shipments), hangi JSON formatında dış sisteme gönderilecek.
+- [ ] AI, Logo, Excel ve notification job'larının queue ve schedule yapılarını gözden geçirerek, “kritik” ve “non-kritik” job'ları ayıran kısa bir plan çıkar.
 
 ---
 

@@ -1,5 +1,6 @@
 # 🧠 LOJİSTİK ERP — AI AUTOPILOT KONTROL DOSYASI
 
+> **Konum:** `docs/ai/SESSION_CONTROL.md` (taşındı: eski `docs/onereadme.md`)
 > **Kullanım:** Bu dosyayı Cursor Chat'e sürükle → `/session` yaz → AI kaldığı yerden devam eder.
 > **Güncelleme:** Her önemli özellik sonrası bu dosyanın `SESSION BELLEĞİ` bölümünü güncelle.
 
@@ -13,13 +14,13 @@ AI Yetkisi    : TAM OTONOM UYGULAMA
 İnsan Rolü    : Yön Verme & Onaylama
 
 Şu Anki Odak:
-  ⚡ Analytics Dashboard — Chart.js entegrasyonu (finance/fleet/ops)
-  ⚡ Delivery Import Pipeline — fatura eşleştirme stabilitesi
-  ⚡ EInvoice — GIB entegrasyon akışı
+  ⚡ Docs & backlog alignment — dokümantasyon ile gerçek proje durumunu hibrit modele çekme
+  ⚡ Analytics Dashboard — Chart.js entegrasyonu ve ek metrikler (finance/fleet/ops)
+  ⚡ Delivery Import Pipeline — pivot & fatura kalemleri hattının sertleştirilmesi
 
-Stabil (son milestone): ✔ Order  ✔ Customer  ✔ Vehicle  ✔ Auth  ✔ FuelPrice  ✔ Calendar
-Aktif Geliştirme:       ⚠ Analytics  ⚠ Delivery  ⚠ EInvoice  ⚠ Finance
-Beklemede:              ❌ Otonom Faturalama Motoru  ❌ Tahminsel Bakım AI
+Stabil (son milestone): ✔ Order  ✔ Customer  ✔ Vehicle  ✔ Auth  ✔ FuelPrice  ✔ Calendar  ✔ EInvoice
+Aktif Geliştirme (ileri seviye): ⚠ Analytics (advanced metrics)  ⚠ Delivery (pivot/invoice tuning)  ⚠ Finance (anomaly detection)  ⚠ AI (AIFleet/AIDocument advanced)
+Beklemede:              ❌ Tahminsel Bakım AI'nin derinleştirilmesi  ❌ Mobile App
 ```
 
 ---
@@ -65,19 +66,19 @@ Order   → Shipment → Delivery → Invoice → Finance → Analytics
 
 ## ═══ 3. MODÜL OLGUNLUK MATRİSİ ═══
 
-| Modül           | Durum      | Test   | Refactor | AI Önceliği |
-|-----------------|------------|--------|----------|-------------|
-| Order           | Stabil     | ✅ Var | Hayır    | Düşük       |
-| Customer        | Stabil     | ✅ Var | Hayır    | Düşük       |
-| Vehicle         | Stabil     | ✅ Var | Hayır    | Düşük       |
-| Auth/RBAC       | Stabil     | ✅ Var | Hayır    | Düşük       |
-| FuelPrice       | Stabil     | ✅ Var | Hayır    | Düşük       |
-| Calendar        | Stabil     | ✅ Var | Hayır    | Düşük       |
-| Location        | Stabil     | ✅ Var | Hayır    | Düşük       |
-| **Analytics**   | **Aktif**  | ⚠ Yeni | Evet    | **YÜKSEK**  |
-| **Delivery**    | **Aktif**  | ⚠ Kısmi| Evet   | **YÜKSEK**  |
-| **EInvoice**    | **Aktif**  | ⚠ Kısmi| Evet   | **YÜKSEK**  |
-| **Finance**     | **Aktif**  | ⚠ Kısmi| Evet   | **YÜKSEK**  |
+| Modül           | Durum                        | Test   | Refactor | AI Önceliği |
+|-----------------|------------------------------|--------|----------|-------------|
+| Order           | Stabil (production)          | ✅ Var | Hayır    | Düşük       |
+| Customer        | Stabil (production)          | ✅ Var | Hayır    | Düşük       |
+| Vehicle         | Stabil (production)          | ✅ Var | Hayır    | Düşük       |
+| Auth/RBAC       | Stabil (production)          | ✅ Var | Hayır    | Düşük       |
+| FuelPrice       | Stabil (production)          | ✅ Var | Hayır    | Düşük       |
+| Calendar        | Stabil (production)          | ✅ Var | Hayır    | Düşük       |
+| Location        | Stabil (production)          | ✅ Var | Hayır    | Düşük       |
+| **Analytics**   | Çekirdek tamam, advanced dev | ⚠ Yeni | Evet     | **YÜKSEK**  |
+| **Delivery**    | Çekirdek tamam, tuning aşaması | ⚠ Kısmi| Evet   | **YÜKSEK**  |
+| **EInvoice**    | Stabil (production)          | ✅ Var | Hayır    | Orta        |
+| **Finance**     | Çekirdek tamam, advanced dev | ⚠ Kısmi| Evet     | **YÜKSEK**  |
 | Employee        | Kısmi      | ❌ Yok | Evet     | Orta        |
 | Warehouse       | Kısmi      | ✅ Var | Evet     | Orta        |
 | Shipment        | Kısmi      | ✅ Var | Hayır    | Orta        |

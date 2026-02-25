@@ -92,15 +92,15 @@ class RunAIAnalysisJob implements ShouldQueue
                     ]);
                 }
 
-                // Fleet analizi (Deployment optimization)
-                $fleetOptimization = $fleetService->optimizeFleetDeployment($company->id);
-                if (isset($fleetOptimization['recommendations'])) {
+                // Fleet analizi (anomali + optimize)
+                $fleetReports = $fleetService->analyze($company->id);
+                foreach ($fleetReports as $report) {
                     AiReport::create([
-                        'type' => 'fleet_optimization',
-                        'summary_text' => 'Filo kullanım oranı: '.$fleetOptimization['average_utilization'],
-                        'severity' => 'low',
-                        'data_snapshot' => $fleetOptimization,
-                        'generated_at' => now(),
+                        'type' => $report['type'],
+                        'summary_text' => $report['summary_text'],
+                        'severity' => $report['severity'],
+                        'data_snapshot' => $report['data_snapshot'],
+                        'generated_at' => $report['generated_at'],
                     ]);
                 }
             }

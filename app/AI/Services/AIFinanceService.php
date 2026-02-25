@@ -40,6 +40,12 @@ class AIFinanceService extends AIService
             );
         }
 
+        // Anomali: geciken ödemeler ortalamanın çok üzerinde mi?
+        $overdueAnomaly = $this->detectOverdueAnomaly();
+        if ($overdueAnomaly !== null) {
+            $reports[] = $overdueAnomaly;
+        }
+
         return $reports;
     }
 
@@ -76,5 +82,50 @@ class AIFinanceService extends AIService
             'count' => $upcoming->count(),
             'total_amount' => $upcoming->sum('amount'),
         ];
+    }
+
+    /**
+     * Geciken ödemelerde anomali tespit et (ortalamaya göre aşırı yüksek gecikme).
+     * Son 3 aydaki aylık ortalama ödenen tutarla karşılaştırır.
+     */
+    public function detectOverdueAnomaly(): ?array
+    {
+        $overdue = $this->analyzeOverduePayments();
+        if ($overdue['total_amount'] <= 0) {
+            return null;
+        }
+
+        $avgMonthlyPaid = (float) Payment::where('status', Payment::STATUS_PAID)
+            ->where('paid_date', '>=', now()->subMonths(3))
+            ->selectRaw('SUM(amount) as total')
+            ->value('total');
+        $avgMonthlyPaid = $avgMonthlyPaid / 3;
+
+        if ($avgMonthlyPaid <= 0) {
+            return null;
+        }
+
+        $ratio = $overdue['total_amount'] / $avgMonthlyPaid;
+        if ($ratio < 1.5) {
+            return null;
+        }
+
+        $severity = $ratio >= 3 ? 'high' : ($ratio >= 2 ? 'medium' : 'low');
+
+        return $this->createReport(
+            'finance',
+            sprintf(
+                'Anomali: Geciken ödemeler (%.2f TL) son 3 ay ortalamasının %.1f katı.',
+                $overdue['total_amount'],
+                round($ratio, 1)
+            ),
+            $severity,
+            [
+                'overdue_total' => $overdue['total_amount'],
+                'overdue_count' => $overdue['count'],
+                'avg_monthly_paid_3m' => round($avgMonthlyPaid, 2),
+                'ratio' => round($ratio, 2),
+            ]
+        );
     }
 }

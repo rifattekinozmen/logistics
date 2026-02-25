@@ -44,11 +44,14 @@ with minimal user input and minimal token usage.
 
 | File | Purpose |
 |------|---------|
-| `README.md` | **Root'taki ana README** — proje özeti, kurulum, stack |
+| `docs/ai/SESSION_CONTROL.md` | Session belleği, modül matrisi, korunan alanlar — AI için birincil giriş noktası |
 | `.ai/session.md` | Current focus, pending TODOs, module status |
 | `.ai/project-map.md` | Models, controllers, routes, config — anti-hallucination |
-| `docs/architecture/01-project-overview.md` | Full module list, tech stack |
-| `docs/ROADMAP.md` | Proje yol haritası, tamamlanan görevler |
+| `docs/architecture/01-project-overview.md` | Full module list, tech stack, Logistics B2B lifecycle |
+| `docs/architecture/02-database-schema.md` | Logistics core tabloları ve index'ler |
+| `docs/modules/04-modules-documentation.md` | Modül bazlı özellik setleri ve otomasyonlar |
+| `docs/ROADMAP.md` | Proje yol haritası, tamamlanan görevler ve Faz 2 / Faz 3 backlog |
+| `README.md` | **Root'taki ana README** — proje özeti, kurulum, stack |
 | `config/delivery_report.php` | Pivot logic — column indices, dimensions |
 
 ---
@@ -56,11 +59,11 @@ with minimal user input and minimal token usage.
 # AUTOPILOT BEHAVIOR (CRITICAL)
 
 When session starts:
-1. Read `README.md` first (root — proje kökündeki ana README)
-2. Assume `.ai/project-map.md` is authoritative for paths/classes
-3. DO NOT scan entire project unless explicitly required
-4. Work ONLY on requested scope
-5. Minimize token usage at all times
+1. Read `docs/ai/SESSION_CONTROL.md` first (aktif odak, modül matrisi, korunan alanlar).
+2. Gerekirse `docs/ROADMAP.md` ve `.ai/session.md` ile production durumu ve backlog'u netleştir.
+3. Mimari veya DB ile ilgiliysen `docs/architecture/01-project-overview.md` ve `docs/architecture/02-database-schema.md` dosyalarını referans al.
+4. Yalnızca istenen modül/özellik için gerekli sınıf ve dosyaları aç (`.ai/project-map.md` üzerinden).
+5. DO NOT scan entire project unless explicitly required; work ONLY on requested scope ve her zaman token kullanımını minimize et.
 
 ---
 

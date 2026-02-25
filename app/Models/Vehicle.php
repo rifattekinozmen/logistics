@@ -74,4 +74,12 @@ class Vehicle extends Model
         return $this->hasMany(Document::class, 'documentable_id')
             ->where('documentable_type', self::class);
     }
+
+    /**
+     * Get GPS position records (Faz 3 - real-time takip).
+     */
+    public function gpsPositions(): HasMany
+    {
+        return $this->hasMany(VehicleGpsPosition::class);
+    }
 }

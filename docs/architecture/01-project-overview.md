@@ -224,6 +224,8 @@ Her renkli blok, sistemdeki bir domain ve event zincirini temsil eder:
 
 Bu lifecycle, yeni özellik geliştirilirken **Order → PaymentIntent → Payment → ShipmentPlan → Shipment → Invoice → AccountTransaction** sırasının bozulmaması için referans alınmalıdır.
 
+**Durum:** Çekirdek B2B lifecycle production ortamı için tamamlanmış kabul edilir; Analytics & AI tarafındaki ileri seviye metrikler, anomaly detection ve optimizasyon özellikleri Faz 2 / Faz 3 backlog'unda planlanmıştır (detay için `docs/ROADMAP.md`).
+
 ---
 
 ## MİMARİ YAKLAŞIM
@@ -306,9 +308,11 @@ Logistics B2B sisteminde güvenlik mimarisi üç katmandan oluşur:
   - Tüm ödeme callback'lerinde HMAC imza kontrolü yapılır (ör. `hash_hmac('sha256', $payload, config('payment.secret'))`).
   - `transaction_id` bazlı duplicate kontrol ile aynı ödeme callback'i ikinci kez işlense bile finansal kayıtlar tekrar oluşturulmaz.
   - Callback sonrası sadece `PaymentService` uygun event'i (`PaymentApproved` / `PaymentFailed`) yayınlar; diğer domain'ler event dinleyicisi olarak tepki verir.
-- **Data Protection:**
+-- **Data Protection:**
   - Kart numarası, CVV vb. hassas bilgiler sistemde tutulmaz; sadece gateway tarafındaki referans/transaction ID saklanır.
   - Vergi numarası gibi hassas alanlar gerekirse Laravel encrypt cast ile şifrelenerek saklanır.
+
+**Regülasyon bağı:** Bu bölüm uygulama tarafındaki teknik güvenlik prensiplerini özetler; TCMB ödeme hizmetleri ve B2B mimarisiyle ilgili yasal/iş gereksinimleri için `docs/compliance/tcmb_pay/` altındaki rehberler (v2, v3, rehber) referans alınmalıdır.
 
 ---
 

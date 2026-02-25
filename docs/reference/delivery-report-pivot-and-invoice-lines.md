@@ -87,3 +87,42 @@ Yüklenen teslimat raporu Excel'inden **pivot tablo** (özet) ve **fatura kaleml
 - malzeme_kodu → 12, malzeme_adi → 13, miktar → 41, birim → 42, irsaliye_no → 45, tarih → 4, firma → 52, plaka → 51.
 
 Bu sayede hem pivot hem fatura kalemleri rapor tipine göre esnek ve tek yerden (config) yönetilir.
+
+### Örnek config yapısı (özet)
+
+```php
+// config/delivery_report.php
+return [
+    'report_types' => [
+        'endustriyel_hammadde' => [
+            'headers' => [/* ... */],
+            'pivot_dimensions' => [
+                'date' => 4,
+                'company' => 52,
+                'material_code' => 12,
+            ],
+            'pivot_metrics' => [
+                'delivered_quantity' => 41,
+                'valid_quantity' => 15,
+            ],
+            'invoice_line_mapping' => [
+                'material_code' => 12,
+                'material_name' => 13,
+                'quantity' => 41,
+                'unit' => 42,
+                'dispatch_number' => 45,
+                'date' => 4,
+                'company' => 52,
+                'plate' => 51,
+            ],
+        ],
+    ],
+];
+```
+
+### Delivery Import → Pivot → Fatura Akışı (Özet)
+
+1. Excel yüklenir ve satırlar `DeliveryImportBatch` + `DeliveryReportRow` tablolarına kaydedilir.
+2. `DeliveryReportPivotService::buildPivot()` ilgili `pivot_dimensions` ve `pivot_metrics` tanımlarına göre özet verileri üretir.
+3. `DeliveryReportPivotService::buildInvoiceLines()` aynı konfigürasyon üzerinden fatura kalemi listesi oluşturur (gerekirse gruplayarak).
+4. Oluşan fatura kalemleri hem ekranda gösterilir hem de Excel/CSV olarak dışa aktarılabilir; ileride `LogoIntegrationService` ve e-Fatura/e-Arşiv akışına beslenmek üzere kullanılabilir.

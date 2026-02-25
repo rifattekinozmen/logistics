@@ -76,6 +76,8 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         Route::post('/', [DeliveryImportController::class, 'store'])->name('store');
         Route::get('/{batch}', [DeliveryImportController::class, 'show'])->name('show');
         Route::get('/{batch}/veri-analiz-raporu', [DeliveryImportController::class, 'veriAnalizRaporu'])->name('veri-analiz-raporu');
+        Route::get('/{batch}/pivot-export', [DeliveryImportController::class, 'exportPivot'])->name('pivot-export');
+        Route::get('/{batch}/invoice-lines-export', [DeliveryImportController::class, 'exportInvoiceLines'])->name('invoice-lines-export');
         Route::patch('/{batch}/invoice-status', [DeliveryImportController::class, 'updateInvoiceStatus'])->name('invoice-status.update');
         Route::patch('/{batch}/petrokok-route', [DeliveryImportController::class, 'updatePetrokokRoute'])->name('petrokok-route.update');
         Route::patch('/{batch}/klinker-overrides', [DeliveryImportController::class, 'updateKlinkerOverrides'])->name('klinker-overrides.update');

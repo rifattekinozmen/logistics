@@ -363,6 +363,15 @@
         </div>
     </div>
 
+    @if(isset($aiReportsHighCount) && $aiReportsHighCount > 0)
+    <div class="alert alert-danger border-0 rounded-3xl shadow-sm mb-4 d-flex align-items-center gap-3" role="alert">
+        <span class="material-symbols-outlined" style="font-size: 1.75rem;">warning</span>
+        <div class="flex-grow-1">
+            <strong>AI Uyarıları:</strong> {{ $aiReportsHighCount }} yüksek öncelikli uyarı tespit edildi. Aşağıdaki AI Özet kutusundan inceleyebilirsiniz.
+        </div>
+    </div>
+    @endif
+
     <!-- AI Özet & Grafik ve Aktiviteler -->
     <div class="row g-4">
         <!-- AI Özet Kutusu -->
@@ -371,7 +380,12 @@
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <div>
                         <h3 class="h5 fw-bold text-dark mb-1">AI Özet</h3>
-                        <p class="small text-secondary mb-0">Bugün dikkat edilmesi gerekenler</p>
+                        <p class="small text-secondary mb-0">
+                            @if(isset($aiReportsHighCount) && $aiReportsHighCount > 0)
+                                <span class="badge bg-danger me-1">{{ $aiReportsHighCount }} yüksek öncelik</span>
+                            @endif
+                            Bugün dikkat edilmesi gerekenler
+                        </p>
                     </div>
                     <span class="material-symbols-outlined text-primary" style="font-size: 1.75rem;">smart_toy</span>
                 </div>

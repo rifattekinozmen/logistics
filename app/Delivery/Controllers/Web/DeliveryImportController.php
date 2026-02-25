@@ -366,6 +366,65 @@ class DeliveryImportController extends Controller
     }
 
     /**
+     * Pivot özetini (buildPivot) CSV olarak dışa aktar.
+     */
+    public function exportPivot(DeliveryImportBatch $batch, DeliveryReportPivotService $pivotService): StreamedResponse|\Illuminate\Http\RedirectResponse
+    {
+        $pivot = $pivotService->buildPivot($batch);
+        if ($pivot === []) {
+            return redirect()->route('admin.delivery-imports.veri-analiz-raporu', $batch)
+                ->with('info', 'Bu rapor için pivot verisi bulunamadı veya rapor tipi desteklenmiyor.');
+        }
+
+        $headers = array_keys($pivot[0]);
+        $rows = [];
+        foreach ($pivot as $row) {
+            $rows[] = array_map(
+                static fn (string $key): string => isset($row[$key]) ? (string) $row[$key] : '',
+                $headers
+            );
+        }
+
+        $baseName = pathinfo($batch->file_name, PATHINFO_FILENAME).'_pivot';
+
+        return app(ExportService::class)->csv($headers, $rows, $baseName.'.csv');
+    }
+
+    /**
+     * Fatura kalemlerini CSV olarak dışa aktar.
+     * ?group=0 ile irsaliye_no + malzeme_kodu grubunu kapatıp ham satır bazlı export alınabilir.
+     */
+    public function exportInvoiceLines(Request $request, DeliveryImportBatch $batch, DeliveryReportPivotService $pivotService): StreamedResponse|\Illuminate\Http\RedirectResponse
+    {
+        $group = $request->boolean('group', true);
+        $lines = $pivotService->buildInvoiceLines($batch, $group);
+        if ($lines === []) {
+            return redirect()->route('admin.delivery-imports.veri-analiz-raporu', $batch)
+                ->with('info', 'Bu rapor için fatura kalemi üretilemedi veya rapor tipi desteklenmiyor.');
+        }
+
+        $first = $lines[0];
+        $headers = [];
+        foreach (array_keys($first) as $field) {
+            $headers[] = str_replace('  ', ' ', ucwords(str_replace('_', ' ', (string) $field)));
+        }
+
+        $rows = [];
+        foreach ($lines as $line) {
+            $row = [];
+            foreach (array_keys($first) as $field) {
+                $row[] = isset($line[$field]) ? (string) $line[$field] : '';
+            }
+            $rows[] = $row;
+        }
+
+        $suffix = $group ? '_invoice_lines_grouped' : '_invoice_lines_raw';
+        $baseName = pathinfo($batch->file_name, PATHINFO_FILENAME).$suffix;
+
+        return app(ExportService::class)->csv($headers, $rows, $baseName.'.csv');
+    }
+
+    /**
      * Günlük Klinker override değerlerini kaydet.
      * Kullanıcı kantar sistemindeki günlük Klinker miktarlarını girerek SAP-kantar farkını düzeltir.
      */

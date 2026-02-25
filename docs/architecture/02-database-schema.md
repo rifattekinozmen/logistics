@@ -441,6 +441,8 @@ Logistics B2B akışındaki temel ilişki zinciri:
 
 `customers` → `orders` → (`shipments`, `delivery_numbers`) → finansal taraf için `payments` ve doküman tarafı için `documents`.
 
+**Durum:** Bu bölümde listelenen tablolar, production ortamındaki çekirdek logistics akışı için referans şema olarak kabul edilir. Analytics & AI tarafındaki ileri seviye metrikler ve entegrasyonlar (örn. PythonBridgeService üzerinden dış analiz) Faz 2 / Faz 3 backlog'unda detaylandırılmıştır (`docs/ROADMAP.md`).
+
 ## 6. DEPO & STOK
 
 ### warehouses
@@ -809,6 +811,8 @@ Kritik tablolarda `created_by`, `updated_by` gibi kolonlar eklenebilir.
 - datetime2 (daha geniş tarih aralığı)
 - nvarchar (Unicode desteği)
 - JSON kolonlar için nvarchar(max) kullanılabilir (Laravel JSON cast ile)
+
+Bu şema, `docs/architecture/01-project-overview.md` içindeki Logistics B2B lifecycle açıklaması ve `docs/modules/04-modules-documentation.md` içindeki modül seviyesindeki açıklamalarla birlikte okunmalıdır; üçü birlikte uygulama mimarisi için tek doğruluk kaynağını oluşturur.
 
 ---
 

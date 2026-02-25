@@ -1,7 +1,9 @@
 <?php
 
+use App\Analytics\Services\AnalyticsDashboardService;
 use App\Integration\Jobs\SendToPythonJob;
 use App\Integration\Services\PythonBridgeService;
+use App\Models\Company;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 
@@ -48,4 +50,21 @@ it('sends data to python endpoint when called synchronously', function () {
 
     expect($result['success'])->toBeTrue();
     expect($result)->toHaveKey('response');
+});
+
+it('pushes analytics snapshot via artisan command', function (): void {
+    Queue::fake();
+
+    /** @var Company $company */
+    $company = Company::factory()->create([
+        'is_active' => 1,
+    ]);
+
+    // Analytics service will run queries, but verinin boş olması bu test için sorun değil.
+    app(AnalyticsDashboardService::class);
+
+    $this->artisan('analytics:push-python', ['companyId' => $company->id, '--days' => 7])
+        ->assertExitCode(0);
+
+    Queue::assertPushed(SendToPythonJob::class);
 });

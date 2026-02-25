@@ -6,7 +6,7 @@
 
 ## Current Focus
 
-Delivery import pipeline (DeliveryImportBatch / DeliveryReportPivotService).
+Documentation & backlog alignment, analytics dashboards ve delivery import pipeline (DeliveryImportBatch / DeliveryReportPivotService).
 
 Recent completed work (last session):
 - Vite entegrasyonu: layouts.app'e @vite eklendi, CDN Bootstrap kaldırıldı — HMR aktif
@@ -31,11 +31,10 @@ Recent completed work (last 5 commits):
 
 ## Pending Work (Known TODOs)
 
-- Python bridge (`PythonBridgeService`) — data pipeline to Python backend
-- AI submodule expansion: AIFleetService, AIDocumentService (AIHRService implemented)
-- E-Fatura / E-Arşiv XML export
+- Python bridge (`PythonBridgeService`) — ileri seviye analizler için veri hattı (advanced analytics POC)
+- Advanced AI capabilities: anomaly detection ve daha derin içgörüler için `AIFleetService`, `AIDocumentService`, `AIFinanceService` üzerinde genişletmeler
 - Flutter/React Native mobile app (Faz 2 — not started)
-- Queue optimization review
+- Queue optimization review (AI, Logo, Excel, notification job'ları için)
 
 ## Module Status Snapshot
 
@@ -64,10 +63,10 @@ Recent completed work (last 5 commits):
 
 ## Safe Next Actions
 
-1. Add missing feature tests for Order and Shipment modules (expand coverage)
-2. Implement `AIFleetService` for fleet maintenance prediction
-3. Implement `AIDocumentService` for document analysis
-4. Python bridge (`PythonBridgeService`) — data pipeline integration
+1. Order ve Shipment modülleri için eksik edge-case feature testlerini güçlendir (gerekli yerlerde kapsamı genişlet).
+2. `AIFleetService` içinde bakım tahmini metrikleri ve eşik değerlerini zenginleştir (advanced rules).
+3. `AIDocumentService` için daha zengin belge sınıflandırma ve compliance kontrol senaryoları ekle.
+4. Python bridge (`PythonBridgeService`) için data pipeline POC tasarla ve entegre et.
 
 ## Session Archive
 

@@ -110,6 +110,76 @@ class AIFleetService
     }
 
     /**
+     * Filo analizi çalıştır; bakım anomali ve kullanım anomali raporları döndürür.
+     *
+     * @return array<int, array{type: string, summary_text: string, severity: string, data_snapshot: array, generated_at: \Illuminate\Support\Carbon}>
+     */
+    public function analyze(int $companyId): array
+    {
+        $reports = [];
+
+        $vehicles = Vehicle::whereHas('branch', fn ($q) => $q->where('company_id', $companyId))
+            ->where('status', 1)
+            ->get();
+
+        $maintenanceAnomalies = [];
+        foreach ($vehicles as $vehicle) {
+            $prediction = $this->predictMaintenanceNeeds($vehicle);
+            if ($prediction['status'] === 'needs_attention' || $prediction['maintenance_score'] < 40) {
+                $maintenanceAnomalies[] = [
+                    'vehicle_id' => $vehicle->id,
+                    'plate' => $vehicle->plate,
+                    'maintenance_score' => $prediction['maintenance_score'],
+                ];
+            }
+        }
+
+        if (count($maintenanceAnomalies) > 0) {
+            $reports[] = $this->createReport(
+                'fleet',
+                count($maintenanceAnomalies).' araç acil bakım veya muayene gerektiriyor.',
+                count($maintenanceAnomalies) >= 3 ? 'high' : 'medium',
+                ['vehicles' => $maintenanceAnomalies]
+            );
+        }
+
+        $deployment = $this->optimizeFleetDeployment($companyId);
+        $idleCount = count(array_filter($deployment['utilization_data'], fn ($v) => $v['status'] === 'idle'));
+        $total = $deployment['total_vehicles'];
+        if ($total > 0 && $idleCount >= $total * 0.5) {
+            $reports[] = $this->createReport(
+                'fleet',
+                "Filo kullanım anomali: {$idleCount}/{$total} araç atıl durumda.",
+                $idleCount === $total ? 'high' : 'medium',
+                [
+                    'idle_count' => $idleCount,
+                    'total_vehicles' => $total,
+                    'average_utilization' => $deployment['average_utilization'],
+                ]
+            );
+        }
+
+        return $reports;
+    }
+
+    /**
+     * AI raporu yapısı oluştur (ai_reports ile uyumlu).
+     *
+     * @param  array<string, mixed>  $data
+     * @return array{type: string, summary_text: string, severity: string, data_snapshot: array, generated_at: \Illuminate\Support\Carbon}
+     */
+    protected function createReport(string $type, string $summaryText, string $severity, array $data = []): array
+    {
+        return [
+            'type' => $type,
+            'summary_text' => $summaryText,
+            'severity' => $severity,
+            'data_snapshot' => $data,
+            'generated_at' => now(),
+        ];
+    }
+
+    /**
      * Optimize fleet deployment for a company.
      */
     public function optimizeFleetDeployment(int $companyId): array

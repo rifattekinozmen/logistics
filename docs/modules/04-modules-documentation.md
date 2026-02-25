@@ -6,6 +6,8 @@
 
 ## 1. DEPO & STOK YÖNETİMİ
 
+**Durum:** Çekirdek fonksiyonlar production ortamında aktif; ileri seviye optimizasyon ve ek raporlar Faz 2 / Faz 3 backlog'unda.
+
 ### Özellikler
 - Depo içi mikro yönetim
 - Lokasyon hiyerarşisi (Alan > Koridor > Raf > Kat > Pozisyon)
@@ -48,6 +50,8 @@ app/Inventory/
 
 ## 2. MOTORİN FİYAT TAKİP MODÜLÜ
 
+**Durum:** Production; haftalık rapor ve email otomasyonları ROADMAP'te tamamlandı olarak işaretli.
+
 ### Özellikler
 - Günlük motorin fiyatı kaydı
 - Satın alma vs istasyon fiyatı karşılaştırması
@@ -70,6 +74,8 @@ app/Inventory/
 ---
 
 ## 3. TESLİMAT NUMARASI OTOMASYONU
+
+**Durum:** Çekirdek import ve otomatik sipariş oluşturma hattı production; pivot/fatura katmanı için Delivery Report hattı ile birlikte tuning ve edge-case sertleştirme Faz 2 kapsamında.
 
 ### Özellikler
 - Excel'den toplu teslimat numarası yükleme
@@ -414,6 +420,8 @@ app/Notification/
 
 ## 12. AI YORUM & TAVSİYE SİSTEMİ
 
+**Durum:** Çekirdek AI servisleri (Operations, Finance, HR, Fleet, Document) production seviyesinde çalışır; anomaly detection, daha gelişmiş skorlamalar ve dış Python analizleri Faz 2 / Faz 3 backlog'unda tanımlıdır (`docs/ROADMAP.md` ve `.ai/session.md`).
+
 ### Domain Bazlı AI Servisleri
 - **AIOperationsService:** Operasyon analizi
 - **AIFinanceService:** Finansal risk uyarıları
@@ -545,6 +553,8 @@ app/Excel/
 ---
 
 ## 15. ENTEGRASYON MODÜLLERİ
+
+**Durum:** Logo entegrasyonu production seviyesinde; Python ara katman (PythonBridgeService) şu an için opsiyonel/POC düzeyinde planlanmış ve Faz 2 içerisinde konumlanmıştır.
 
 ### ERP Entegrasyonu
 - Fatura header mapping

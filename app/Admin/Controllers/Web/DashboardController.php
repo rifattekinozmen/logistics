@@ -127,9 +127,11 @@ class DashboardController extends Controller
                 ];
             });
 
+        $aiReportsHighCount = AiReport::whereIn('severity', ['high'])->count();
         $aiReports = AiReport::query()
+            ->orderByRaw("CASE severity WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END")
             ->latest('generated_at')
-            ->limit(5)
+            ->limit(8)
             ->get();
 
         $user = auth()->user();
@@ -143,6 +145,7 @@ class DashboardController extends Controller
             'stats',
             'recentActivities',
             'aiReports',
+            'aiReportsHighCount',
             'financeData',
             'operationsData',
             'sapStats',

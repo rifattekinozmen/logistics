@@ -7,6 +7,7 @@ use App\Employee\Controllers\Api\EmployeeController;
 use App\Finance\Controllers\Api\PaymentCallbackController;
 use App\Order\Controllers\Api\OrderController;
 use App\Vehicle\Controllers\Api\VehicleController;
+use App\Vehicle\Controllers\Api\VehicleGpsController;
 use App\Warehouse\Controllers\Api\BarcodeController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,13 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
 
     // Vehicles
     Route::apiResource('vehicles', VehicleController::class);
+
+    // GPS (Faz 3 - real-time araç konumu placeholder)
+    Route::prefix('gps')->name('gps.')->group(function () {
+        Route::get('/positions', [VehicleGpsController::class, 'index'])->name('positions.index');
+        Route::post('/positions', [VehicleGpsController::class, 'store'])->name('positions.store');
+    });
+    Route::get('/vehicles/{vehicle}/gps/latest', [VehicleGpsController::class, 'latest'])->name('vehicles.gps.latest');
 
     // Employees
     Route::apiResource('employees', EmployeeController::class);
