@@ -101,7 +101,13 @@
                             @endif
                         </a>
                     </th>
-                    <th class="border-0 small text-secondary fw-semibold">Tür</th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $direction = $currentSort === 'notification_type' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.notifications.index', array_merge(request()->query(), ['sort' => 'notification_type', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Tür</span>
+                            @if($currentSort === 'notification_type')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif
+                        </a>
+                    </th>
                     <th class="border-0 small text-secondary fw-semibold">
                         @php $direction = $currentSort === 'channel' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
                         <a href="{{ route('admin.notifications.index', array_merge(request()->query(), ['sort' => 'channel', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">

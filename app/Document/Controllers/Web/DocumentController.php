@@ -27,6 +27,7 @@ class DocumentController extends Controller
                 $sortableColumns = [
                     'name' => 'name',
                     'category' => 'category',
+                    'documentable_type' => 'documentable_type',
                     'valid_until' => 'valid_until',
                     'created_at' => 'created_at',
                 ];

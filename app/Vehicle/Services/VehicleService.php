@@ -40,6 +40,7 @@ class VehicleService
             'plate' => 'plate',
             'brand' => 'brand',
             'year' => 'year',
+            'vehicle_type' => 'vehicle_type',
             'capacity_kg' => 'capacity_kg',
             'status' => 'status',
             'created_at' => 'created_at',

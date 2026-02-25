@@ -32,6 +32,8 @@ class LeaveController extends Controller
         $sortableColumns = [
             'start_date' => 'start_date',
             'end_date' => 'end_date',
+            'leave_type' => 'leave_type',
+            'total_days' => 'total_days',
             'status' => 'status',
             'created_at' => 'created_at',
         ];

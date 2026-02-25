@@ -51,6 +51,7 @@ class OrderService
         $sortableColumns = [
             'order_number' => 'order_number',
             'status' => 'status',
+            'pickup_address' => 'pickup_address',
             'planned_delivery_date' => 'planned_delivery_date',
             'total_weight' => 'total_weight',
             'created_at' => 'created_at',

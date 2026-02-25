@@ -71,8 +71,14 @@
                         @php $d = $currentSort === 'shift_date' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
                         <a href="{{ route('admin.shifts.index', array_merge(request()->query(), ['sort' => 'shift_date', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Vardiya Tarihi @if($currentSort === 'shift_date')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
                     </th>
-                    <th class="border-0 fw-semibold text-secondary small">Şablon</th>
-                    <th class="border-0 fw-semibold text-secondary small">Başlangıç</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $d = $currentSort === 'template' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.shifts.index', array_merge(request()->query(), ['sort' => 'template', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Şablon @if($currentSort === 'template')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $d = $currentSort === 'start_time' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.shifts.index', array_merge(request()->query(), ['sort' => 'start_time', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Başlangıç @if($currentSort === 'start_time')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">Bitiş</th>
                 </tr>
             </thead>

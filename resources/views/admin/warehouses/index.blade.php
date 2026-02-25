@@ -131,8 +131,14 @@
                             @endif
                         </a>
                     </th>
-                    <th class="border-0 fw-semibold text-secondary small">Şube</th>
-                    <th class="border-0 fw-semibold text-secondary small">Adres</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'branch_id' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.warehouses.index', array_merge(request()->query(), ['sort' => 'branch_id', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Şube @if($currentSort === 'branch_id')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'address' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.warehouses.index', array_merge(request()->query(), ['sort' => 'address', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Adres @if($currentSort === 'address')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">
                         @php
                             $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc';

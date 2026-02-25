@@ -57,7 +57,10 @@
             <thead class="bg-primary-200">
                 <tr>
                     <th class="border-0 text-center align-middle" style="width: 40px;"><input type="checkbox" id="select-all-advances"></th>
-                    <th class="border-0 small text-secondary fw-semibold">Personel</th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $d = $currentSort === 'employee_id' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.advances.index', array_merge(request()->query(), ['sort' => 'employee_id', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Personel @if($currentSort === 'employee_id')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
+                    </th>
                     <th class="border-0 small text-secondary fw-semibold">
                         @php $d = $currentSort === 'amount' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
                         <a href="{{ route('admin.advances.index', array_merge(request()->query(), ['sort' => 'amount', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Tutar @if($currentSort === 'amount')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>

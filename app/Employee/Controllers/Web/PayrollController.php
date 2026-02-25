@@ -42,6 +42,7 @@ class PayrollController extends Controller
             'payroll_number' => 'payroll_number',
             'period_start' => 'period_start',
             'period_end' => 'period_end',
+            'employee_id' => 'employee_id',
             'net_salary' => 'net_salary',
             'status' => 'status',
             'created_at' => 'created_at',

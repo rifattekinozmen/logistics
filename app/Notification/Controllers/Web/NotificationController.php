@@ -46,6 +46,7 @@ class NotificationController extends Controller
         $direction = $request->string('direction')->toString() === 'desc' ? 'desc' : 'asc';
         $sortableColumns = [
             'title' => 'title',
+            'notification_type' => 'notification_type',
             'status' => 'status',
             'channel' => 'channel',
             'created_at' => 'created_at',

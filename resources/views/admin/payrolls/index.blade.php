@@ -65,7 +65,10 @@
                         @php $d = $currentSort === 'payroll_number' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
                         <a href="{{ route('admin.payrolls.index', array_merge(request()->query(), ['sort' => 'payroll_number', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Bordro No @if($currentSort === 'payroll_number')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
                     </th>
-                    <th class="border-0 small text-secondary fw-semibold">Personel</th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $d = $currentSort === 'employee_id' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.payrolls.index', array_merge(request()->query(), ['sort' => 'employee_id', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Personel @if($currentSort === 'employee_id')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
+                    </th>
                     <th class="border-0 small text-secondary fw-semibold">
                         @php $d = $currentSort === 'period_start' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
                         <a href="{{ route('admin.payrolls.index', array_merge(request()->query(), ['sort' => 'period_start', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Dönem @if($currentSort === 'period_start')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>

@@ -75,6 +75,7 @@ class PersonelController extends Controller
         $sortableColumns = [
             'ad_soyad' => 'ad_soyad',
             'email' => 'email',
+            'telefon' => 'telefon',
             'departman' => 'departman',
             'pozisyon' => 'pozisyon',
             'ise_baslama_tarihi' => 'ise_baslama_tarihi',

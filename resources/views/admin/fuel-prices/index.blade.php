@@ -121,8 +121,27 @@
                             @endif
                         </a>
                     </th>
-                    <th class="border-0 small text-secondary fw-semibold">Tedarikçi/Bölge</th>
-                    <th class="border-0 small text-secondary fw-semibold">Notlar</th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $direction = $currentSort === 'supplier_name' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.fuel-prices.index', array_merge(request()->query(), ['sort' => 'supplier_name', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Tedarikçi</span>
+                            @if($currentSort === 'supplier_name')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif
+                        </a>
+                    </th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $direction = $currentSort === 'region' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.fuel-prices.index', array_merge(request()->query(), ['sort' => 'region', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Bölge</span>
+                            @if($currentSort === 'region')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif
+                        </a>
+                    </th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $direction = $currentSort === 'notes' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.fuel-prices.index', array_merge(request()->query(), ['sort' => 'notes', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Notlar</span>
+                            @if($currentSort === 'notes')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif
+                        </a>
+                    </th>
                     <th class="border-0 small text-secondary fw-semibold text-end">İşlemler</th>
                 </tr>
             </thead>
@@ -144,12 +163,10 @@
                             <span class="fw-bold text-dark">{{ number_format($price->price, 4) }} ₺</span>
                         </td>
                         <td class="align-middle">
-                            <small class="text-secondary">
-                                {{ $price->supplier_name ?? '-' }}
-                                @if($price->region)
-                                    <br><span class="text-muted">({{ $price->region }})</span>
-                                @endif
-                            </small>
+                            <small class="text-secondary">{{ $price->supplier_name ?? '-' }}</small>
+                        </td>
+                        <td class="align-middle">
+                            <small class="text-secondary">{{ $price->region ?? '-' }}</small>
                         </td>
                         <td class="align-middle">
                             <small class="text-secondary">{{ Str::limit($price->notes ?? '-', 30) }}</small>

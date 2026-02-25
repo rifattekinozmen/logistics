@@ -46,6 +46,9 @@ class FuelPriceController extends Controller
             'price_date' => 'price_date',
             'price_type' => 'price_type',
             'price' => 'price',
+            'supplier_name' => 'supplier_name',
+            'region' => 'region',
+            'notes' => 'notes',
             'created_at' => 'created_at',
         ];
 

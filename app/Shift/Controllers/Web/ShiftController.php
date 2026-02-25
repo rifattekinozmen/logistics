@@ -26,9 +26,15 @@ class ShiftController extends Controller
         $direction = (isset($filters['direction']) && $filters['direction'] === 'desc') ? 'desc' : 'asc';
         $sortableColumns = [
             'shift_date' => 'shift_date',
+            'start_time' => 'start_time',
             'created_at' => 'created_at',
         ];
-        if ($sort !== null && \array_key_exists($sort, $sortableColumns)) {
+        if ($sort === 'template') {
+            $query->leftJoin('shift_schedules', 'shift_assignments.schedule_id', '=', 'shift_schedules.id')
+                ->leftJoin('shift_templates', 'shift_schedules.template_id', '=', 'shift_templates.id')
+                ->orderBy('shift_templates.name', $direction)
+                ->select('shift_assignments.*');
+        } elseif ($sort !== null && \array_key_exists($sort, $sortableColumns)) {
             $query->orderBy($sortableColumns[$sort], $direction);
         } else {
             $query->orderBy('shift_date', 'desc');

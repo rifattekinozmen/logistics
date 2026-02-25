@@ -57,7 +57,10 @@
                 <tr>
                     <th class="border-0 text-center align-middle" style="width: 40px;"><input type="checkbox" id="select-all-leaves"></th>
                     <th class="border-0 small text-secondary fw-semibold">Personel</th>
-                    <th class="border-0 small text-secondary fw-semibold">İzin Türü</th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $d = $currentSort === 'leave_type' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.leaves.index', array_merge(request()->query(), ['sort' => 'leave_type', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">İzin Türü @if($currentSort === 'leave_type')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
+                    </th>
                     <th class="border-0 small text-secondary fw-semibold">
                         @php $d = $currentSort === 'start_date' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
                         <a href="{{ route('admin.leaves.index', array_merge(request()->query(), ['sort' => 'start_date', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Başlangıç @if($currentSort === 'start_date')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
@@ -66,7 +69,10 @@
                         @php $d = $currentSort === 'end_date' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
                         <a href="{{ route('admin.leaves.index', array_merge(request()->query(), ['sort' => 'end_date', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Bitiş @if($currentSort === 'end_date')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
                     </th>
-                    <th class="border-0 small text-secondary fw-semibold">Gün</th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $d = $currentSort === 'total_days' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.leaves.index', array_merge(request()->query(), ['sort' => 'total_days', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Gün @if($currentSort === 'total_days')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
+                    </th>
                     <th class="border-0 small text-secondary fw-semibold">
                         @php $d = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
                         <a href="{{ route('admin.leaves.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $d])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Durum @if($currentSort === 'status')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>

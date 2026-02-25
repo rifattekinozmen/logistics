@@ -110,8 +110,14 @@
                             @endif
                         </a>
                     </th>
-                    <th class="border-0 fw-semibold text-secondary small">Güzergah</th>
-                    <th class="border-0 fw-semibold text-secondary small">Fiyat</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'route_origin' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.pricing-conditions.index', array_merge(request()->query(), ['sort' => 'route_origin', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Güzergah @if($currentSort === 'route_origin')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'flat_rate' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.pricing-conditions.index', array_merge(request()->query(), ['sort' => 'flat_rate', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Fiyat @if($currentSort === 'flat_rate')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">
                         @php
                             $direction = $currentSort === 'currency' && $currentDirection === 'asc' ? 'desc' : 'asc';

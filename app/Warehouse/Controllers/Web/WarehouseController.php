@@ -48,6 +48,8 @@ class WarehouseController extends Controller
                 $sortableColumns = [
                     'name' => 'name',
                     'code' => 'code',
+                    'branch_id' => 'branch_id',
+                    'address' => 'address',
                     'status' => 'status',
                     'created_at' => 'created_at',
                 ];

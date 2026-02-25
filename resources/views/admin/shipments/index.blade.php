@@ -114,7 +114,17 @@
                             @endif
                         </a>
                     </th>
-                    <th class="border-0 fw-semibold text-secondary small">Sipariş</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'order_id' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.shipments.index', array_merge(request()->query(), ['sort' => 'order_id', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Sipariş</span>
+                            @if($currentSort === 'order_id')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">Araç</th>
                     <th class="border-0 fw-semibold text-secondary small">
                         @php

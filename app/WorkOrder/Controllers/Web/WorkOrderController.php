@@ -25,7 +25,14 @@ class WorkOrderController extends Controller
 
         $sort = $filters['sort'] ?? null;
         $direction = (isset($filters['direction']) && $filters['direction'] === 'desc') ? 'desc' : 'asc';
-        $sortableColumns = ['id' => 'id', 'type' => 'type', 'status' => 'status', 'created_at' => 'created_at'];
+        $sortableColumns = [
+            'id' => 'id',
+            'type' => 'type',
+            'status' => 'status',
+            'vehicle_id' => 'vehicle_id',
+            'service_provider_id' => 'service_provider_id',
+            'created_at' => 'created_at',
+        ];
         if ($sort !== null && \array_key_exists($sort, $sortableColumns)) {
             $query->orderBy($sortableColumns[$sort], $direction);
         } else {

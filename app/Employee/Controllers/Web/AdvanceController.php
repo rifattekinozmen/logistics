@@ -32,6 +32,7 @@ class AdvanceController extends Controller
         $sortableColumns = [
             'amount' => 'amount',
             'requested_date' => 'requested_date',
+            'employee_id' => 'employee_id',
             'status' => 'status',
             'created_at' => 'created_at',
         ];

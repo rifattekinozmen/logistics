@@ -39,7 +39,13 @@ class UserController extends Controller
 
         $sort = $filters['sort'] ?? null;
         $direction = (isset($filters['direction']) && $filters['direction'] === 'desc') ? 'desc' : 'asc';
-        $sortableColumns = ['name' => 'name', 'email' => 'email', 'status' => 'status', 'created_at' => 'created_at'];
+        $sortableColumns = [
+            'name' => 'name',
+            'username' => 'username',
+            'email' => 'email',
+            'status' => 'status',
+            'created_at' => 'created_at',
+        ];
         if ($sort !== null && \array_key_exists($sort, $sortableColumns)) {
             $query->orderBy($sortableColumns[$sort], $direction);
         } else {

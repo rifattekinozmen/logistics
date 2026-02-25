@@ -178,6 +178,9 @@ class PricingService
         $sortableColumns = [
             'name' => 'name',
             'condition_type' => 'condition_type',
+            'route_origin' => 'route_origin',
+            'route_destination' => 'route_destination',
+            'flat_rate' => 'flat_rate',
             'currency' => 'currency',
             'valid_from' => 'valid_from',
             'valid_to' => 'valid_to',

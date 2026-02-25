@@ -110,6 +110,7 @@ class ShipmentController extends Controller
 
                 $sortableColumns = [
                     'id' => 'id',
+                    'order_id' => 'order_id',
                     'status' => 'status',
                     'pickup_date' => 'pickup_date',
                     'created_at' => 'created_at',

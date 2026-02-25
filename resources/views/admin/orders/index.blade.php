@@ -156,7 +156,10 @@
                             @endif
                         </a>
                     </th>
-                    <th class="border-0 fw-semibold text-secondary small">Alış Adresi</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'pickup_address' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.orders.index', array_merge(request()->query(), ['sort' => 'pickup_address', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">Alış Adresi @if($currentSort === 'pickup_address')<span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>@else<span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>@endif</a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">
                         @php
                             $direction = $currentSort === 'planned_delivery_date' && $currentDirection === 'asc' ? 'desc' : 'asc';
