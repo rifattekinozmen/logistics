@@ -24,7 +24,6 @@ class DatabaseSeeder extends Seeder
             LocationSeeder::class,
             TaxOfficeSeeder::class,
             CompanySeeder::class,
-            FullTestDataSeeder::class,
         ]);
 
         // Admin kullanıcı oluştur
