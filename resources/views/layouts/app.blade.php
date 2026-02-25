@@ -181,6 +181,17 @@
     @stack('styles')
 </head>
 <body class="min-vh-100">
+    @if($showCompanySelectModal ?? false)
+        <style>
+            body {
+                background-color: var(--bs-soft-bg);
+            }
+            aside,
+            .sidebar-content {
+                display: none !important;
+            }
+        </style>
+    @endif
     <!-- Sidebar Overlay (Mobile) -->
     <div class="sidebar-overlay d-lg-none" id="sidebarOverlay"></div>
     
@@ -202,6 +213,160 @@
 
     @include('components.delete-modal')
     @include('components.toast')
+
+    @if(($showCompanySelectModal ?? false) && auth()->check())
+        @php
+            $companiesForModal = $userCompaniesForLayout ?? collect();
+        @endphp
+
+        @if($companiesForModal->isNotEmpty())
+            <x-modal id="companySelectModal" title="Firma Seçimi" size="xl" :centered="true" :close-button="false">
+                <form id="companySelectForm" action="{{ route('admin.companies.switch') }}" method="POST">
+                    @csrf
+
+                    <p class="text-secondary mb-3">
+                        Lütfen işlem yapmak istediğiniz firmayı seçin.
+                    </p>
+
+                    <div class="row g-3 align-items-end mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-secondary">VKN/TCKN</label>
+                            <input type="text" id="filterTaxNumber" class="form-control form-control-sm" placeholder="VKN/TCKN">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-secondary">Firma Kodu</label>
+                            <input type="text" id="filterCode" class="form-control form-control-sm" placeholder="Firma Kodu">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-secondary">Firma Adı</label>
+                            <input type="text" id="filterName" class="form-control form-control-sm" placeholder="Firma Adı">
+                        </div>
+                        <div class="col-md-3 d-flex gap-2 justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-3xl px-3" id="companyFilterClearButton">
+                                Temizle
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm rounded-3xl px-3" id="companyFilterButton">
+                                Filtrele
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive border rounded-3xl" style="border-color: var(--bs-primary-200) !important;">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 40px;"></th>
+                                    <th class="small text-secondary">VKN/TCKN</th>
+                                    <th class="small text-secondary">Firma Kodu</th>
+                                    <th class="small text-secondary">Firma Adı</th>
+                                </tr>
+                            </thead>
+                            <tbody id="companySelectTableBody">
+                                @foreach($companiesForModal as $company)
+                                    <tr
+                                        data-tax="{{ Str::lower($company->tax_number ?? '') }}"
+                                        data-code="{{ Str::lower((string) $company->id) }}"
+                                        data-name="{{ Str::lower($company->name ?? '') }}"
+                                    >
+                                        <td class="text-center">
+                                            <input type="radio" name="company_id" value="{{ $company->id }}" class="form-check-input company-radio">
+                                        </td>
+                                        <td class="small">{{ $company->tax_number ?? '-' }}</td>
+                                        <td class="small">{{ $company->id }}</td>
+                                        <td class="small">{{ $company->name }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <p class="small text-secondary mb-0">
+                            Toplam Kayıt: {{ $companiesForModal->count() }}
+                        </p>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary rounded-3xl px-4" data-bs-dismiss="modal">
+                                Vazgeç
+                            </button>
+                            <button type="submit" class="btn btn-primary rounded-3xl px-4" id="companySelectSubmit" disabled>
+                                Devam
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </x-modal>
+
+            @push('scripts')
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var modalEl = document.getElementById('companySelectModal');
+                        if (modalEl && window.bootstrap) {
+                            var modal = new bootstrap.Modal(modalEl, {
+                                backdrop: 'static',
+                                keyboard: false
+                            });
+                            modal.show();
+                        }
+
+                        var submitBtn = document.getElementById('companySelectSubmit');
+                        var radios = modalEl.querySelectorAll('.company-radio');
+                        radios.forEach(function (radio) {
+                            radio.addEventListener('change', function () {
+                                if (submitBtn) {
+                                    submitBtn.disabled = !modalEl.querySelector('.company-radio:checked');
+                                }
+                            });
+                        });
+
+                        var filterTax = document.getElementById('filterTaxNumber');
+                        var filterCode = document.getElementById('filterCode');
+                        var filterName = document.getElementById('filterName');
+                        var filterButton = document.getElementById('companyFilterButton');
+                        var clearButton = document.getElementById('companyFilterClearButton');
+                        var rows = Array.from(document.querySelectorAll('#companySelectTableBody tr'));
+
+                        function applyFilter() {
+                            var taxVal = (filterTax.value || '').toLowerCase();
+                            var codeVal = (filterCode.value || '').toLowerCase();
+                            var nameVal = (filterName.value || '').toLowerCase();
+
+                            rows.forEach(function (row) {
+                                var rowTax = row.dataset.tax || '';
+                                var rowCode = row.dataset.code || '';
+                                var rowName = row.dataset.name || '';
+
+                                var matches =
+                                    (!taxVal || rowTax.indexOf(taxVal) !== -1) &&
+                                    (!codeVal || rowCode.indexOf(codeVal) !== -1) &&
+                                    (!nameVal || rowName.indexOf(nameVal) !== -1);
+
+                                row.style.display = matches ? '' : 'none';
+                            });
+                        }
+
+                        if (filterButton) {
+                            filterButton.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                applyFilter();
+                            });
+                        }
+
+                        if (clearButton) {
+                            clearButton.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                if (filterTax) filterTax.value = '';
+                                if (filterCode) filterCode.value = '';
+                                if (filterName) filterName.value = '';
+                                rows.forEach(function (row) {
+                                    row.style.display = '';
+                                });
+                            });
+                        }
+                    });
+                </script>
+            @endpush
+        @endif
+    @endif
 
     @stack('scripts')
     <script>

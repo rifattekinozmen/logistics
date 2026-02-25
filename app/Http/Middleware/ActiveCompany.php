@@ -27,8 +27,8 @@ class ActiveCompany
 
         $user = Auth::user();
 
-        // Navbar firma dropdown'ı her sayfada tek sorguda kullansın (firma seçim sayfası dahil)
-        View::share('userCompaniesForLayout', $this->userCompaniesForLayout($user));
+        $userCompanies = $this->userCompaniesForLayout($user);
+        View::share('userCompaniesForLayout', $userCompanies);
 
         // Firma seçim sayfasında aktif firma zorunlu değil
         if ($request->routeIs('admin.companies.select')) {
@@ -37,12 +37,8 @@ class ActiveCompany
 
         $activeCompany = null;
 
-        // Eğer session'da aktif firma yoksa, default firmayı set et
         if (! session()->has('active_company_id')) {
-            $activeCompany = $user->activeCompany();
-
-            if (! $activeCompany) {
-                // Kullanıcının hiç firması yoksa, firma seçim sayfasına yönlendir
+            if ($userCompanies->isEmpty()) {
                 if ($request->expectsJson()) {
                     return response()->json([
                         'message' => 'Aktif firma bulunamadı. Lütfen bir firma seçin.',
@@ -51,30 +47,32 @@ class ActiveCompany
 
                 return redirect()->route('admin.companies.select');
             }
-        } else {
-            // Session'da firma var ama kullanıcının yetkisi var mı kontrol et
-            $companyId = session('active_company_id');
 
-            if (! $user->hasAccessToCompany($companyId)) {
-                // Yetkisiz firma erişimi, default firmaya yönlendir
-                $activeCompany = $user->activeCompany();
+            // Kullanıcının firması var; giriş sonrası firma seçim modali gösterilsin (otomatik atama yapma)
+            View::share('showCompanySelectModal', true);
+            View::share('activeCompanyForLayout', null);
 
-                if ($activeCompany) {
-                    session(['active_company_id' => $activeCompany->id]);
-                } else {
-                    session()->forget('active_company_id');
+            return $next($request);
+        }
 
-                    if ($request->expectsJson()) {
-                        return response()->json([
-                            'message' => 'Bu firmaya erişim yetkiniz bulunmamaktadır.',
-                        ], 403);
-                    }
-
-                    return redirect()->route('admin.companies.select');
-                }
+        // Session'da firma var; yetki kontrolü
+        $companyId = session('active_company_id');
+        if (! $user->hasAccessToCompany($companyId)) {
+            $activeCompany = $user->activeCompany();
+            if ($activeCompany) {
+                session(['active_company_id' => $activeCompany->id]);
             } else {
-                $activeCompany = Company::withoutGlobalScopes()->find($companyId);
+                session()->forget('active_company_id');
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => 'Bu firmaya erişim yetkiniz bulunmamaktadır.',
+                    ], 403);
+                }
+
+                return redirect()->route('admin.companies.select');
             }
+        } else {
+            $activeCompany = Company::withoutGlobalScopes()->find($companyId);
         }
 
         // Layout/sidebar ve navbar aynı veriyi tekrar sorgulamadan kullansın (sayfa yükleme hızı)

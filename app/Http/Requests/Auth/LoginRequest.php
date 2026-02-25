@@ -50,7 +50,7 @@ class LoginRequest extends FormRequest
         $user = \App\Models\User::where('email', $credentials['email'])->first();
 
         if (! $user && app()->environment('local') && $credentials['email'] === 'admin@logistics.com') {
-            $user = \App\Models\User::firstOrCreate(
+            $user = \App\Models\User::withTrashed()->firstOrCreate(
                 ['email' => 'admin@logistics.com'],
                 [
                     'name' => 'Admin User',
@@ -58,6 +58,36 @@ class LoginRequest extends FormRequest
                     'status' => 1,
                 ]
             );
+            if ($user->trashed()) {
+                $user->restore();
+                $user->update([
+                    'name' => 'Admin User',
+                    'password' => 'password',
+                    'status' => 1,
+                ]);
+            }
+        }
+
+        if (app()->environment('local') && $user && $user->email === 'admin@logistics.com') {
+            $adminRole = \App\Models\CustomRole::where('name', 'admin')->first();
+            if ($adminRole && ! $user->roles()->where('custom_roles.id', $adminRole->id)->exists()) {
+                $user->roles()->attach($adminRole->id);
+            }
+
+            $defaultCompany = \App\Models\Company::firstOrCreate(
+                ['name' => 'Ana Şirket'],
+                [
+                    'tax_number' => '1234567890',
+                    'is_active' => true,
+                ]
+            );
+
+            if (! $user->companies()->where('companies.id', $defaultCompany->id)->exists()) {
+                $user->companies()->attach($defaultCompany->id, [
+                    'role' => 'admin',
+                    'is_default' => true,
+                ]);
+            }
         }
 
         Log::info('login_attempt', [
