@@ -76,22 +76,88 @@
 </div>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden" style="border-color: var(--bs-primary-200);">
+    <div class="px-4 pt-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <select id="employees-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+                <option value="activate">Aktif yap</option>
+                <option value="deactivate">Pasif yap</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="employees-bulk-apply">
+                Uygula
+            </button>
+        </div>
+        <div class="small text-secondary">
+            <span id="employees-selected-count">0</span> kayıt seçili
+        </div>
+    </div>
     <div class="table-responsive">
+        @php
+            $currentSort = request('sort');
+            $currentDirection = request('direction', 'asc');
+        @endphp
         <table class="table table-hover mb-0">
             <thead class="bg-primary-200">
                 <tr>
-                    <th class="border-0 fw-semibold text-secondary small">Personel No</th>
-                    <th class="border-0 fw-semibold text-secondary small">Ad Soyad</th>
+                    <th class="border-0 text-center align-middle" style="width: 40px;">
+                        <input type="checkbox" id="select-all-employees">
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'employee_number' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.employees.index', array_merge(request()->query(), ['sort' => 'employee_number', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Personel No</span>
+                            @if($currentSort === 'employee_number')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'first_name' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.employees.index', array_merge(request()->query(), ['sort' => 'first_name', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Ad Soyad</span>
+                            @if($currentSort === 'first_name')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">Şube</th>
                     <th class="border-0 fw-semibold text-secondary small">Pozisyon</th>
-                    <th class="border-0 fw-semibold text-secondary small">İşe Başlama</th>
-                    <th class="border-0 fw-semibold text-secondary small">Durum</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'hire_date' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.employees.index', array_merge(request()->query(), ['sort' => 'hire_date', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>İşe Başlama</span>
+                            @if($currentSort === 'hire_date')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.employees.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Durum</span>
+                            @if($currentSort === 'status')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small text-end">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($employees as $employee)
                 <tr>
+                    <td class="align-middle text-center">
+                        <input type="checkbox" class="employees-row-checkbox" value="{{ $employee->id }}">
+                    </td>
                     <td class="align-middle">
                         <span class="fw-bold text-dark">{{ $employee->employee_number }}</span>
                     </td>
@@ -113,8 +179,6 @@
                             $statusLabels = [0 => 'Pasif', 1 => 'Aktif', 2 => 'İzinli'];
                             $color = $statusColors[$employee->status] ?? 'secondary';
                             $label = $statusLabels[$employee->status] ?? '-';
-                        @endphp
-                        @php
                             $softColors = ['secondary' => 'secondary-200', 'success' => 'success-200', 'warning' => 'warning-200'];
                             $softColor = $softColors[$color] ?? 'secondary-200';
                         @endphp
@@ -142,7 +206,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center py-5">
+                    <td colspan="8" class="text-center py-5">
                         <div class="d-flex flex-column align-items-center gap-2">
                             <span class="material-symbols-outlined text-secondary" style="font-size: 3rem;">groups</span>
                             <p class="text-secondary mb-0">Henüz personel bulunmuyor.</p>
@@ -160,4 +224,54 @@
     </div>
     @endif
 </div>
+
+<form id="employees-bulk-form" method="POST" action="{{ route('admin.employees.bulk') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="action" id="employees-bulk-action-input">
+</form>
 @endsection
+
+@push('scripts')
+<script>
+const empMaster = document.getElementById('select-all-employees');
+const empRows = document.querySelectorAll('.employees-row-checkbox');
+const empCountEl = document.getElementById('employees-selected-count');
+const empApplyBtn = document.getElementById('employees-bulk-apply');
+const empActionSelect = document.getElementById('employees-bulk-action');
+const empForm = document.getElementById('employees-bulk-form');
+const empActionInput = document.getElementById('employees-bulk-action-input');
+
+function updateEmployeesSelectedCount() {
+    const selected = Array.from(empRows).filter(cb => cb.checked);
+    if (empCountEl) empCountEl.textContent = selected.length.toString();
+    if (empMaster) {
+        empMaster.checked = selected.length > 0 && selected.length === empRows.length;
+        empMaster.indeterminate = selected.length > 0 && selected.length < empRows.length;
+    }
+}
+if (empMaster) {
+    empMaster.addEventListener('change', function () {
+        empRows.forEach(function (cb) { cb.checked = empMaster.checked; });
+        updateEmployeesSelectedCount();
+    });
+}
+empRows.forEach(function (cb) { cb.addEventListener('change', updateEmployeesSelectedCount); });
+if (empApplyBtn) {
+    empApplyBtn.addEventListener('click', function () {
+        const action = empActionSelect.value;
+        const selected = Array.from(empRows).filter(cb => cb.checked);
+        if (!action) { alert('Lütfen bir toplu işlem seçin.'); return; }
+        if (selected.length === 0) { alert('Lütfen en az bir kayıt seçin.'); return; }
+        if (action === 'delete' && !confirm('Seçili personeli silmek istediğinize emin misiniz?')) return;
+        empForm.querySelectorAll('input[name="selected[]"]').forEach(function (input) { input.remove(); });
+        selected.forEach(function (cb) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden'; hidden.name = 'selected[]'; hidden.value = cb.value;
+            empForm.appendChild(hidden);
+        });
+        empActionInput.value = action;
+        empForm.submit();
+    });
+}
+</script>
+@endpush

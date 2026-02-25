@@ -62,11 +62,15 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     });
 
     // Shipments
-    Route::middleware('permission:shipment.view')->resource('shipments', ShipmentController::class);
+    Route::middleware('permission:shipment.view')->group(function () {
+        Route::post('shipments/bulk', [ShipmentController::class, 'bulk'])->name('shipments.bulk');
+        Route::resource('shipments', ShipmentController::class);
+    });
 
     // Delivery Imports (Teslimat Raporları Excel Yükleme)
     Route::prefix('delivery-imports')->name('delivery-imports.')->group(function () {
         Route::get('/', [DeliveryImportController::class, 'index'])->name('index');
+        Route::post('/bulk', [DeliveryImportController::class, 'bulk'])->name('bulk');
         Route::get('/create', [DeliveryImportController::class, 'create'])->name('create');
         Route::get('/template', [DeliveryImportController::class, 'downloadTemplate'])->name('template');
         Route::post('/', [DeliveryImportController::class, 'store'])->name('store');
@@ -88,12 +92,19 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     });
 
     // Employees
-    Route::middleware('permission:employee.view')->resource('employees', EmployeeController::class);
-    Route::middleware('permission:employee.view')->resource('personnel', PersonelController::class);
+    Route::middleware('permission:employee.view')->group(function () {
+        Route::post('employees/bulk', [EmployeeController::class, 'bulk'])->name('employees.bulk');
+        Route::resource('employees', EmployeeController::class);
+    });
+    Route::middleware('permission:employee.view')->group(function () {
+        Route::post('personnel/bulk', [PersonelController::class, 'bulk'])->name('personnel.bulk');
+        Route::resource('personnel', PersonelController::class);
+    });
 
     // Leaves (İzin Yönetimi)
     Route::prefix('leaves')->name('leaves.')->group(function () {
         Route::get('/', [LeaveController::class, 'index'])->name('index');
+        Route::post('/bulk', [LeaveController::class, 'bulk'])->name('bulk');
         Route::get('/create', [LeaveController::class, 'create'])->name('create');
         Route::post('/', [LeaveController::class, 'store'])->name('store');
         Route::post('/{leave}/approve', [LeaveController::class, 'approve'])->name('approve');
@@ -102,6 +113,7 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     // Personnel Attendance (Puantaj / Yoklama)
     Route::prefix('personnel-attendance')->name('personnel_attendance.')->group(function () {
         Route::get('/', [PersonnelAttendanceController::class, 'index'])->name('index');
+        Route::post('/bulk', [PersonnelAttendanceController::class, 'bulk'])->name('bulk');
         Route::post('/', [PersonnelAttendanceController::class, 'store'])->name('store');
         Route::get('/api/table', [PersonnelAttendanceController::class, 'apiTable'])->name('api.table');
     });
@@ -109,6 +121,7 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     // Advances (Avans Yönetimi)
     Route::prefix('advances')->name('advances.')->group(function () {
         Route::get('/', [AdvanceController::class, 'index'])->name('index');
+        Route::post('/bulk', [AdvanceController::class, 'bulk'])->name('bulk');
         Route::get('/create', [AdvanceController::class, 'create'])->name('create');
         Route::post('/', [AdvanceController::class, 'store'])->name('store');
         Route::post('/{advance}/approve', [AdvanceController::class, 'approve'])->name('approve');
@@ -117,6 +130,7 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     // Payrolls (Bordro Yönetimi)
     Route::prefix('payrolls')->name('payrolls.')->group(function () {
         Route::get('/', [PayrollController::class, 'index'])->name('index');
+        Route::post('/bulk', [PayrollController::class, 'bulk'])->name('bulk');
         Route::get('/create', [PayrollController::class, 'create'])->name('create');
         Route::post('/', [PayrollController::class, 'store'])->name('store');
         Route::get('/{payroll}/pdf', [PayrollController::class, 'pdf'])->name('pdf');
@@ -130,32 +144,45 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     });
 
     // Documents
-    Route::middleware('permission:document.view')->resource('documents', DocumentController::class);
+    Route::middleware('permission:document.view')->group(function () {
+        Route::post('documents/bulk', [DocumentController::class, 'bulk'])->name('documents.bulk');
+        Route::resource('documents', DocumentController::class);
+    });
 
     // Payments (Finance)
-    Route::middleware('permission:payment.view')->resource('payments', PaymentController::class);
+    Route::middleware('permission:payment.view')->group(function () {
+        Route::post('payments/bulk', [PaymentController::class, 'bulk'])->name('payments.bulk');
+        Route::resource('payments', PaymentController::class);
+    });
 
     // Shifts
     Route::prefix('shifts')->name('shifts.')->group(function () {
         Route::get('/', [ShiftController::class, 'index'])->name('index');
+        Route::post('/bulk', [ShiftController::class, 'bulk'])->name('bulk');
         Route::get('/templates', [ShiftController::class, 'templates'])->name('templates');
         Route::get('/planning', [ShiftController::class, 'planning'])->name('planning');
     });
 
     // Work Orders
+    Route::post('work-orders/bulk', [WorkOrderController::class, 'bulk'])->name('work-orders.bulk');
     Route::resource('work-orders', WorkOrderController::class);
 
     // Fuel Prices (Motorin Fiyat Takibi)
-    Route::middleware('permission:fuel_price.view')->resource('fuel-prices', FuelPriceController::class);
+    Route::middleware('permission:fuel_price.view')->group(function () {
+        Route::post('fuel-prices/bulk', [FuelPriceController::class, 'bulk'])->name('fuel-prices.bulk');
+        Route::resource('fuel-prices', FuelPriceController::class);
+    });
 
     // Notifications (Bildirim Yönetimi)
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::post('/bulk', [NotificationController::class, 'bulk'])->name('bulk');
         Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
         Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
     });
 
     // Users
+    Route::post('users/bulk', [\App\Admin\Controllers\Web\UserController::class, 'bulk'])->name('users.bulk');
     Route::resource('users', \App\Admin\Controllers\Web\UserController::class);
     Route::get('/users/{user}/edit-roles', [\App\Admin\Controllers\Web\UserController::class, 'editRoles'])->name('users.edit-roles');
     Route::put('/users/{user}/roles', [\App\Admin\Controllers\Web\UserController::class, 'updateRoles'])->name('users.update-roles');
@@ -171,6 +198,7 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     // Companies
     Route::prefix('companies')->name('companies.')->group(function () {
         Route::get('/', [\App\Admin\Controllers\Web\CompanyController::class, 'index'])->name('index');
+        Route::post('/bulk', [\App\Admin\Controllers\Web\CompanyController::class, 'bulk'])->name('bulk');
         Route::get('/create', [\App\Admin\Controllers\Web\CompanyController::class, 'create'])->name('create');
         Route::post('/', [\App\Admin\Controllers\Web\CompanyController::class, 'store'])->name('store');
         Route::get('/select', [\App\Admin\Controllers\Web\CompanyController::class, 'select'])->name('select');

@@ -58,22 +58,86 @@
 </div>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden" style="border-color: var(--bs-primary-200);">
+    <div class="px-4 pt-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <select id="work-orders-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="work-orders-bulk-apply">Uygula</button>
+        </div>
+        <div class="small text-secondary"><span id="work-orders-selected-count">0</span> kayıt seçili</div>
+    </div>
+    <form id="work-orders-bulk-form" action="{{ route('admin.work-orders.bulk') }}" method="POST" class="d-none">
+        @csrf
+        <input type="hidden" name="action" id="work-orders-bulk-action-input">
+    </form>
     <div class="table-responsive">
+        @php
+            $currentSort = request('sort');
+            $currentDirection = request('direction', 'asc');
+        @endphp
         <table class="table table-hover mb-0">
             <thead class="bg-primary-200">
                 <tr>
-                    <th class="border-0 fw-semibold text-secondary small">İş Emri No</th>
+                    <th class="border-0 text-center align-middle" style="width: 40px;">
+                        <input type="checkbox" id="select-all-work-orders">
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'id' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.work-orders.index', array_merge(request()->query(), ['sort' => 'id', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>İş Emri No</span>
+                            @if($currentSort === 'id')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">Araç</th>
-                    <th class="border-0 fw-semibold text-secondary small">Tür</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'type' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.work-orders.index', array_merge(request()->query(), ['sort' => 'type', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Tür</span>
+                            @if($currentSort === 'type')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">Servis Sağlayıcı</th>
-                    <th class="border-0 fw-semibold text-secondary small">Durum</th>
-                    <th class="border-0 fw-semibold text-secondary small">Oluşturulma</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.work-orders.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Durum</span>
+                            @if($currentSort === 'status')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'created_at' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.work-orders.index', array_merge(request()->query(), ['sort' => 'created_at', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Oluşturulma</span>
+                            @if($currentSort === 'created_at')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small text-end">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($workOrders as $workOrder)
                 <tr>
+                    <td class="align-middle text-center">
+                        <input type="checkbox" class="form-check-input work-order-row-check" name="selected[]" value="{{ $workOrder->id }}" form="work-orders-bulk-form">
+                    </td>
                     <td class="align-middle">
                         <span class="fw-bold text-dark">#{{ $workOrder->id }}</span>
                     </td>
@@ -142,7 +206,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center py-5">
+                    <td colspan="8" class="text-center py-5">
                         <div class="d-flex flex-column align-items-center gap-2">
                             <span class="material-symbols-outlined text-secondary" style="font-size: 3rem;">build</span>
                             <p class="text-secondary mb-0">Henüz iş emri bulunmuyor.</p>
@@ -160,4 +224,30 @@
     </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('work-orders-bulk-form');
+    const actionSelect = document.getElementById('work-orders-bulk-action');
+    const actionInput = document.getElementById('work-orders-bulk-action-input');
+    const applyBtn = document.getElementById('work-orders-bulk-apply');
+    const selectAll = document.getElementById('select-all-work-orders');
+    const checkboxes = document.querySelectorAll('.work-order-row-check');
+    const countEl = document.getElementById('work-orders-selected-count');
+    function updateCount() { const n = document.querySelectorAll('.work-order-row-check:checked').length; countEl.textContent = n; }
+    checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
+    if (selectAll) { selectAll.addEventListener('change', function () { checkboxes.forEach(cb => { cb.checked = selectAll.checked; }); updateCount(); }); }
+    applyBtn.addEventListener('click', function () {
+        const action = actionSelect.value;
+        if (!action) return;
+        const checked = document.querySelectorAll('.work-order-row-check:checked');
+        if (checked.length === 0) { alert('Lütfen en az bir iş emri seçin.'); return; }
+        checked.forEach(cb => form.appendChild(cb.cloneNode(true)));
+        actionInput.value = action;
+        form.submit();
+    });
+});
+</script>
+@endpush
 @endsection

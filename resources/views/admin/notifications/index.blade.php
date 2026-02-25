@@ -64,21 +64,86 @@
 </div>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden" style="border-color: var(--bs-primary-200);">
+    <div class="px-4 pt-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <select id="notifications-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+                <option value="mark_read">Okundu işaretle</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="notifications-bulk-apply">Uygula</button>
+        </div>
+        <div class="small text-secondary"><span id="notifications-selected-count">0</span> kayıt seçili</div>
+    </div>
+    <form id="notifications-bulk-form" action="{{ route('admin.notifications.bulk') }}" method="POST" class="d-none">
+        @csrf
+        <input type="hidden" name="action" id="notifications-bulk-action-input">
+    </form>
     <div class="table-responsive">
+        @php
+            $currentSort = request('sort');
+            $currentDirection = request('direction', 'asc');
+        @endphp
         <table class="table table-hover mb-0">
             <thead class="bg-primary-200">
                 <tr>
-                    <th class="border-0 small text-secondary fw-semibold">Başlık</th>
+                    <th class="border-0 text-center align-middle" style="width: 40px;">
+                        <input type="checkbox" id="select-all-notifications">
+                    </th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $direction = $currentSort === 'title' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.notifications.index', array_merge(request()->query(), ['sort' => 'title', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Başlık</span>
+                            @if($currentSort === 'title')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 small text-secondary fw-semibold">Tür</th>
-                    <th class="border-0 small text-secondary fw-semibold">Kanal</th>
-                    <th class="border-0 small text-secondary fw-semibold">Durum</th>
-                    <th class="border-0 small text-secondary fw-semibold">Tarih</th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $direction = $currentSort === 'channel' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.notifications.index', array_merge(request()->query(), ['sort' => 'channel', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Kanal</span>
+                            @if($currentSort === 'channel')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.notifications.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Durum</span>
+                            @if($currentSort === 'status')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 small text-secondary fw-semibold">
+                        @php $direction = $currentSort === 'created_at' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.notifications.index', array_merge(request()->query(), ['sort' => 'created_at', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Tarih</span>
+                            @if($currentSort === 'created_at')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 small text-secondary fw-semibold text-end">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($notifications as $notification)
                     <tr class="{{ !$notification->is_read ? 'table-active' : '' }}">
+                        <td class="align-middle text-center">
+                            <input type="checkbox" class="form-check-input notification-row-check" name="selected[]" value="{{ $notification->id }}" form="notifications-bulk-form">
+                        </td>
                         <td class="align-middle">
                             <span class="fw-semibold text-dark">{{ $notification->title }}</span>
                             @if(!$notification->is_read)
@@ -107,7 +172,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5">
+                        <td colspan="7" class="text-center py-5">
                             <p class="text-secondary mb-0">Henüz bildirim bulunmuyor.</p>
                         </td>
                     </tr>
@@ -121,4 +186,30 @@
         </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('notifications-bulk-form');
+    const actionSelect = document.getElementById('notifications-bulk-action');
+    const actionInput = document.getElementById('notifications-bulk-action-input');
+    const applyBtn = document.getElementById('notifications-bulk-apply');
+    const selectAll = document.getElementById('select-all-notifications');
+    const checkboxes = document.querySelectorAll('.notification-row-check');
+    const countEl = document.getElementById('notifications-selected-count');
+    function updateCount() { const n = document.querySelectorAll('.notification-row-check:checked').length; countEl.textContent = n; }
+    checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
+    if (selectAll) { selectAll.addEventListener('change', function () { checkboxes.forEach(cb => { cb.checked = selectAll.checked; }); updateCount(); }); }
+    applyBtn.addEventListener('click', function () {
+        const action = actionSelect.value;
+        if (!action) return;
+        const checked = document.querySelectorAll('.notification-row-check:checked');
+        if (checked.length === 0) { alert('Lütfen en az bir bildirim seçin.'); return; }
+        checked.forEach(cb => form.appendChild(cb.cloneNode(true)));
+        actionInput.value = action;
+        form.submit();
+    });
+});
+</script>
+@endpush
 @endsection

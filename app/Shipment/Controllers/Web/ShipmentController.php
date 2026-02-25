@@ -31,7 +31,7 @@ class ShipmentController extends Controller
      */
     public function index(Request $request): View|StreamedResponse|Response
     {
-        $filters = $request->only(['status', 'order_id', 'vehicle_id', 'date_from', 'date_to', 'workflow']);
+        $filters = $request->only(['status', 'order_id', 'vehicle_id', 'date_from', 'date_to', 'workflow', 'sort', 'direction']);
 
         if ($request->filled('workflow')) {
             $filters['status'] = match ($request->string('workflow')->toString()) {
@@ -46,7 +46,9 @@ class ShipmentController extends Controller
             return $this->export($filters, $request->get('export'));
         }
 
-        $shipments = $this->buildQuery($filters)->paginate(25);
+        $shipments = $this->buildQuery($filters)
+            ->paginate(25)
+            ->withQueryString();
 
         $stats = [
             'total' => \App\Models\Shipment::count(),
@@ -102,7 +104,44 @@ class ShipmentController extends Controller
             ->when($filters['vehicle_id'] ?? null, fn ($q, $vehicleId) => $q->where('vehicle_id', $vehicleId))
             ->when($filters['date_from'] ?? null, fn ($q, $date) => $q->whereDate('pickup_date', '>=', $date))
             ->when($filters['date_to'] ?? null, fn ($q, $date) => $q->whereDate('pickup_date', '<=', $date))
-            ->orderBy('pickup_date', 'desc');
+            ->tap(function ($query) use ($filters) {
+                $sort = $filters['sort'] ?? null;
+                $direction = ($filters['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+                $sortableColumns = [
+                    'id' => 'id',
+                    'status' => 'status',
+                    'pickup_date' => 'pickup_date',
+                    'created_at' => 'created_at',
+                ];
+
+                if ($sort !== null && \array_key_exists($sort, $sortableColumns)) {
+                    $query->orderBy($sortableColumns[$sort], $direction);
+                } else {
+                    $query->orderBy('pickup_date', 'desc');
+                }
+            });
+    }
+
+    /**
+     * Apply bulk actions to shipments.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:shipments,id'],
+            'action' => ['required', 'string', 'in:delete'],
+        ]);
+
+        $ids = $validated['selected'];
+
+        if ($validated['action'] === 'delete') {
+            \App\Models\Shipment::whereIn('id', $ids)->delete();
+        }
+
+        return redirect()->route('admin.shipments.index')
+            ->with('success', 'Seçili sevkiyatlar için toplu işlem uygulandı.');
     }
 
     /**

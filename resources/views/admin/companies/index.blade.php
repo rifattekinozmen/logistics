@@ -22,6 +22,12 @@
 
 <div class="filter-area filter-area-primary rounded-3xl shadow-sm border p-4 mb-4">
     <form method="GET" action="{{ route('admin.companies.index') }}" class="row g-3 align-items-end">
+        @if(request('sort'))
+            <input type="hidden" name="sort" value="{{ request('sort') }}">
+        @endif
+        @if(request('direction'))
+            <input type="hidden" name="direction" value="{{ request('direction') }}">
+        @endif
         <div class="col-md-4">
             <label class="form-label small fw-semibold text-dark">Ara</label>
             <input
@@ -60,6 +66,10 @@
     </form>
 </div>
 
+@php
+    $currentSort = $filters['sort'] ?? '';
+    $currentDirection = $filters['direction'] ?? 'asc';
+@endphp
 <div class="bg-white rounded-3xl shadow-sm border p-4" style="border-color: var(--bs-primary-200);">
     @if($companies->isEmpty())
     <div class="text-center py-5">
@@ -72,10 +82,40 @@
         </a>
     </div>
     @else
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3 border-bottom">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="small text-secondary fw-semibold">Sırala:</span>
+            @php $q = request()->only(['search', 'status']); @endphp
+            <a href="{{ route('admin.companies.index', array_merge($q, ['sort' => 'name', 'direction' => ($currentSort === 'name' && $currentDirection === 'asc') ? 'desc' : 'asc'])) }}" class="btn btn-sm {{ $currentSort === 'name' ? 'btn-primary' : 'btn-outline-secondary' }}">
+                Firma adı @if($currentSort === 'name') <span class="material-symbols-outlined ms-1" style="font-size:1rem">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span> @endif
+            </a>
+            <a href="{{ route('admin.companies.index', array_merge($q, ['sort' => 'created_at', 'direction' => ($currentSort === 'created_at' && $currentDirection === 'asc') ? 'desc' : 'asc'])) }}" class="btn btn-sm {{ $currentSort === 'created_at' ? 'btn-primary' : 'btn-outline-secondary' }}">
+                Tarih @if($currentSort === 'created_at') <span class="material-symbols-outlined ms-1" style="font-size:1rem">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span> @endif
+            </a>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <select id="companies-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+                <option value="activate">Aktif yap</option>
+                <option value="deactivate">Pasif yap</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="companies-bulk-apply">Uygula</button>
+            <span class="small text-secondary"><span id="companies-selected-count">0</span> kayıt seçili</span>
+        </div>
+    </div>
+    <form id="companies-bulk-form" action="{{ route('admin.companies.bulk') }}" method="POST" class="d-none">
+        @csrf
+        <input type="hidden" name="action" id="companies-bulk-action-input">
+    </form>
     <div class="row g-4">
         @foreach($companies as $company)
         <div class="col-md-6 col-lg-4">
             <div class="border rounded-3xl p-4 h-100 transition-all hover:shadow-md {{ session('active_company_id') == $company->id ? 'border-primary bg-primary-50' : '' }}" style="border-color: var(--bs-primary-200);">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <input type="checkbox" class="form-check-input company-row-check" name="selected[]" value="{{ $company->id }}" form="companies-bulk-form" title="Seç">
+                    <span class="invisible">.</span>
+                </div>
                 <div class="d-flex flex-column align-items-center text-center mb-3">
                     @php
                         $companyLogoUrl = $company->logo_url;
@@ -132,4 +172,30 @@
     </div>
     @endif
 </div>
+
+@if(!$companies->isEmpty())
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('companies-bulk-form');
+    const actionSelect = document.getElementById('companies-bulk-action');
+    const actionInput = document.getElementById('companies-bulk-action-input');
+    const applyBtn = document.getElementById('companies-bulk-apply');
+    const checkboxes = document.querySelectorAll('.company-row-check');
+    const countEl = document.getElementById('companies-selected-count');
+    function updateCount() { const n = document.querySelectorAll('.company-row-check:checked').length; countEl.textContent = n; }
+    checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
+    applyBtn.addEventListener('click', function () {
+        const action = actionSelect.value;
+        if (!action) return;
+        const checked = document.querySelectorAll('.company-row-check:checked');
+        if (checked.length === 0) { alert('Lütfen en az bir firma seçin.'); return; }
+        checked.forEach(cb => form.appendChild(cb.cloneNode(true)));
+        actionInput.value = action;
+        form.submit();
+    });
+});
+</script>
+@endpush
+@endif
 @endsection

@@ -41,6 +41,19 @@ class DeliveryImportController extends Controller
             $query->whereDate('created_at', '<=', $request->date('date_to'));
         }
 
+        $sort = $request->string('sort')->toString();
+        $direction = $request->string('direction')->toString() === 'desc' ? 'desc' : 'asc';
+        $sortableColumns = [
+            'file_name' => 'file_name',
+            'status' => 'status',
+            'created_at' => 'created_at',
+        ];
+        if ($sort !== '' && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->latest();
+        }
+
         $batches = $query->withCount('reportRows')->paginate(20)->withQueryString();
 
         $stats = [
@@ -50,6 +63,25 @@ class DeliveryImportController extends Controller
         ];
 
         return view('admin.delivery-imports.index', compact('batches', 'stats'));
+    }
+
+    /**
+     * Toplu işlem: sil.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:delivery_import_batches,id'],
+            'action' => ['required', 'string', 'in:delete'],
+        ]);
+
+        if ($validated['action'] === 'delete') {
+            DeliveryImportBatch::whereIn('id', $validated['selected'])->delete();
+        }
+
+        return redirect()->route('admin.delivery-imports.index')
+            ->with('success', 'Seçili teslimat raporları için toplu işlem uygulandı.');
     }
 
     /**

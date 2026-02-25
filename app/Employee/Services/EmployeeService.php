@@ -49,7 +49,22 @@ class EmployeeService
             $query->where('position_id', $filters['position_id']);
         }
 
-        return $query->latest()->paginate($perPage);
+        $sort = $filters['sort'] ?? null;
+        $direction = (isset($filters['direction']) && $filters['direction'] === 'desc') ? 'desc' : 'asc';
+        $sortableColumns = [
+            'employee_number' => 'employee_number',
+            'first_name' => 'first_name',
+            'hire_date' => 'hire_date',
+            'status' => 'status',
+            'created_at' => 'created_at',
+        ];
+        if ($sort !== null && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->latest();
+        }
+
+        return $query->paginate($perPage);
     }
 
     /**

@@ -42,7 +42,21 @@ class NotificationController extends Controller
             $query->where('is_read', $request->is_read === '1');
         }
 
-        $notifications = $query->latest('created_at')->paginate(30);
+        $sort = $request->string('sort')->toString();
+        $direction = $request->string('direction')->toString() === 'desc' ? 'desc' : 'asc';
+        $sortableColumns = [
+            'title' => 'title',
+            'status' => 'status',
+            'channel' => 'channel',
+            'created_at' => 'created_at',
+        ];
+        if ($sort !== '' && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->latest('created_at');
+        }
+
+        $notifications = $query->paginate(30)->withQueryString();
 
         // İstatistikler
         $stats = [
@@ -58,6 +72,29 @@ class NotificationController extends Controller
             'stats' => $stats,
             'filters' => $request->only(['status', 'channel', 'notification_type', 'is_read']),
         ]);
+    }
+
+    /**
+     * Toplu işlem: sil veya okundu işaretle.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:notifications,id'],
+            'action' => ['required', 'string', 'in:delete,mark_read'],
+        ]);
+
+        $ids = $validated['selected'];
+        if ($validated['action'] === 'delete') {
+            Notification::whereIn('id', $ids)->delete();
+            $message = 'Seçili bildirimler silindi.';
+        } else {
+            Notification::whereIn('id', $ids)->update(['is_read' => true, 'read_at' => now()]);
+            $message = 'Seçili bildirimler okundu işaretlendi.';
+        }
+
+        return redirect()->route('admin.notifications.index')->with('success', $message);
     }
 
     /**

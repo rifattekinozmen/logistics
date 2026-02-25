@@ -46,17 +46,57 @@ class CompanyController extends Controller
             $query->where('is_active', false);
         }
 
-        $companies = $query
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $sort = $request->string('sort')->toString();
+        $direction = $request->string('direction')->toString() === 'desc' ? 'desc' : 'asc';
+        $sortableColumns = ['name' => 'name', 'short_name' => 'short_name', 'created_at' => 'created_at', 'is_active' => 'is_active'];
+        if ($sort !== '' && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $companies = $query->get();
 
         return view('admin.companies.index', [
             'companies' => $companies,
             'filters' => [
                 'search' => $search,
                 'status' => $status,
+                'sort' => $sort,
+                'direction' => $direction,
             ],
         ]);
+    }
+
+    /**
+     * Toplu işlem: sil, aktif yap, pasif yap.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:companies,id'],
+            'action' => ['required', 'string', 'in:delete,activate,deactivate'],
+        ]);
+
+        $user = Auth::user();
+        $query = Company::withTrashed()
+            ->whereIn('id', $validated['selected'])
+            ->whereHas('users', fn ($q) => $q->where('users.id', $user->id));
+
+        if ($validated['action'] === 'delete') {
+            $query->delete();
+            $message = 'Seçili firmalar silindi.';
+        } elseif ($validated['action'] === 'activate') {
+            $query->update(['is_active' => true]);
+            $message = 'Seçili firmalar aktif yapıldı.';
+        } else {
+            $query->update(['is_active' => false]);
+            $message = 'Seçili firmalar pasif yapıldı.';
+        }
+
+        return redirect()->route('admin.companies.index')
+            ->with('success', $message);
     }
 
     /**

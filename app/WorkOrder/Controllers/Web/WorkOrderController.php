@@ -14,16 +14,25 @@ class WorkOrderController extends Controller
      */
     public function index(Request $request): View
     {
-        $filters = $request->only(['status', 'vehicle_id', 'service_provider_id', 'date_from', 'date_to']);
-        $workOrders = \App\Models\WorkOrder::query()
+        $filters = $request->only(['status', 'vehicle_id', 'service_provider_id', 'date_from', 'date_to', 'sort', 'direction']);
+        $query = \App\Models\WorkOrder::query()
             ->with(['vehicle', 'serviceProvider'])
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when($filters['vehicle_id'] ?? null, fn ($q, $vehicleId) => $q->where('vehicle_id', $vehicleId))
             ->when($filters['service_provider_id'] ?? null, fn ($q, $providerId) => $q->where('service_provider_id', $providerId))
             ->when($filters['date_from'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
-            ->when($filters['date_to'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '<=', $date))
-            ->orderBy('created_at', 'desc')
-            ->paginate(25);
+            ->when($filters['date_to'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
+
+        $sort = $filters['sort'] ?? null;
+        $direction = (isset($filters['direction']) && $filters['direction'] === 'desc') ? 'desc' : 'asc';
+        $sortableColumns = ['id' => 'id', 'type' => 'type', 'status' => 'status', 'created_at' => 'created_at'];
+        if ($sort !== null && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $workOrders = $query->paginate(25)->withQueryString();
 
         $vehicles = \App\Models\Vehicle::where('status', 1)->orderBy('plate')->get();
         $serviceProviders = \App\Models\ServiceProvider::where('status', 1)->orderBy('name')->get();
@@ -120,5 +129,24 @@ class WorkOrderController extends Controller
 
         return redirect()->route('admin.work-orders.index')
             ->with('success', 'İş emri başarıyla silindi.');
+    }
+
+    /**
+     * Toplu işlem: sil.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:work_orders,id'],
+            'action' => ['required', 'string', 'in:delete'],
+        ]);
+
+        if ($validated['action'] === 'delete') {
+            \App\Models\WorkOrder::whereIn('id', $validated['selected'])->delete();
+        }
+
+        return redirect()->route('admin.work-orders.index')
+            ->with('success', 'Seçili iş emirleri için toplu işlem uygulandı.');
     }
 }

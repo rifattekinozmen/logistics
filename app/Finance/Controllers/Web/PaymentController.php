@@ -25,13 +25,13 @@ class PaymentController extends Controller
      */
     public function index(Request $request): View|StreamedResponse|Response
     {
-        $filters = $request->only(['type', 'status', 'due_date_from', 'due_date_to', 'company_id']);
+        $filters = $request->only(['type', 'status', 'due_date_from', 'due_date_to', 'company_id', 'sort', 'direction']);
 
         if ($request->has('export')) {
             return $this->export($filters, $request->get('export'));
         }
 
-        $payments = $this->buildQuery($filters)->paginate(25);
+        $payments = $this->buildQuery($filters)->paginate(25)->withQueryString();
         $payments->getCollection()->loadMorph('related', [
             Customer::class => ['businessPartner.company'],
         ]);
@@ -86,7 +86,45 @@ class PaymentController extends Controller
         $query->when($filters['due_date_from'] ?? null, fn ($q, $date) => $q->whereDate('due_date', '>=', $date));
         $query->when($filters['due_date_to'] ?? null, fn ($q, $date) => $q->whereDate('due_date', '<=', $date));
 
-        return $query->orderBy('due_date', 'asc');
+        $query->tap(function ($q) use ($filters) {
+            $sort = $filters['sort'] ?? null;
+            $direction = ($filters['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+            $sortableColumns = [
+                'amount' => 'amount',
+                'due_date' => 'due_date',
+                'status' => 'status',
+                'payment_type' => 'payment_type',
+                'created_at' => 'created_at',
+            ];
+            if ($sort !== null && \array_key_exists($sort, $sortableColumns)) {
+                $q->orderBy($sortableColumns[$sort], $direction);
+            } else {
+                $q->orderBy('due_date', 'asc');
+            }
+        });
+
+        return $query;
+    }
+
+    /**
+     * Apply bulk actions to payments.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:payments,id'],
+            'action' => ['required', 'string', 'in:delete'],
+        ]);
+
+        $ids = $validated['selected'];
+
+        if ($validated['action'] === 'delete') {
+            \App\Models\Payment::whereIn('id', $ids)->delete();
+        }
+
+        return redirect()->route('admin.payments.index')
+            ->with('success', 'Seçili ödemeler için toplu işlem uygulandı.');
     }
 
     /**

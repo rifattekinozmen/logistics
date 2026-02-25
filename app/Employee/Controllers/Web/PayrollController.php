@@ -36,7 +36,23 @@ class PayrollController extends Controller
             $query->where('period_end', '<=', $request->period_end);
         }
 
-        $payrolls = $query->latest('period_start')->paginate(25);
+        $sort = $request->string('sort')->toString();
+        $direction = $request->string('direction')->toString() === 'desc' ? 'desc' : 'asc';
+        $sortableColumns = [
+            'payroll_number' => 'payroll_number',
+            'period_start' => 'period_start',
+            'period_end' => 'period_end',
+            'net_salary' => 'net_salary',
+            'status' => 'status',
+            'created_at' => 'created_at',
+        ];
+        if ($sort !== '' && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->latest('period_start');
+        }
+
+        $payrolls = $query->paginate(25)->withQueryString();
 
         $stats = [
             'total' => Payroll::count(),
@@ -46,6 +62,25 @@ class PayrollController extends Controller
         ];
 
         return view('admin.payrolls.index', compact('payrolls', 'stats'));
+    }
+
+    /**
+     * Toplu işlem: sil.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:payrolls,id'],
+            'action' => ['required', 'string', 'in:delete'],
+        ]);
+
+        if ($validated['action'] === 'delete') {
+            Payroll::whereIn('id', $validated['selected'])->delete();
+        }
+
+        return redirect()->route('admin.payrolls.index')
+            ->with('success', 'Seçili bordrolar için toplu işlem uygulandı.');
     }
 
     /**

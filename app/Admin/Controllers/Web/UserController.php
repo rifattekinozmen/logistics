@@ -19,8 +19,8 @@ class UserController extends Controller
      */
     public function index(Request $request): View
     {
-        $filters = $request->only(['status', 'search', 'role_id', 'user_type']);
-        $users = User::query()
+        $filters = $request->only(['status', 'search', 'role_id', 'user_type', 'sort', 'direction']);
+        $query = User::query()
             ->with(['roles'])
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(function ($query) use ($search) {
@@ -35,9 +35,18 @@ class UserController extends Controller
                 } elseif ($userType === 'system') {
                     $q->whereDoesntHave('roles', fn ($query) => $query->whereIn('name', ['customer', 'customer_user', 'customer_viewer']));
                 }
-            })
-            ->orderBy('name')
-            ->paginate(25);
+            });
+
+        $sort = $filters['sort'] ?? null;
+        $direction = (isset($filters['direction']) && $filters['direction'] === 'desc') ? 'desc' : 'asc';
+        $sortableColumns = ['name' => 'name', 'email' => 'email', 'status' => 'status', 'created_at' => 'created_at'];
+        if ($sort !== null && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->orderBy('name');
+        }
+
+        $users = $query->paginate(25)->withQueryString();
 
         $roles = CustomRole::orderBy('name')->get();
         $customerRoles = CustomRole::whereIn('name', ['customer', 'customer_user', 'customer_viewer'])->get();
@@ -49,6 +58,32 @@ class UserController extends Controller
         ];
 
         return view('admin.users.index', compact('users', 'roles', 'customerRoles', 'systemRoles', 'stats'));
+    }
+
+    /**
+     * Apply bulk actions to users.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:users,id'],
+            'action' => ['required', 'string', 'in:delete,activate,deactivate'],
+        ]);
+
+        $ids = $validated['selected'];
+        if ($validated['action'] === 'delete') {
+            User::whereIn('id', $ids)->delete();
+        }
+        if ($validated['action'] === 'activate') {
+            User::whereIn('id', $ids)->update(['status' => 1]);
+        }
+        if ($validated['action'] === 'deactivate') {
+            User::whereIn('id', $ids)->update(['status' => 0]);
+        }
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Seçili kullanıcılar için toplu işlem uygulandı.');
     }
 
     /**

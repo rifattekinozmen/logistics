@@ -62,15 +62,68 @@
 </div>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden" style="border-color: var(--bs-primary-200);">
+    <div class="px-4 pt-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <select id="users-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+                <option value="activate">Aktif yap</option>
+                <option value="deactivate">Pasif yap</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="users-bulk-apply">Uygula</button>
+        </div>
+        <div class="small text-secondary"><span id="users-selected-count">0</span> kayıt seçili</div>
+    </div>
+    <form id="users-bulk-form" action="{{ route('admin.users.bulk') }}" method="POST" class="d-none">
+        @csrf
+        <input type="hidden" name="action" id="users-bulk-action-input">
+    </form>
     <div class="table-responsive">
+        @php
+            $currentSort = request('sort');
+            $currentDirection = request('direction', 'asc');
+        @endphp
         <table class="table table-hover mb-0">
             <thead class="bg-primary-200">
                 <tr>
-                    <th class="border-0 fw-semibold text-secondary small">Kullanıcı</th>
-                    <th class="border-0 fw-semibold text-secondary small">E-posta</th>
+                    <th class="border-0 text-center align-middle" style="width: 40px;">
+                        <input type="checkbox" id="select-all-users">
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'name' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.users.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Kullanıcı</span>
+                            @if($currentSort === 'name')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'email' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.users.index', array_merge(request()->query(), ['sort' => 'email', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>E-posta</span>
+                            @if($currentSort === 'email')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">Kullanıcı Adı</th>
                     <th class="border-0 fw-semibold text-secondary small" id="roles-column-header">Roller</th>
-                    <th class="border-0 fw-semibold text-secondary small">Durum</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc'; @endphp
+                        <a href="{{ route('admin.users.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction])) }}" class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Durum</span>
+                            @if($currentSort === 'status')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">{{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small text-end">İşlemler</th>
                 </tr>
             </thead>
@@ -82,6 +135,9 @@
                         });
                     @endphp
                 <tr class="{{ $isCustomerUser ? 'bg-success-50' : '' }}">
+                    <td class="align-middle text-center">
+                        <input type="checkbox" class="form-check-input user-row-check" name="selected[]" value="{{ $user->id }}" form="users-bulk-form">
+                    </td>
                     <td class="align-middle">
                         <div class="d-flex align-items-center gap-2">
                             @if($user->avatar)
@@ -162,7 +218,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-5">
+                    <td colspan="7" class="text-center py-5">
                         <div class="d-flex flex-column align-items-center gap-2">
                             <span class="material-symbols-outlined text-secondary" style="font-size: 3rem;">person</span>
                             <p class="text-secondary mb-0">Henüz kullanıcı bulunmuyor.</p>
@@ -180,4 +236,39 @@
     </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('users-bulk-form');
+    const actionSelect = document.getElementById('users-bulk-action');
+    const actionInput = document.getElementById('users-bulk-action-input');
+    const applyBtn = document.getElementById('users-bulk-apply');
+    const selectAll = document.getElementById('select-all-users');
+    const checkboxes = document.querySelectorAll('.user-row-check');
+    const countEl = document.getElementById('users-selected-count');
+
+    function updateCount() {
+        const n = document.querySelectorAll('.user-row-check:checked').length;
+        countEl.textContent = n;
+    }
+    checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            checkboxes.forEach(cb => { cb.checked = selectAll.checked; });
+            updateCount();
+        });
+    }
+    applyBtn.addEventListener('click', function () {
+        const action = actionSelect.value;
+        if (!action) return;
+        const checked = document.querySelectorAll('.user-row-check:checked');
+        if (checked.length === 0) { alert('Lütfen en az bir kullanıcı seçin.'); return; }
+        checked.forEach(cb => form.appendChild(cb.cloneNode(true)));
+        actionInput.value = action;
+        form.submit();
+    });
+});
+</script>
+@endpush
 @endsection

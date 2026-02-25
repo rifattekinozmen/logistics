@@ -10,6 +10,7 @@ use App\Models\Department;
 use App\Models\Personel;
 use App\Models\Position;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -55,24 +56,39 @@ class PersonelController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         $query = Personel::query();
 
-        // Filtreleme
-        if (request()->has('aktif') && request('aktif') !== '') {
-            $query->where('aktif', request('aktif'));
+        if ($request->filled('aktif')) {
+            $query->where('aktif', $request->aktif);
+        }
+        if ($request->filled('departman')) {
+            $query->where('departman', 'like', '%'.$request->departman.'%');
+        }
+        if ($request->filled('pozisyon')) {
+            $query->where('pozisyon', 'like', '%'.$request->pozisyon.'%');
         }
 
-        if (request()->has('departman') && request('departman') !== '') {
-            $query->where('departman', 'like', '%'.request('departman').'%');
+        $sort = $request->string('sort')->toString();
+        $direction = $request->string('direction')->toString() === 'desc' ? 'desc' : 'asc';
+        $sortableColumns = [
+            'ad_soyad' => 'ad_soyad',
+            'email' => 'email',
+            'departman' => 'departman',
+            'pozisyon' => 'pozisyon',
+            'ise_baslama_tarihi' => 'ise_baslama_tarihi',
+            'maas' => 'maas',
+            'aktif' => 'aktif',
+            'created_at' => 'created_at',
+        ];
+        if ($sort !== '' && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->latest();
         }
 
-        if (request()->has('pozisyon') && request('pozisyon') !== '') {
-            $query->where('pozisyon', 'like', '%'.request('pozisyon').'%');
-        }
-
-        $personels = $query->latest()->paginate(15);
+        $personels = $query->paginate(15)->withQueryString();
 
         $stats = [
             'total' => Personel::count(),
@@ -161,5 +177,32 @@ class PersonelController extends Controller
 
         return redirect()->route('admin.personnel.index')
             ->with('success', 'Personel başarıyla silindi.');
+    }
+
+    /**
+     * Apply bulk actions to personnel.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:personels,id'],
+            'action' => ['required', 'string', 'in:delete,activate,deactivate'],
+        ]);
+
+        $ids = $validated['selected'];
+
+        if ($validated['action'] === 'delete') {
+            Personel::whereIn('id', $ids)->delete();
+        }
+        if ($validated['action'] === 'activate') {
+            Personel::whereIn('id', $ids)->update(['aktif' => 1]);
+        }
+        if ($validated['action'] === 'deactivate') {
+            Personel::whereIn('id', $ids)->update(['aktif' => 0]);
+        }
+
+        return redirect()->route('admin.personnel.index')
+            ->with('success', 'Seçili personel için toplu işlem uygulandı.');
     }
 }

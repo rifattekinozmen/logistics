@@ -8,6 +8,7 @@ use App\Models\Personel;
 use App\Models\PersonnelAttendance;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -135,6 +136,25 @@ class PersonnelAttendanceController extends Controller
             'personnelData' => $personnelData,
             'daysInMonth' => $daysInMonth,
         ]);
+    }
+
+    /**
+     * Toplu işlem: puantaj kayıtlarını sil.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:personnel_attendance,id'],
+            'action' => ['required', 'string', 'in:delete'],
+        ]);
+
+        if ($validated['action'] === 'delete') {
+            PersonnelAttendance::whereIn('id', $validated['selected'])->delete();
+        }
+
+        return redirect()->route('admin.personnel_attendance.index')
+            ->with('success', 'Seçili puantaj kayıtları için toplu işlem uygulandı.');
     }
 
     /**

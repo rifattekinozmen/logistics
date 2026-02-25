@@ -14,15 +14,30 @@ class DocumentController extends Controller
      */
     public function index(Request $request): View
     {
-        $filters = $request->only(['type', 'documentable_type', 'documentable_id', 'expiry_date_from', 'expiry_date_to']);
+        $filters = $request->only(['type', 'documentable_type', 'documentable_id', 'expiry_date_from', 'expiry_date_to', 'sort', 'direction']);
         $documents = \App\Models\Document::query()
             ->when($filters['type'] ?? null, fn ($q, $type) => $q->where('category', $type))
             ->when($filters['documentable_type'] ?? null, fn ($q, $type) => $q->where('documentable_type', $type))
             ->when($filters['documentable_id'] ?? null, fn ($q, $id) => $q->where('documentable_id', $id))
             ->when($filters['expiry_date_from'] ?? null, fn ($q, $date) => $q->whereDate('valid_until', '>=', $date))
             ->when($filters['expiry_date_to'] ?? null, fn ($q, $date) => $q->whereDate('valid_until', '<=', $date))
-            ->orderBy('valid_until', 'asc')
-            ->paginate(25);
+            ->tap(function ($query) use ($filters) {
+                $sort = $filters['sort'] ?? null;
+                $direction = ($filters['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+                $sortableColumns = [
+                    'name' => 'name',
+                    'category' => 'category',
+                    'valid_until' => 'valid_until',
+                    'created_at' => 'created_at',
+                ];
+                if ($sort !== null && \array_key_exists($sort, $sortableColumns)) {
+                    $query->orderBy($sortableColumns[$sort], $direction);
+                } else {
+                    $query->orderBy('valid_until', 'asc');
+                }
+            })
+            ->paginate(25)
+            ->withQueryString();
 
         $stats = [
             'total' => \App\Models\Document::count(),
@@ -127,5 +142,26 @@ class DocumentController extends Controller
 
         return redirect()->route('admin.documents.index')
             ->with('success', 'Belge başarıyla silindi.');
+    }
+
+    /**
+     * Apply bulk actions to documents.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:documents,id'],
+            'action' => ['required', 'string', 'in:delete'],
+        ]);
+
+        $ids = $validated['selected'];
+
+        if ($validated['action'] === 'delete') {
+            \App\Models\Document::whereIn('id', $ids)->delete();
+        }
+
+        return redirect()->route('admin.documents.index')
+            ->with('success', 'Seçili belgeler için toplu işlem uygulandı.');
     }
 }

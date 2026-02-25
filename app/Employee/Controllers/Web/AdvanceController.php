@@ -27,7 +27,21 @@ class AdvanceController extends Controller
             $query->where('status', $request->status);
         }
 
-        $advances = $query->latest('requested_date')->paginate(25);
+        $sort = $request->string('sort')->toString();
+        $direction = $request->string('direction')->toString() === 'desc' ? 'desc' : 'asc';
+        $sortableColumns = [
+            'amount' => 'amount',
+            'requested_date' => 'requested_date',
+            'status' => 'status',
+            'created_at' => 'created_at',
+        ];
+        if ($sort !== '' && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->latest('requested_date');
+        }
+
+        $advances = $query->paginate(25)->withQueryString();
 
         $stats = [
             'total' => Advance::count(),
@@ -36,6 +50,42 @@ class AdvanceController extends Controller
         ];
 
         return view('admin.advances.index', compact('advances', 'stats'));
+    }
+
+    /**
+     * Toplu işlem: sil, onayla, reddet.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:advances,id'],
+            'action' => ['required', 'string', 'in:delete,approve,reject'],
+        ]);
+
+        $ids = $validated['selected'];
+        $user = Auth::user();
+
+        if ($validated['action'] === 'delete') {
+            Advance::whereIn('id', $ids)->delete();
+            $message = 'Seçili avans talepleri silindi.';
+        } elseif ($validated['action'] === 'approve') {
+            Advance::whereIn('id', $ids)->where('status', 'pending')->update([
+                'status' => 'approved',
+                'approved_by' => $user->id,
+                'approved_at' => now(),
+            ]);
+            $message = 'Seçili avans talepleri onaylandı.';
+        } else {
+            Advance::whereIn('id', $ids)->where('status', 'pending')->update([
+                'status' => 'rejected',
+                'approved_by' => $user->id,
+                'approved_at' => now(),
+            ]);
+            $message = 'Seçili avans talepleri reddedildi.';
+        }
+
+        return redirect()->route('admin.advances.index')->with('success', $message);
     }
 
     /**

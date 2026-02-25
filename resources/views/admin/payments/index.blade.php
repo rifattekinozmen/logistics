@@ -78,21 +78,105 @@
 </div>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden" style="border-color: var(--bs-primary-200);">
+    <div class="px-4 pt-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <select id="payments-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="payments-bulk-apply">
+                Uygula
+            </button>
+        </div>
+        <div class="small text-secondary">
+            <span id="payments-selected-count">0</span> kayıt seçili
+        </div>
+    </div>
     <div class="table-responsive">
+        @php
+            $currentSort = request('sort');
+            $currentDirection = request('direction', 'asc');
+        @endphp
         <table class="table table-hover mb-0">
             <thead class="bg-primary-200">
                 <tr>
+                    <th class="border-0 text-center align-middle" style="width: 40px;">
+                        <input type="checkbox" id="select-all-payments">
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">Firma</th>
-                    <th class="border-0 fw-semibold text-secondary small">Tür</th>
-                    <th class="border-0 fw-semibold text-secondary small">Tutar</th>
-                    <th class="border-0 fw-semibold text-secondary small">Vade Tarihi</th>
-                    <th class="border-0 fw-semibold text-secondary small">Durum</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'payment_type' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.payments.index', array_merge(request()->query(), ['sort' => 'payment_type', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Tür</span>
+                            @if($currentSort === 'payment_type')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'amount' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.payments.index', array_merge(request()->query(), ['sort' => 'amount', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Tutar</span>
+                            @if($currentSort === 'amount')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'due_date' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.payments.index', array_merge(request()->query(), ['sort' => 'due_date', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Vade Tarihi</span>
+                            @if($currentSort === 'due_date')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.payments.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Durum</span>
+                            @if($currentSort === 'status')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small text-end">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($payments as $payment)
                 <tr>
+                    <td class="align-middle text-center">
+                        <input type="checkbox" class="payments-row-checkbox" value="{{ $payment->id }}">
+                    </td>
                     <td class="align-middle">
                         <span class="fw-bold text-dark">{{ $payment->company?->name ?? '-' }}</span>
                     </td>
@@ -110,19 +194,22 @@
                     <td class="align-middle">
                         @php
                             $statusColors = [
-                                'pending' => 'warning',
-                                'paid' => 'success',
-                                'overdue' => 'danger',
+                                0 => 'warning',
+                                1 => 'success',
+                                2 => 'danger',
+                                3 => 'secondary',
                             ];
                             $softColors = [
                                 'warning' => 'warning-200',
                                 'success' => 'success-200',
                                 'danger' => 'danger-200',
+                                'secondary' => 'secondary-200',
                             ];
                             $statusLabels = [
-                                'pending' => 'Beklemede',
-                                'paid' => 'Ödendi',
-                                'overdue' => 'Gecikmiş',
+                                0 => 'Beklemede',
+                                1 => 'Ödendi',
+                                2 => 'Gecikmiş',
+                                3 => 'İptal',
                             ];
                             $color = $statusColors[$payment->status] ?? 'secondary';
                             $softColor = $softColors[$color] ?? 'secondary-200';
@@ -152,7 +239,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-5">
+                    <td colspan="7" class="text-center py-5">
                         <div class="d-flex flex-column align-items-center gap-2">
                             <span class="material-symbols-outlined text-secondary" style="font-size: 3rem;">payments</span>
                             <p class="text-secondary mb-0">Henüz ödeme bulunmuyor.</p>
@@ -170,4 +257,82 @@
     </div>
     @endif
 </div>
+
+<form id="payments-bulk-form" method="POST" action="{{ route('admin.payments.bulk') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="action" id="payments-bulk-action-input">
+</form>
 @endsection
+
+@push('scripts')
+<script>
+const payMaster = document.getElementById('select-all-payments');
+const payRows = document.querySelectorAll('.payments-row-checkbox');
+const payCountEl = document.getElementById('payments-selected-count');
+const payApplyBtn = document.getElementById('payments-bulk-apply');
+const payActionSelect = document.getElementById('payments-bulk-action');
+const payForm = document.getElementById('payments-bulk-form');
+const payActionInput = document.getElementById('payments-bulk-action-input');
+
+function updatePaymentsSelectedCount() {
+    const selected = Array.from(payRows).filter(cb => cb.checked);
+    if (payCountEl) {
+        payCountEl.textContent = selected.length.toString();
+    }
+    if (payMaster) {
+        payMaster.checked = selected.length > 0 && selected.length === payRows.length;
+        payMaster.indeterminate = selected.length > 0 && selected.length < payRows.length;
+    }
+}
+
+if (payMaster) {
+    payMaster.addEventListener('change', function () {
+        const checked = payMaster.checked;
+        payRows.forEach(function (cb) {
+            cb.checked = checked;
+        });
+        updatePaymentsSelectedCount();
+    });
+}
+
+payRows.forEach(function (cb) {
+    cb.addEventListener('change', updatePaymentsSelectedCount);
+});
+
+if (payApplyBtn) {
+    payApplyBtn.addEventListener('click', function () {
+        const action = payActionSelect.value;
+        const selected = Array.from(payRows).filter(cb => cb.checked);
+
+        if (! action) {
+            alert('Lütfen bir toplu işlem seçin.');
+            return;
+        }
+
+        if (selected.length === 0) {
+            alert('Lütfen en az bir kayıt seçin.');
+            return;
+        }
+
+        if (action === 'delete' && ! confirm('Seçili ödemeleri silmek istediğinize emin misiniz?')) {
+            return;
+        }
+
+        payForm.querySelectorAll('input[name="selected[]"]').forEach(function (input) {
+            input.remove();
+        });
+
+        selected.forEach(function (cb) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'selected[]';
+            hidden.value = cb.value;
+            payForm.appendChild(hidden);
+        });
+
+        payActionInput.value = action;
+        payForm.submit();
+    });
+}
+</script>
+@endpush

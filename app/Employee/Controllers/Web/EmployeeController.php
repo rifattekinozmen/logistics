@@ -25,13 +25,13 @@ class EmployeeController extends Controller
      */
     public function index(Request $request): View|StreamedResponse|Response
     {
-        $filters = $request->only(['status', 'branch_id', 'position_id']);
+        $filters = $request->only(['status', 'branch_id', 'position_id', 'sort', 'direction']);
 
         if ($request->has('export')) {
             return $this->export($filters, $request->get('export'));
         }
 
-        $employees = $this->employeeService->getPaginated($filters);
+        $employees = $this->employeeService->getPaginated($filters)->withQueryString();
         $branches = \App\Models\Branch::where('status', 1)->orderBy('name')->get();
         $positions = \App\Models\Position::orderBy('name')->get();
 
@@ -134,5 +134,32 @@ class EmployeeController extends Controller
 
         return redirect()->route('admin.employees.index')
             ->with('success', 'Personel başarıyla silindi.');
+    }
+
+    /**
+     * Apply bulk actions to employees.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:employees,id'],
+            'action' => ['required', 'string', 'in:delete,activate,deactivate'],
+        ]);
+
+        $ids = $validated['selected'];
+
+        if ($validated['action'] === 'delete') {
+            \App\Models\Employee::whereIn('id', $ids)->delete();
+        }
+        if ($validated['action'] === 'activate') {
+            \App\Models\Employee::whereIn('id', $ids)->update(['status' => 1]);
+        }
+        if ($validated['action'] === 'deactivate') {
+            \App\Models\Employee::whereIn('id', $ids)->update(['status' => 0]);
+        }
+
+        return redirect()->route('admin.employees.index')
+            ->with('success', 'Seçili personel için toplu işlem uygulandı.');
     }
 }
