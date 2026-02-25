@@ -2,6 +2,7 @@
 
 namespace App\AI\Jobs;
 
+use App\AI\Services\AIDocumentService;
 use App\AI\Services\AIFinanceService;
 use App\AI\Services\AIFleetService;
 use App\AI\Services\AIHRService;
@@ -20,10 +21,13 @@ use Illuminate\Support\Facades\Log;
  * AI analiz job'u.
  *
  * Günlük cronjob ile çalışır ve tüm AI servislerini tetikler.
+ * Kritik değil: başarısız olursa ertesi gün tekrar çalışır.
  */
 class RunAIAnalysisJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 2;
 
     /**
      * Create a new job instance.
@@ -39,7 +43,8 @@ class RunAIAnalysisJob implements ShouldQueue
         AIOperationsService $operationsService,
         AIFinanceService $financeService,
         AIHRService $hrService,
-        AIFleetService $fleetService
+        AIFleetService $fleetService,
+        AIDocumentService $documentService
     ): void {
         try {
             $companies = $this->company
@@ -103,6 +108,18 @@ class RunAIAnalysisJob implements ShouldQueue
                         'generated_at' => $report['generated_at'],
                     ]);
                 }
+            }
+
+            // Belge uygunluk analizi (global, şirket bağımsız)
+            $documentReports = $documentService->analyze();
+            foreach ($documentReports as $report) {
+                AiReport::create([
+                    'type' => $report['type'],
+                    'summary_text' => $report['summary_text'],
+                    'severity' => $report['severity'],
+                    'data_snapshot' => $report['data_snapshot'],
+                    'generated_at' => $report['generated_at'],
+                ]);
             }
         } catch (Exception $e) {
             Log::error("AI analiz job hatası: {$e->getMessage()}", [

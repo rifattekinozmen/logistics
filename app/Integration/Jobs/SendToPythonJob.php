@@ -13,10 +13,13 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Python ara katmana veri gönderme job'u.
+ * Kritik değil: analitik POC, başarısız olursa sonraki tetiklemede tekrar dener.
  */
 class SendToPythonJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 2;
 
     /**
      * Create a new job instance.

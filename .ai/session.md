@@ -1,40 +1,43 @@
 # Session State
 
-**Last updated:** 2026-02-21
+**Last updated:** 2026-02-25
 **Branch:** main
 **Status:** Active development
 
 ## Current Focus
 
-Documentation & backlog alignment, analytics dashboards ve delivery import pipeline (DeliveryImportBatch / DeliveryReportPivotService).
+Faz 2/3 backlog: queue yapılandırması, Order/Shipment testleri, AIFleetService gelişmiş kurallar.
 
-Recent completed work (last session):
-- Vite entegrasyonu: layouts.app'e @vite eklendi, CDN Bootstrap kaldırıldı — HMR aktif
-- Document modülü: DocumentFactory, DocumentTest (7 test), controller schema uyumu (category/valid_until)
-- README HMR notu, Development guide TODO referansı, docs/sessions arşiv
+Recent completed work (2026-02-25):
+- AI anomaly: `AIFinanceService::detectOverdueAnomaly`, `AIFleetService::analyze()` (bakım + filo kullanım anomali), `ai_reports` yazımı
+- Dashboard: yüksek öncelikli AI uyarı sayısı ve banner (kritik/high)
+- Faz 3 GPS: `vehicle_gps_positions` tablosu, `VehicleGpsPosition` modeli, API placeholder, VehicleGpsApiTest
+- `AIDocumentService::analyze()`: süresi dolacak belgeler + eksik file_path/category, `RunAIAnalysisJob` entegrasyonu
+- Python POC genişletme: `buildFuelAndShipmentsPayload`, `pushFuelAndShipmentsToPython`, `python:push-fuel-shipments` komutu, haftalık schedule, PythonBridgeTest güncellemesi
+- DeliveryReportPivotService edge-case testleri: boş satır (buildPivot/buildInvoiceLines []), grupsuz fatura (groupBy=false 2 satır), eksik/boş miktar (0.0)
 
-Recent completed work (last 5 commits):
-- `DeliveryReportPivotService` eager loading optimization (reportRows N+1 fix)
-- Index on `delivery_report_rows.delivery_import_batch_id` (migration applied)
-- `invoice_status` field on `delivery_import_batches` (pending/created/sent)
-- `petrokok_route_preference` field (ekinciler/isdemir) on `delivery_import_batches`
-- Pivot view enhancements: material codes, short descriptions, route details
+Earlier:
+- Queue tries + dokümantasyon, Order/Shipment 404 ve filtre testleri, AIFleetService eşik sabitleri
+- DeliveryReportPivotService eager loading, pivot/invoice CSV export, DeliveryReportPivotTest, DeliveryReportExportTest
+- PythonBridgeService POC: analytics:push-python, SendToPythonJob, PythonBridgeTest
 
 ## Active Areas
 
 | Module | File(s) | Status |
 |---|---|---|
 | Delivery | `DeliveryReportPivotService`, `DeliveryImportController` | Active |
+| AI | `AIFleetService`, `AIFinanceService`, `AIDocumentService`, `RunAIAnalysisJob` | Active |
+| Vehicle | `VehicleGpsPosition`, `VehicleGpsController` (API) | Placeholder |
 | Finance | `FinanceDashboardService`, `PaymentController` | Stable |
 | Employee | `PersonnelAttendanceController`, `Personel` model | Stable |
-| AI | `AIOperationsService`, `AIFinanceService`, `AIHRService` | Partial |
 
 ## Pending Work (Known TODOs)
 
-- Python bridge (`PythonBridgeService`) — ileri seviye analizler için veri hattı (advanced analytics POC)
-- Advanced AI capabilities: anomaly detection ve daha derin içgörüler için `AIFleetService`, `AIDocumentService`, `AIFinanceService` üzerinde genişletmeler
+- Queue: job'lara queue adı ve tries atanması, kritik/non-kritik ayrımı dokümante
+- Order/Shipment: edge-case feature testleri (filtre, 404, status geçişleri)
+- AIFleetService: bakım eşikleri ve kuralların zenginleştirilmesi
+- Python bridge: POC genişletme (ek veri setleri)
 - Flutter/React Native mobile app (Faz 2 — not started)
-- Queue optimization review (AI, Logo, Excel, notification job'ları için)
 
 ## Module Status Snapshot
 
@@ -63,10 +66,9 @@ Recent completed work (last 5 commits):
 
 ## Safe Next Actions
 
-1. Order ve Shipment modülleri için eksik edge-case feature testlerini güçlendir (gerekli yerlerde kapsamı genişlet).
-2. `AIFleetService` içinde bakım tahmini metrikleri ve eşik değerlerini zenginleştir (advanced rules).
-3. `AIDocumentService` için daha zengin belge sınıflandırma ve compliance kontrol senaryoları ekle.
-4. Python bridge (`PythonBridgeService`) için data pipeline POC tasarla ve entegre et.
+1. Queue: RunAIAnalysisJob, SendToLogoJob, ProcessDeliveryImportJob vb. için `$queue` / `$tries` tanımla; docs veya yorumla kritik/non-kritik notu ekle.
+2. Order ve Shipment modülleri için edge-case feature testleri (filtre, 404, geçersiz durum).
+3. AIFleetService: bakım eşikleri (muayene süresi, km) ve ek kural (çok eski muayene = high).
 
 ## Session Archive
 

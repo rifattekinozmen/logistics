@@ -162,3 +162,14 @@ it('has correct status transitions', function () {
     $shipment->update(['status' => 'delivered']);
     expect($shipment->fresh()->status)->toBe('delivered');
 });
+
+it('returns 404 when showing non-existent shipment', function () {
+    [$user, $company] = createAdminUser();
+    $nonExistentId = Shipment::query()->max('id') + 9999;
+
+    $response = $this->actingAs($user)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('admin.shipments.show', ['shipment' => $nonExistentId]));
+
+    $response->assertNotFound();
+});

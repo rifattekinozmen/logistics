@@ -2,6 +2,7 @@
 
 namespace App\AI\Services;
 
+use App\Models\Document;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -9,6 +10,76 @@ use Illuminate\Support\Facades\Storage;
 
 class AIDocumentService
 {
+    /**
+     * Belge uygunluk analizi çalıştır ve AI rapor formatında sonuç döndür.
+     *
+     * @return array<int, array{type:string,summary_text:string,severity:string,data_snapshot:array,generated_at:\Illuminate\Support\Carbon}>
+     */
+    public function analyze(): array
+    {
+        $reports = [];
+
+        // 1) Son 30 günde süresi dolacak belgeler
+        $expiringSoon = Document::query()
+            ->whereNotNull('valid_until')
+            ->whereDate('valid_until', '>=', now())
+            ->whereDate('valid_until', '<=', now()->addDays(30))
+            ->orderBy('valid_until')
+            ->get();
+
+        if ($expiringSoon->isNotEmpty()) {
+            $criticalCount = $expiringSoon->where('valid_until', '<=', now()->addDays(7))->count();
+            $totalCount = $expiringSoon->count();
+
+            $severity = match (true) {
+                $criticalCount >= 5 || $totalCount >= 20 => 'high',
+                $criticalCount >= 1 || $totalCount >= 10 => 'medium',
+                default => 'low',
+            };
+
+            $reports[] = $this->createReport(
+                'document_compliance',
+                "Önümüzdeki 30 gün içinde {$totalCount} belgenin süresi dolacak (".$criticalCount.' kritik ≤7 gün).',
+                $severity,
+                [
+                    'total_expiring_30d' => $totalCount,
+                    'critical_expiring_7d' => $criticalCount,
+                    'documents' => $expiringSoon->take(10)->map(fn (Document $doc) => [
+                        'id' => $doc->id,
+                        'name' => $doc->name,
+                        'category' => $doc->category,
+                        'valid_until' => optional($doc->valid_until)->toDateString(),
+                    ])->all(),
+                ]
+            );
+        }
+
+        // 2) Eksik dosya yolu veya kategori bilgisi olan belgeler
+        $incompleteDocs = Document::query()
+            ->whereNull('file_path')
+            ->orWhereNull('category')
+            ->get();
+
+        if ($incompleteDocs->isNotEmpty()) {
+            $reports[] = $this->createReport(
+                'document_compliance',
+                $incompleteDocs->count().' belgenin dosya yolu veya kategorisi eksik.',
+                $incompleteDocs->count() > 10 ? 'medium' : 'low',
+                [
+                    'incomplete_count' => $incompleteDocs->count(),
+                    'documents' => $incompleteDocs->take(10)->map(fn (Document $doc) => [
+                        'id' => $doc->id,
+                        'name' => $doc->name,
+                        'category' => $doc->category,
+                        'file_path' => $doc->file_path,
+                    ])->all(),
+                ]
+            );
+        }
+
+        return $reports;
+    }
+
     /**
      * Extract invoice data from an image or PDF using AI/OCR.
      *
@@ -96,8 +167,8 @@ class AIDocumentService
             $errors[] = 'Missing file path';
         }
 
-        if (! isset($document->document_type)) {
-            $warnings[] = 'Document type not specified';
+        if (! isset($document->category)) {
+            $warnings[] = 'Document category not specified';
         }
 
         $isValid = empty($errors);
@@ -182,5 +253,22 @@ class AIDocumentService
         }
 
         return $recommendations;
+    }
+
+    /**
+     * AI raporu oluştur (ai_reports ile uyumlu yapı).
+     *
+     * @param  array<string, mixed>  $data
+     * @return array{type:string,summary_text:string,severity:string,data_snapshot:array,generated_at:\Illuminate\Support\Carbon}
+     */
+    protected function createReport(string $type, string $summary, string $severity, array $data = []): array
+    {
+        return [
+            'type' => $type,
+            'summary_text' => $summary,
+            'severity' => $severity,
+            'data_snapshot' => $data,
+            'generated_at' => now(),
+        ];
     }
 }

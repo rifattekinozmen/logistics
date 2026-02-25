@@ -145,3 +145,79 @@ it('builds pivot and grouped invoice lines for dokme_cimento report type', funct
     expect($line['miktar'])->toBe(15.5);
 });
 
+it('returns empty pivot and invoice lines when batch has no report rows', function (): void {
+    $batch = DeliveryImportBatch::factory()->create([
+        'report_type' => 'dokme_cimento',
+    ]);
+    // reportRows ilişkisi boş; hiç DeliveryReportRow eklenmedi.
+
+    $pivotService = app(DeliveryReportPivotService::class);
+
+    expect($pivotService->buildPivot($batch))->toBe([]);
+    expect($pivotService->buildInvoiceLines($batch))->toBe([]);
+});
+
+it('buildInvoiceLines without grouping returns one line per row', function (): void {
+    $batch = DeliveryImportBatch::factory()->create([
+        'report_type' => 'dokme_cimento',
+    ]);
+
+    $rowData1 = array_fill(0, 13, '');
+    $rowData1[2] = '15.02.2026';
+    $rowData1[5] = 'MAT-001';
+    $rowData1[7] = '10';
+    $rowData1[10] = '34ABC123';
+    $rowData1[11] = 'Firma A';
+    $rowData1[12] = 'IRS-001';
+
+    $rowData2 = $rowData1;
+    $rowData2[7] = '5';
+
+    DeliveryReportRow::query()->create([
+        'delivery_import_batch_id' => $batch->id,
+        'row_index' => 1,
+        'row_data' => $rowData1,
+    ]);
+    DeliveryReportRow::query()->create([
+        'delivery_import_batch_id' => $batch->id,
+        'row_index' => 2,
+        'row_data' => $rowData2,
+    ]);
+
+    $pivotService = app(DeliveryReportPivotService::class);
+
+    $grouped = $pivotService->buildInvoiceLines($batch, true);
+    $ungrouped = $pivotService->buildInvoiceLines($batch, false);
+
+    expect($grouped)->toHaveCount(1);
+    expect($ungrouped)->toHaveCount(2);
+});
+
+it('handles row_data with missing or empty metric index gracefully', function (): void {
+    $batch = DeliveryImportBatch::factory()->create([
+        'report_type' => 'dokme_cimento',
+    ]);
+
+    $rowData = array_fill(0, 13, '');
+    $rowData[2] = '16.02.2026';
+    $rowData[5] = 'MAT-002';
+    $rowData[6] = 'Malzeme 2';
+    $rowData[7] = ''; // Miktar boş
+    $rowData[10] = '06XYZ789';
+    $rowData[11] = 'Firma B';
+    $rowData[12] = 'IRS-002';
+
+    DeliveryReportRow::query()->create([
+        'delivery_import_batch_id' => $batch->id,
+        'row_index' => 1,
+        'row_data' => $rowData,
+    ]);
+
+    $pivotService = app(DeliveryReportPivotService::class);
+
+    $pivot = $pivotService->buildPivot($batch);
+    expect($pivot)->toHaveCount(1);
+    expect($pivot[0]['Miktar'])->toBe(0.0);
+    expect($pivot[0]['Satır sayısı'])->toBe(1);
+});
+

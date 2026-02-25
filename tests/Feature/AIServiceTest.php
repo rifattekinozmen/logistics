@@ -1,6 +1,7 @@
 <?php
 
 use App\AI\Jobs\RunAIAnalysisJob;
+use App\AI\Services\AIDocumentService;
 use App\AI\Services\AIFinanceService;
 use App\AI\Services\AIFleetService;
 use App\AI\Services\AIHRService;
@@ -158,9 +159,37 @@ it('RunAIAnalysisJob persists fleet reports to ai_reports when company has ai_en
         app(\App\AI\Services\AIOperationsService::class),
         app(AIFinanceService::class),
         app(AIHRService::class),
-        app(AIFleetService::class)
+        app(AIFleetService::class),
+        app(AIDocumentService::class)
     );
 
     expect(AiReport::count())->toBeGreaterThan($initialCount);
     expect(AiReport::where('type', 'fleet')->exists())->toBeTrue();
+});
+
+it('AIDocumentService analyze returns compliance reports for expiring or incomplete documents', function () {
+    // Expiring document
+    \App\Models\Document::factory()->create([
+        'name' => 'Araç Ruhsatı',
+        'category' => 'vehicle_document',
+        'valid_until' => now()->addDays(5),
+        'file_path' => 'documents/ruhsat.pdf',
+    ]);
+
+    // Incomplete document (missing file_path)
+    \App\Models\Document::factory()->create([
+        'name' => 'Eksik Belge',
+        'category' => null,
+        'file_path' => null,
+    ]);
+
+    $service = app(AIDocumentService::class);
+    $reports = $service->analyze();
+
+    expect($reports)->toBeArray();
+    expect($reports)->not->toBeEmpty();
+    foreach ($reports as $report) {
+        expect($report)->toHaveKeys(['type', 'summary_text', 'severity', 'data_snapshot', 'generated_at']);
+        expect($report['type'])->toBe('document_compliance');
+    }
 });

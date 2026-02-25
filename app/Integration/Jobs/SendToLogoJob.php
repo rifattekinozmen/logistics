@@ -15,10 +15,13 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Logo ERP'ye fatura gönderme job'u.
+ * Kritik: ödeme/fatura senkronu için tekrarlı deneme yapılır.
  */
 class SendToLogoJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 3;
 
     /**
      * Create a new job instance.

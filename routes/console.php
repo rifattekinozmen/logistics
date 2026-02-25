@@ -38,3 +38,9 @@ Schedule::job(new \App\FuelPrice\Jobs\GenerateWeeklyReportJob)
     ->weeklyOn(0, '20:00')
     ->name('weekly-fuel-report')
     ->withoutOverlapping();
+
+// Python POC: Haftalık yakıt + sevkiyat özeti (son 7 gün) — Pazar 21:00
+Schedule::command('python:push-fuel-shipments', ['--days' => 7])
+    ->weeklyOn(0, '21:00')
+    ->name('python-push-fuel-shipments')
+    ->withoutOverlapping();

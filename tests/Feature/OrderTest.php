@@ -93,3 +93,24 @@ it('calculates freight price correctly', function () {
 
     expect((float) $order->freight_price)->toBe(13583.73);
 });
+
+it('returns 404 when showing non-existent order', function () {
+    $response = $this->getJson('/api/v1/orders/999999');
+
+    $response->assertNotFound();
+});
+
+it('filters orders by status when provided', function () {
+    Order::factory()->create(['status' => 'pending']);
+    Order::factory()->create(['status' => 'delivered']);
+    Order::factory()->create(['status' => 'pending']);
+
+    $response = $this->getJson('/api/v1/orders?status=pending');
+
+    $response->assertSuccessful();
+    $data = $response->json('data');
+    expect($data)->not->toBeEmpty();
+    foreach ($data as $order) {
+        expect($order['status'])->toBe('pending');
+    }
+});

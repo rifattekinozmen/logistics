@@ -68,3 +68,34 @@ it('pushes analytics snapshot via artisan command', function (): void {
 
     Queue::assertPushed(SendToPythonJob::class);
 });
+
+it('buildFuelAndShipmentsPayload returns expected structure', function () {
+    $service = app(PythonBridgeService::class);
+    $payload = $service->buildFuelAndShipmentsPayload(7);
+
+    expect($payload)->toHaveKeys(['source', 'period_days', 'period', 'fuel', 'shipments']);
+    expect($payload['source'])->toBe('fuel_shipments');
+    expect($payload['period_days'])->toBe(7);
+    expect($payload['period'])->toHaveKeys(['start', 'end']);
+    expect($payload['fuel'])->toHaveKeys(['avg_price', 'min_price', 'max_price', 'record_count']);
+    expect($payload['shipments'])->toHaveKeys(['total', 'by_status']);
+    expect($payload['shipments']['by_status'])->toBeArray();
+});
+
+it('pushFuelAndShipmentsToPython dispatches SendToPythonJob', function () {
+    Queue::fake();
+
+    $service = app(PythonBridgeService::class);
+    $service->pushFuelAndShipmentsToPython(7);
+
+    Queue::assertPushed(SendToPythonJob::class);
+});
+
+it('python push-fuel-shipments command queues job', function () {
+    Queue::fake();
+
+    $this->artisan('python:push-fuel-shipments', ['--days' => 7])
+        ->assertExitCode(0);
+
+    Queue::assertPushed(SendToPythonJob::class);
+});

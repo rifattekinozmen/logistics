@@ -441,7 +441,16 @@ Bu bölüm, ROADMAP ve `.ai/session.md` ile uyumlu olarak **yakın vadeli geliş
 
 ### PythonBridge & Queue
 - [ ] `PythonBridgeService` için minimal bir POC akışı tanımla: hangi veri seti (ör. weekly fuel price + shipments), hangi JSON formatında dış sisteme gönderilecek.
-- [ ] AI, Logo, Excel ve notification job'larının queue ve schedule yapılarını gözden geçirerek, “kritik” ve “non-kritik” job'ları ayıran kısa bir plan çıkar.
+- [x] AI, Logo, Excel ve notification job'larının queue ve schedule yapılarını gözden geçirerek, “kritik” ve “non-kritik” job'ları ayıran kısa bir plan çıkar (2026-02-25: tries atandı, aşağıda özet).
+
+#### Queue stratejisi (kısa özet)
+| Job | Tries | Öncelik | Not |
+|-----|-------|---------|-----|
+| `RunAIAnalysisJob` | 2 | Non-kritik | Günlük 09:00; başarısızsa ertesi gün tekrar. |
+| `SendToLogoJob` | 3 | Kritik | Fatura/ödeme senkronu; 3 deneme. |
+| `ProcessDeliveryImportJob` | 2 | Orta | Kullanıcı import sonucunu bekler. |
+| `SendToPythonJob` | 2 | Non-kritik | Analitik POC. |
+| Diğer (Excel, E-Fatura, SAP, Fuel report) | Varsayılan | — | İhtiyaca göre `$tries` eklenebilir. |
 
 ---
 

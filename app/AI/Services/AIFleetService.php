@@ -10,6 +10,21 @@ use Illuminate\Support\Facades\Schema;
 
 class AIFleetService
 {
+    /** Muayene uyarı eşiği (gün). */
+    public const INSPECTION_WARNING_DAYS = 150;
+
+    /** Muayene kritik eşiği (gün) — bu süreyi aşan araçlar mutlaka needs_attention. */
+    public const INSPECTION_CRITICAL_DAYS = 220;
+
+    /** Yasal muayene periyodu (gün). */
+    public const INSPECTION_INTERVAL_DAYS = 180;
+
+    /** Yağ değişimi periyodu (km). */
+    public const MILEAGE_OIL_KM = 10000;
+
+    /** Lastik değişimi periyodu (km). */
+    public const MILEAGE_TYRE_KM = 40000;
+
     /**
      * Predict maintenance needs for a vehicle.
      */
@@ -28,35 +43,37 @@ class AIFleetService
 
         $upcomingMaintenance = [];
 
-        if ($daysSinceInspection >= 150) {
+        if ($daysSinceInspection >= self::INSPECTION_WARNING_DAYS) {
             $upcomingMaintenance[] = [
                 'type' => 'Periyodik Muayene',
-                'urgency' => 'high',
-                'estimated_days' => max(0, 180 - $daysSinceInspection),
+                'urgency' => $daysSinceInspection >= self::INSPECTION_CRITICAL_DAYS ? 'critical' : 'high',
+                'estimated_days' => max(0, self::INSPECTION_INTERVAL_DAYS - $daysSinceInspection),
             ];
         }
 
-        if ($mileage > 0 && $mileage % 10000 < 2000) {
+        if ($mileage > 0 && $mileage % self::MILEAGE_OIL_KM < 2000) {
             $upcomingMaintenance[] = [
                 'type' => 'Yağ Değişimi',
                 'urgency' => 'medium',
-                'estimated_km' => 10000 - ($mileage % 10000),
+                'estimated_km' => self::MILEAGE_OIL_KM - ($mileage % self::MILEAGE_OIL_KM),
             ];
         }
 
-        if ($mileage > 0 && $mileage % 40000 < 5000) {
+        if ($mileage > 0 && $mileage % self::MILEAGE_TYRE_KM < 5000) {
             $upcomingMaintenance[] = [
                 'type' => 'Lastik Değişimi',
                 'urgency' => 'medium',
-                'estimated_km' => 40000 - ($mileage % 40000),
+                'estimated_km' => self::MILEAGE_TYRE_KM - ($mileage % self::MILEAGE_TYRE_KM),
             ];
         }
+
+        $status = $this->getMaintenanceStatus($maintenanceScore, $daysSinceInspection);
 
         return [
             'vehicle_id' => $vehicle->id,
             'vehicle_plate' => $vehicle->plate,
             'maintenance_score' => $maintenanceScore,
-            'status' => $this->getMaintenanceStatus($maintenanceScore),
+            'status' => $status,
             'last_inspection_days' => $daysSinceInspection,
             'current_mileage' => $mileage,
             'upcoming_maintenance' => $upcomingMaintenance,
@@ -227,17 +244,22 @@ class AIFleetService
      */
     protected function calculateMaintenanceScore(int $daysSinceInspection, float $mileage): float
     {
-        $inspectionScore = max(0, 100 - ($daysSinceInspection / 180 * 100));
-        $mileageScore = $mileage > 0 ? max(0, 100 - (($mileage % 10000) / 10000 * 100)) : 100;
+        $inspectionScore = max(0, 100 - ($daysSinceInspection / self::INSPECTION_INTERVAL_DAYS * 100));
+        $mileageScore = $mileage > 0 ? max(0, 100 - (($mileage % self::MILEAGE_OIL_KM) / self::MILEAGE_OIL_KM * 100)) : 100;
 
         return round(($inspectionScore + $mileageScore) / 2, 2);
     }
 
     /**
-     * Get maintenance status from score.
+     * Get maintenance status from score and inspection days.
+     * Kritik eşiği aşan araçlar her zaman needs_attention.
      */
-    protected function getMaintenanceStatus(float $score): string
+    protected function getMaintenanceStatus(float $score, int $daysSinceInspection = 0): string
     {
+        if ($daysSinceInspection >= self::INSPECTION_CRITICAL_DAYS) {
+            return 'needs_attention';
+        }
+
         return match (true) {
             $score >= 80 => 'excellent',
             $score >= 60 => 'good',
@@ -315,7 +337,7 @@ class AIFleetService
 
         if (! empty($upcoming)) {
             foreach ($upcoming as $item) {
-                if ($item['urgency'] === 'high') {
+                if (in_array($item['urgency'], ['critical', 'high'], true)) {
                     $recommendations[] = $item['type'].' için hemen randevu alın';
                 }
             }

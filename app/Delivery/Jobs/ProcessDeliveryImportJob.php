@@ -13,9 +13,15 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
+/**
+ * Teslimat raporu import job'u.
+ * Orta öncelik: kullanıcı bekleyebilir, başarısızsa tekrar denenir.
+ */
 class ProcessDeliveryImportJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 2;
 
     public function __construct(
         protected DeliveryImportBatch $batch,
