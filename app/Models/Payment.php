@@ -64,6 +64,11 @@ class Payment extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function paymentIntent(): BelongsTo
+    {
+        return $this->belongsTo(PaymentIntent::class);
+    }
+
     /**
      * Get the calendar events for this payment.
      */

@@ -200,6 +200,32 @@ Kurumsal ölçekli bir **Logistics ERP + CRM + Fleet Management** projesi. Nakli
 
 ---
 
+## LOGISTICS B2B ORDER LIFECYCLE
+
+Lojistik projesinin kalbi, siparişten başlayıp faturaya ve cari hareketlere kadar uzanan B2B yaşam döngüsüdür. Yüksek seviye akış:
+
+- **Customer creates order** → sistem `Order` kaydını ve temel yük bilgilerini oluşturur.
+- **OrderCreated event** → ilgili `PaymentIntent` kaydı hazırlanır (online/cari/havale için ödeme niyeti).
+- **PaymentApproved event** → operasyon için `ShipmentPlan` oluşturulur, araç ve nakliyeci planlanır.
+- **ShipmentStarted / ShipmentDelivered events** → gerçek `Shipment` kaydı güncellenir, teslim tarihi ve POD dokümanları bağlanır.
+- **InvoiceGenerated event** → sevkiyat bazlı `Invoice` üretilir, satırlar pivot/veri kaynaklarından doldurulur.
+- **AccountTransactionCreated event** → müşterinin cari hesabına borç/alacak hareketleri işlenir (ledger mantığı).
+
+Bu akışın görsel karşılığı aşağıdaki diyagramdır:
+
+![Logistics B2B Order Lifecycle](../../.cursor/projects/c-Users-TekinOzmen-Desktop-logistics/assets/c__Users_TekinOzmen_AppData_Roaming_Cursor_User_workspaceStorage_8f265710ef1535467a1e80695d50a57e_images_image-83361f87-da96-44e2-b5c6-f33047cff303.png)
+
+Her renkli blok, sistemdeki bir domain ve event zincirini temsil eder:
+
+- **OrderCreated** → Order domain
+- **PaymentApproved** → Payment/Finance domain
+- **Create Shipment Plan / ShipmentStarted / ShipmentDelivered** → Shipment domain
+- **Generate Invoice / InvoiceGenerated** → Invoice & Account domain
+
+Bu lifecycle, yeni özellik geliştirilirken **Order → PaymentIntent → Payment → ShipmentPlan → Shipment → Invoice → AccountTransaction** sırasının bozulmaması için referans alınmalıdır.
+
+---
+
 ## MİMARİ YAKLAŞIM
 
 ### API-First
@@ -225,6 +251,18 @@ Kurumsal ölçekli bir **Logistics ERP + CRM + Fleet Management** projesi. Nakli
 
 ---
 
+## LOGISTICS B2B ROLES & FLOW RESPONSIBILITIES
+
+Bu B2B lifecycle içinde rollerin sorumlulukları:
+
+- **Admin:** Tüm domainlerde tam yetkili; ayarlar, kullanıcı ve şirket yönetimi.
+- **Operasyon:** `Order`, `ShipmentPlan` ve `Shipment` üzerinde çalışır; araç/şoför atama ve sevkiyat yönetimi.
+- **Muhasebe / Finance:** `PaymentIntent`, `Payment`, `Invoice` ve `AccountTransaction` süreçlerinden sorumludur.
+- **Müşteri (Customer Portal):** Kendi `Order` kayıtlarını oluşturur ve takip eder; fatura ve dokümanlara erişir.
+- **Şoför / Driver (Mobil):** Kendisine atanan `Shipment` kayıtlarını görür, yükleme/teslim durumlarını günceller ve POD yükler.
+
+---
+
 ## ROL YÖNETİMİ
 
 ### Roller
@@ -238,6 +276,39 @@ Kurumsal ölçekli bir **Logistics ERP + CRM + Fleet Management** projesi. Nakli
 - Sayfa bazlı yetkiler
 - Aksiyon bazlı yetkiler
 - Cache destekli yetki kontrolü
+
+---
+
+## SECURITY & RBAC ARCHITECTURE
+
+Logistics B2B sisteminde güvenlik mimarisi üç katmandan oluşur:
+
+- **Roles & Permissions:**
+  - Roller: `admin`, `operation`, `accounting`, `driver`, `customer` (ve gerektiğinde şirket özel rolleri).
+  - Permission kodları: `order.create`, `order.view`, `payment.approve`, `shipment.assign`, `invoice.generate`, `account.view` vb.
+  - Blade tarafında menü ve aksiyonlar `@can('permission-code')` ile filtrelenir; böylece sidebar bile RBAC ile korunur.
+- **Multi-tenant veri izolasyonu:**
+  - `CompanyScope` / benzeri global scope ile kullanıcıya ait `company_id`/`customer_id` otomatik olarak tüm sorgulara eklenir.
+  - B2B müşteri tarafında, başka müşterinin `orders` / `documents` / `invoices` kayıtlarına erişim URL manipülasyonu ile mümkün olmayacak şekilde kısıtlanır.
+- **ID & public code kullanımı:**
+  - Dış dünyaya açık URL'lerde mümkün olduğunca auto-increment ID yerine public code/UUID kullanılır; ID enumeration saldırıları minimize edilir.
+
+---
+
+## API & PAYMENT SECURITY
+
+Ödeme ve API güvenliği için temel prensipler:
+
+- **API Authentication:**
+  - Laravel Sanctum ile token bazlı auth; her token belirli bir kullanıcıya ve isteğe bağlı IP aralığına bağlıdır.
+  - API grupları `throttle` middleware ile rate limit altına alınır (özellikle login, ödeme ve kritik finans endpoint'leri).
+- **Payment Gateway Callback:**
+  - Tüm ödeme callback'lerinde HMAC imza kontrolü yapılır (ör. `hash_hmac('sha256', $payload, config('payment.secret'))`).
+  - `transaction_id` bazlı duplicate kontrol ile aynı ödeme callback'i ikinci kez işlense bile finansal kayıtlar tekrar oluşturulmaz.
+  - Callback sonrası sadece `PaymentService` uygun event'i (`PaymentApproved` / `PaymentFailed`) yayınlar; diğer domain'ler event dinleyicisi olarak tepki verir.
+- **Data Protection:**
+  - Kart numarası, CVV vb. hassas bilgiler sistemde tutulmaz; sadece gateway tarafındaki referans/transaction ID saklanır.
+  - Vergi numarası gibi hassas alanlar gerekirse Laravel encrypt cast ile şifrelenerek saklanır.
 
 ---
 

@@ -237,6 +237,33 @@ Finans → Ödeme Takvimi
 
 ---
 
+## END-TO-END LOGISTICS B2B UX FLOW
+
+Bu bölüm, bir B2B müşterinin siparişten fatura ve cariye kadar olan uçtan uca ekran akışını özetler:
+
+```
+Müşteri Portalı → Sipariş Oluştur
+    ↓
+Admin / Operasyon → Siparişler Listesi
+    ↓
+Operasyon → Sevkiyat Planlama / Araç Ata
+    ↓
+Şoför → Mobil Uygulama ile Yükleme & Teslim
+    ↓
+Muhasebe → Faturalar Ekranı
+    ↓
+Finans → Ödeme Takvimi & Cari Hareketler
+```
+
+Ekran–backend eşleşmeleri:
+
+- **Siparişler (Orders)** → `OrderController` + `OrderService` (liste, detay, durum geçmişi).
+- **Sevkiyat / Operasyon** → `ShipmentPlan` ve `Shipment` ekranları; `ShipmentService` ve ilgili event'ler.
+- **Faturalar (Invoices)** → teslim edilmiş sevkiyatlar üzerinden üretilen faturalar; `InvoiceService`.
+- **Finans & Cari** → ödeme takvimi, geciken ödemeler ve cari hareketler; `PaymentService` ve `AccountTransaction` akışları.
+
+---
+
 ## OPERASYON KULLANICISI AKIŞI
 
 ### Dashboard

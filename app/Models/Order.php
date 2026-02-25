@@ -112,6 +112,16 @@ class Order extends Model
         return $this->morphMany(Document::class, 'documentable');
     }
 
+    public function paymentIntents(): HasMany
+    {
+        return $this->hasMany(PaymentIntent::class);
+    }
+
+    public function shipmentPlans(): HasMany
+    {
+        return $this->hasMany(ShipmentPlan::class);
+    }
+
     public function pricingCondition(): BelongsTo
     {
         return $this->belongsTo(PricingCondition::class);

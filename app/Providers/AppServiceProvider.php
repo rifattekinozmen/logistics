@@ -6,8 +6,12 @@ use App\Events\InvoiceIssued;
 use App\Events\OrderPaid;
 use App\Events\ShipmentDelivered;
 use App\Listeners\CloseOrderAfterInvoice;
+use App\Listeners\CreateAccountTransactionForInvoice;
 use App\Listeners\CreateInvoiceDraft;
 use App\Listeners\MoveOrderToPreparing;
+use App\Events\OrderCreated;
+use App\Listeners\CreatePaymentIntentForOrder;
+use App\Listeners\CreateShipmentPlanForPaidOrder;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
@@ -55,9 +59,12 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Document::observe(\App\Observers\DocumentObserver::class);
         \App\Models\Payment::observe(\App\Observers\PaymentObserver::class);
 
+        Event::listen(OrderCreated::class, CreatePaymentIntentForOrder::class);
         Event::listen(OrderPaid::class, MoveOrderToPreparing::class);
+        Event::listen(OrderPaid::class, CreateShipmentPlanForPaidOrder::class);
         Event::listen(ShipmentDelivered::class, CreateInvoiceDraft::class);
         Event::listen(InvoiceIssued::class, CloseOrderAfterInvoice::class);
+        Event::listen(InvoiceIssued::class, CreateAccountTransactionForInvoice::class);
 
         View::share('activeCompanyForLayout', null);
 

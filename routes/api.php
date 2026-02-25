@@ -4,6 +4,7 @@ use App\Customer\Controllers\Api\V2\CustomerMobileController;
 use App\Driver\Controllers\Api\DriverController;
 use App\Driver\Controllers\Api\V2\DriverV2Controller;
 use App\Employee\Controllers\Api\EmployeeController;
+use App\Finance\Controllers\Api\PaymentCallbackController;
 use App\Order\Controllers\Api\OrderController;
 use App\Vehicle\Controllers\Api\VehicleController;
 use App\Warehouse\Controllers\Api\BarcodeController;
@@ -29,6 +30,9 @@ Route::get('/districts', function (\Illuminate\Http\Request $request) {
 
     return response()->json($query->orderBy('name_tr')->get(['id', 'name_tr', 'name_en']));
 });
+
+Route::post('payment/callback', [PaymentCallbackController::class, 'handle'])
+    ->name('api.payment.callback');
 
 Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     // Orders

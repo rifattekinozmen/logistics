@@ -8,6 +8,8 @@ use App\Events\ShipmentDelivered;
 use App\Http\Controllers\Controller;
 use App\Order\Services\OrderStatusTransitionService;
 use App\Order\Services\OrderWorkflowGuardService;
+use App\Models\ShipmentPlan;
+use App\Shipment\Services\ShipmentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -20,7 +22,8 @@ class ShipmentController extends Controller
         protected ExportService $exportService,
         protected DocumentFlowService $documentFlowService,
         protected OrderWorkflowGuardService $workflowGuardService,
-        protected OrderStatusTransitionService $orderStatusTransitionService
+        protected OrderStatusTransitionService $orderStatusTransitionService,
+        protected ShipmentService $shipmentService
     ) {}
 
     /**
@@ -134,7 +137,18 @@ class ShipmentController extends Controller
             abort(403, 'Ödeme onaylanmadan veya uygun sipariş durumuna gelmeden sevkiyat oluşturulamaz.');
         }
 
-        $shipment = \App\Models\Shipment::create($validated);
+        $plan = ShipmentPlan::firstOrCreate(
+            ['order_id' => $order->id],
+            [
+                'vehicle_id' => $validated['vehicle_id'],
+                'driver_id' => $validated['driver_id'] ?? null,
+                'planned_pickup_date' => $validated['pickup_date'],
+                'planned_delivery_date' => $validated['delivery_date'] ?? null,
+                'status' => 'planned',
+            ]
+        );
+
+        $shipment = $this->shipmentService->startShipment($plan, $validated);
 
         $this->documentFlowService->recordDeliveryStep($order, $shipment);
 
@@ -203,7 +217,7 @@ class ShipmentController extends Controller
         $shipment->update($validated);
 
         if ($previousStatus !== 'delivered' && $shipment->fresh()->status === 'delivered') {
-            event(new ShipmentDelivered($shipment->fresh()));
+            $shipment = $this->shipmentService->markDelivered($shipment->fresh(), $validated);
         }
 
         return redirect()->route('admin.shipments.show', $shipment)

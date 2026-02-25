@@ -213,6 +213,30 @@ Schedule::command('orders:check-delivery')
     ->withoutOverlapping();
 ```
 
+---
+
+## LOGISTICS ORDER–PAYMENT–SHIPMENT FLOW (SERVICE & EVENT)
+
+Logistics B2B sürecinde controller'lar sadece istek alır; asıl iş mantığı service + event zincirindedir:
+
+1. **Order Creation**
+   - `OrderController@store` → `OrderService::create()` → `OrderCreated` event.
+   - Listener/Action: `CreatePaymentIntentAction` → ilgili `PaymentIntent` kaydı oluşturulur.
+2. **Payment Approval**
+   - Payment gateway callback veya cari ödeme: `PaymentGatewayCallbackController@handle` → `PaymentService::approve()`.
+   - Başarılı ise `PaymentApproved` event yayınlanır → `CreateShipmentPlanAction` çalışır ve `ShipmentPlan` oluşturulur.
+3. **Shipment & Delivery**
+   - Operasyon `ShipmentService` üzerinden planı gerçek `Shipment` kaydına dönüştürür ve `ShipmentStarted` event tetiklenir.
+   - Teslim sonrası `ShipmentService::markDelivered()` → `ShipmentDelivered` event yayınlanır.
+4. **Invoice & Accounting**
+   - `ShipmentDelivered` listener'ı `GenerateInvoiceAction`'ı çağırır → `InvoiceGenerated` event.
+   - `InvoiceGenerated` listener'ı `CreateAccountTransactionAction` ile cari hareket (`AccountTransaction`) üretir.
+
+Bu akışın kuralı:
+
+- Domain'ler (Order, Payment, Shipment, Invoice, Account) **birbirini doğrudan update etmez**, sadece event üzerinden haberleşir.
+- Yeni özellik eklerken bu zinciri bozmak yerine yeni listener/action eklemek tercih edilmelidir.
+
 ### Job Örnekleri
 - `SendEmailJob`
 - `SendSmsJob`

@@ -56,6 +56,11 @@ class Shipment extends Model
         return $this->belongsTo(Employee::class, 'driver_id');
     }
 
+    public function shipmentPlan(): BelongsTo
+    {
+        return $this->belongsTo(ShipmentPlan::class);
+    }
+
     public function getStatusLabelAttribute(): string
     {
         return match ($this->status) {

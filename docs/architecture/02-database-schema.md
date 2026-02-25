@@ -418,6 +418,29 @@ deleted_at (datetime2, nullable)
 
 ---
 
+## LOGISTICS CORE TABLES (B2B FLOW)
+
+Siparişten faturaya kadar uzanan logistics B2B lifecycle için kritik tablolar:
+
+- **orders**
+  - Müşteri talebini ve yük detaylarını tutar.
+  - Ana ilişkiler: `orders.customer_id` → `customers.id`, `shipments.order_id` → `orders.id`.
+- **shipments**
+  - Bir veya daha fazla siparişe karşılık gelen gerçek sevkiyat kayıtları.
+  - Araç, şoför ve teslim tarihleri burada tutulur.
+- **delivery_numbers**
+  - Dış sistemlerden gelen teslimat numaralarının normalleştirilmiş halidir; sipariş ve sevkiyat ile eşleştirme için kullanılır.
+- **payments**
+  - Ödeme takvimi ve tahsilat bilgilerini tutar (müşteri ve tedarikçi tarafı); due_date/status üzerinden dashboard ve takvimler beslenir.
+- **documents**
+  - Sevkiyat, fatura, personel ve araçlara bağlı tüm dokümanlar (POD, sözleşme, ruhsat, vb.) için merkezi storage meta tablosu.
+- **ai_reports / activity_logs / audit_logs**
+  - Analitik, izlenebilirlik ve denetim açısından logistics sürecini destekleyen yan tablolar.
+
+Logistics B2B akışındaki temel ilişki zinciri:
+
+`customers` → `orders` → (`shipments`, `delivery_numbers`) → finansal taraf için `payments` ve doküman tarafı için `documents`.
+
 ## 6. DEPO & STOK
 
 ### warehouses
@@ -766,6 +789,14 @@ updated_at (datetime2)
 - `payments (due_date, status)` (composite)
 - `personnel_attendance (employee_id, attendance_date)` (UNIQUE)
 - `inventory_stocks (warehouse_id, item_id, location_id)` (composite)
+
+#### Recommended indexes for logistics B2B flows
+
+- `orders (customer_id, status, planned_delivery_date)` → müşteri bazlı sipariş listeleri ve SLA raporları.
+- `shipments (status, delivery_date)` → aktif/yolda/teslim edilmiş sevkiyat listeleri ve dashboard widget'ları.
+- `delivery_numbers (company_id, status)` → import edilen teslimatların eşleşme ve hata durumlarının hızlı raporlanması.
+- `payments (due_date, status, payment_type)` → ödeme takvimi ve geciken ödemeler için takvim/rapor ekranları.
+- `documents (category, valid_until)` → sürücü/araç/müşteri belgeleri için süre yaklaşıyor/geçti sorguları.
 
 ### Soft Delete
 Tüm ana tablolarda `deleted_at` kolonu nullable datetime2 olarak eklenir.

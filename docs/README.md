@@ -43,8 +43,8 @@ The `.ai/` folder is the AI workflow system. Load these before starting any codi
 
 | Document | Contents |
 |---|---|
-| [Project Overview](architecture/01-project-overview.md) | Tech stack, module structure, roles, roadmap |
-| [Database Schema](architecture/02-database-schema.md) | All tables, columns, indexes, MSSQL notes |
+| [Project Overview](architecture/01-project-overview.md) | Tech stack, module structure, roles, **Logistics B2B order lifecycle** |
+| [Database Schema](architecture/02-database-schema.md) | All tables, columns, indexes, MSSQL notes, **Logistics core tables & indexes** |
 | [Company Settings & Switch](architecture/06-company-settings-and-switch.md) | Multi-tenant DB schema, UI flow, Laravel implementation |
 
 ---
@@ -53,8 +53,8 @@ The `.ai/` folder is the AI workflow system. Load these before starting any codi
 
 | Document | Contents |
 |---|---|
-| [Development Guide](workflows/03-development-guide.md) | Module conventions, service pattern, queue, AI module, TODO list |
-| [UX Page Flow](workflows/05-ux-page-flow.md) | Role-based page flows, UX principles |
+| [Development Guide](workflows/03-development-guide.md) | Module conventions, service pattern, queue, AI module, TODO list, **Logistics order–payment–shipment flow** |
+| [UX Page Flow](workflows/05-ux-page-flow.md) | Role-based page flows, UX principles, **end-to-end Logistics B2B UX flow** |
 
 ---
 
@@ -89,6 +89,13 @@ The `.ai/` folder is the AI workflow system. Load these before starting any codi
 | [Customer Portal Access](reference/customer-portal-access.md) | How to set up customer portal users |
 | [SAP Integration Guide](reference/sap-integration/sap_logistics_integration_guide.md) | SAP S/4HANA entegrasyon mimarisi, SD eşleşmesi |
 | [SAP Integration Guide (Value Edition)](reference/sap-integration/sap_logistics_integration_guide2.md) | SAP entegrasyonu + Dashboard + Investor presentation |
+
+---
+
+## Logistics B2B Lifecycle & AI Rules
+
+- Logistics B2B order lifecycle ve core table bölümleri, **logistics ile ilgili tüm geliştirmeler için mimari referans** olarak kullanılmalıdır.
+- AI veya geliştiriciler, logistics alanında yeni özellik eklerken **Order → PaymentIntent → Payment → ShipmentPlan → Shipment → Invoice → AccountTransaction** akışını ve ilgili güvenlik/backup kurallarını ihlal etmemelidir.
 
 ---
 

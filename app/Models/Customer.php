@@ -79,4 +79,9 @@ class Customer extends Model
     {
         return $this->hasMany(OrderTemplate::class);
     }
+
+    public function accountTransactions(): HasMany
+    {
+        return $this->hasMany(AccountTransaction::class);
+    }
 }

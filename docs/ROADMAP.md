@@ -317,6 +317,50 @@ php artisan queue:work redis --sleep=3 --tries=3
 
 ---
 
+## 🛡️ BACKUP & DISASTER RECOVERY STRATEJİSİ
+
+Production ortamında logistics B2B verisini korumak için önerilen strateji:
+
+### Veritabanı Backup
+
+- **Günlük Full Backup:** Tüm veritabanı her gece alınır (örn. 02:00).
+- **Saatlik Transaction Log/Binlog Backup:** Gün içindeki değişiklikler saatlik incremental olarak saklanır.
+- **3–2–1 Kuralı:**
+  - 3 kopya (örn. primary backup + secondary + offsite),
+  - 2 farklı ortam (farklı disk/storage),
+  - 1 kopya mutlaka offsite / farklı lokasyonda.
+
+### Storage Backup (Doküman & Evrak)
+
+- Fatura, POD, sözleşme, ruhsat vb. tüm dosyalar **S3-compatible storage** üzerinde tutulmalıdır.
+- Periyodik snapshot'lar (örn. günlük) alınarak farklı bir bucket veya region'a kopyalanır.
+
+### Otomasyon & Cron
+
+- Backup script'leri ve raporlama komutları `routes/console.php` içindeki schedule ile tetiklenir:
+  - Mevcut cron'lar (document/payment/AI) yanında backup job'ları da eklenebilir.
+- Sunucu tarafında klasik Laravel schedule:
+
+```bash
+* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### Disaster Recovery Senaryosu
+
+Uygulama sunucusu veya veritabanı tamamen kaybedildiğinde izlenecek özet adımlar:
+
+1. Yeni app ve DB sunucularını ayağa kaldır.
+2. Git repository'den projeyi clone et (`main`/`master` production branch).
+3. Production `.env` dosyasını geri yükle (gerekirse şifrelenmiş vault'tan).
+4. Son full DB backup'ını ve gerekirse son transaction log backup'larını restore et.
+5. `composer install --optimize-autoloader --no-dev` ve `php artisan migrate --force` çalıştır.
+6. `php artisan config:cache`, `route:cache`, `view:cache` komutlarını yeniden uygula.
+7. Queue worker'ları ve scheduler'ı (cron) tekrar başlat.
+
+Bu adımlar doğru backup disiplinleri ile birleştirildiğinde, logistics sistemi 10–15 dakika içinde kabul edilebilir veri kaybı ile tekrar ayağa kaldırılabilir.
+
+---
+
 ## 📈 SONRAKİ AŞAMALAR (Opsiyonel)
 
 ### Faz 2: Mobile App (Henüz Başlanmadı)
