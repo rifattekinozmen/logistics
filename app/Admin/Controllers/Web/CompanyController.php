@@ -250,13 +250,15 @@ class CompanyController extends Controller
         // Aktif firma kontrolü - sadece aktif firmanın ayarlarını gösterebilir
         $activeCompanyId = session('active_company_id');
         if (! $activeCompanyId || $activeCompanyId !== $company->id) {
-            // Aktif firma yoksa veya farklı bir firma seçilmişse, aktif firmaya yönlendir
+            // Aktif firma yoksa varsayılan firmayı session'a set et
             $activeCompany = $user->activeCompany();
-            if ($activeCompany) {
+            if ($activeCompany && $activeCompany->id === $company->id) {
+                // İstenen firma zaten varsayılan; session set edildi, sayfayı göster
+            } elseif ($activeCompany) {
                 return redirect()->route('admin.companies.settings', $activeCompany);
+            } else {
+                return redirect()->route('admin.companies.select');
             }
-
-            return redirect()->route('admin.companies.select');
         }
 
         // Yetki kontrolü

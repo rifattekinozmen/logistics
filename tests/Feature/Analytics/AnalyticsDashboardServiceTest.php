@@ -10,36 +10,44 @@ uses(RefreshDatabase::class);
 it('calculates financial metrics for given period', function (): void {
     /** @var Company $company */
     $company = Company::factory()->create();
+    $customerId = \App\Models\Customer::factory()->create()->id;
 
     $start = now()->subDays(30);
     $end = now();
 
     // Orders (only invoiced and in range should be counted)
+    $baseOrder = [
+        'company_id' => $company->id,
+        'customer_id' => $customerId,
+        'order_number' => 'ORD-'.uniqid(),
+        'pickup_address' => 'Test Pickup',
+        'delivery_address' => 'Test Delivery',
+        'status' => 'invoiced',
+        'freight_price' => 1000,
+        'created_at' => now()->subDays(5),
+        'updated_at' => now()->subDays(5),
+    ];
     DB::table('orders')->insert([
-        [
-            'company_id' => $company->id,
-            'status' => 'invoiced',
-            'freight_price' => 1000,
-            'created_at' => now()->subDays(5),
-        ],
-        [
-            'company_id' => $company->id,
-            'status' => 'invoiced',
+        $baseOrder,
+        array_merge($baseOrder, [
+            'order_number' => 'ORD-'.uniqid(),
             'freight_price' => 500,
             'created_at' => now()->subDays(10),
-        ],
-        [
-            'company_id' => $company->id,
+            'updated_at' => now()->subDays(10),
+        ]),
+        array_merge($baseOrder, [
+            'order_number' => 'ORD-'.uniqid(),
             'status' => 'pending',
             'freight_price' => 9999,
             'created_at' => now()->subDays(3),
-        ],
-        [
-            'company_id' => $company->id,
-            'status' => 'invoiced',
+            'updated_at' => now()->subDays(3),
+        ]),
+        array_merge($baseOrder, [
+            'order_number' => 'ORD-'.uniqid(),
             'freight_price' => 300,
-            'created_at' => now()->subDays(40), // out of range
-        ],
+            'created_at' => now()->subDays(40),
+            'updated_at' => now()->subDays(40),
+        ]),
     ]);
 
     // Payments (only outgoing + status=1 within range)
@@ -81,32 +89,44 @@ it('calculates financial metrics for given period', function (): void {
 it('calculates operational KPIs for last 30 days', function (): void {
     /** @var Company $company */
     $company = Company::factory()->create();
+    $customerId = \App\Models\Customer::factory()->create()->id;
 
     $now = now();
     $past = $now->copy()->subDays(10);
 
-    // Orders
+    // Orders (same columns for all rows for bulk insert)
+    $orderBase = [
+        'company_id' => $company->id,
+        'customer_id' => $customerId,
+        'order_number' => 'ORD-'.uniqid(),
+        'pickup_address' => 'Test',
+        'delivery_address' => 'Test',
+    ];
     DB::table('orders')->insert([
-        [
-            'company_id' => $company->id,
+        array_merge($orderBase, [
+            'order_number' => 'ORD-'.uniqid(),
             'status' => 'delivered',
             'freight_price' => 100,
             'created_at' => $past,
+            'updated_at' => $past,
             'delivered_at' => $past->copy()->addDays(1),
-        ],
-        [
-            'company_id' => $company->id,
+        ]),
+        array_merge($orderBase, [
+            'order_number' => 'ORD-'.uniqid(),
             'status' => 'delivered',
             'freight_price' => 200,
             'created_at' => $past->copy()->addDay(),
+            'updated_at' => $past->copy()->addDay(),
             'delivered_at' => $past->copy()->addDays(3),
-        ],
-        [
-            'company_id' => $company->id,
+        ]),
+        array_merge($orderBase, [
+            'order_number' => 'ORD-'.uniqid(),
             'status' => 'pending',
             'freight_price' => 50,
             'created_at' => $past,
-        ],
+            'updated_at' => $past,
+            'delivered_at' => null,
+        ]),
     ]);
 
     // Shipments for on-time and total deliveries
@@ -161,6 +181,7 @@ it('calculates fleet performance metrics', function (): void {
         'plate' => '34AAA001',
         'brand' => 'Ford',
         'model' => 'F-Max',
+        'vehicle_type' => 'truck',
         'status' => 1,
         'branch_id' => $branchId,
         'created_at' => now(),
@@ -170,6 +191,7 @@ it('calculates fleet performance metrics', function (): void {
         'plate' => '34BBB002',
         'brand' => 'Mercedes',
         'model' => 'Actros',
+        'vehicle_type' => 'truck',
         'status' => 1,
         'branch_id' => $branchId,
         'created_at' => now(),
@@ -179,6 +201,7 @@ it('calculates fleet performance metrics', function (): void {
         'plate' => '34CCC003',
         'brand' => 'Volvo',
         'model' => 'FH',
+        'vehicle_type' => 'truck',
         'status' => 1,
         'branch_id' => $branchId,
         'created_at' => now(),

@@ -64,7 +64,7 @@ it('exports pivot summary as CSV', function (): void {
     $response->assertSuccessful();
     $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
 
-    $content = $response->getContent();
+    $content = (string) $response->getContent();
     expect($content)->toContain('Tarih');
     expect($content)->toContain('Miktar');
     expect($content)->toContain('Satır sayısı');
@@ -80,7 +80,7 @@ it('exports grouped invoice lines as CSV', function (): void {
     $response->assertSuccessful();
     $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
 
-    $content = $response->getContent();
+    $content = (string) $response->getContent();
     // Başlık satırında insan okunur isimler beklenir.
     expect($content)->toContain('Malzeme Kodu');
     expect($content)->toContain('Irsaliye No');

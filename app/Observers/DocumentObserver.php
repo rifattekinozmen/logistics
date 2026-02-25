@@ -17,7 +17,7 @@ class DocumentObserver
     public function created(Document $document): void
     {
         if ($document->valid_until && $document->valid_until->isFuture()) {
-            $this->calendarService->createEvent([
+            $data = [
                 'title' => $document->name.' - Süre Sonu',
                 'description' => 'Belge süre sonu: '.$document->valid_until->format('d.m.Y'),
                 'event_type' => 'document',
@@ -28,7 +28,9 @@ class DocumentObserver
                 'priority' => $this->calculatePriority($document->valid_until),
                 'color' => $this->getColorByDate($document->valid_until),
                 'status' => 'pending',
-            ]);
+            ];
+            $data['company_id'] = $this->resolveCompanyIdForDocument($document);
+            $this->calendarService->createEvent($data);
         }
     }
 
@@ -46,7 +48,7 @@ class DocumentObserver
                     'priority' => $this->calculatePriority($document->valid_until),
                 ]);
             } elseif ($document->valid_until->isFuture()) {
-                $this->calendarService->createEvent([
+                $data = [
                     'title' => $document->name.' - Süre Sonu',
                     'description' => 'Belge süre sonu: '.$document->valid_until->format('d.m.Y'),
                     'event_type' => 'document',
@@ -57,7 +59,9 @@ class DocumentObserver
                     'priority' => $this->calculatePriority($document->valid_until),
                     'color' => $this->getColorByDate($document->valid_until),
                     'status' => 'pending',
-                ]);
+                ];
+                $data['company_id'] = $this->resolveCompanyIdForDocument($document);
+                $this->calendarService->createEvent($data);
             }
         }
     }
@@ -76,6 +80,23 @@ class DocumentObserver
         }
 
         return 'low';
+    }
+
+    protected function resolveCompanyIdForDocument(Document $document): ?int
+    {
+        $document->loadMissing('documentable');
+        $related = $document->documentable;
+        if ($related === null) {
+            return null;
+        }
+        if (isset($related->company_id)) {
+            return (int) $related->company_id;
+        }
+        if (method_exists($related, 'branch') && $related->branch) {
+            return $related->branch->company_id ?? null;
+        }
+
+        return null;
     }
 
     protected function getColorByDate($date): string
