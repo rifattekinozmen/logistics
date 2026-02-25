@@ -52,6 +52,9 @@ function createAdminUser(): array
         ['name' => 'admin'],
         ['description' => 'Sistem yöneticisi']
     );
+    if ($role->trashed()) {
+        $role->restore();
+    }
 
     $shipmentViewPermission = \App\Models\CustomPermission::firstOrCreate(
         ['code' => 'shipment.view'],

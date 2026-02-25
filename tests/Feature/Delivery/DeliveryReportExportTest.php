@@ -7,6 +7,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function (): void {
+    [$user, $company] = createAdminUser();
+    $this->actingAs($user)->withSession(['active_company_id' => $company->id]);
+});
+
 function createDokmeCimentoBatchWithRows(): DeliveryImportBatch
 {
     $batch = DeliveryImportBatch::factory()->create([
@@ -51,9 +56,6 @@ function createDokmeCimentoBatchWithRows(): DeliveryImportBatch
 }
 
 it('exports pivot summary as CSV', function (): void {
-    [$user, $company] = createAdminUser();
-    $this->actingAs($user)->withSession(['active_company_id' => $company->id]);
-
     $batch = createDokmeCimentoBatchWithRows();
 
     $response = $this->get(route('admin.delivery-imports.pivot-export', $batch));
@@ -68,9 +70,6 @@ it('exports pivot summary as CSV', function (): void {
 });
 
 it('exports grouped invoice lines as CSV', function (): void {
-    [$user, $company] = createAdminUser();
-    $this->actingAs($user)->withSession(['active_company_id' => $company->id]);
-
     $batch = createDokmeCimentoBatchWithRows();
 
     $response = $this->get(route('admin.delivery-imports.invoice-lines-export', [$batch, 'group' => 1]));
