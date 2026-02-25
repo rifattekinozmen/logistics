@@ -30,6 +30,7 @@ class DocumentObserver
                 'status' => 'pending',
             ];
             $data['company_id'] = $this->resolveCompanyIdForDocument($document);
+            $data['created_by'] = auth()->id() ?? $document->uploaded_by ?? \App\Models\User::query()->value('id');
             $this->calendarService->createEvent($data);
         }
     }
@@ -61,6 +62,7 @@ class DocumentObserver
                     'status' => 'pending',
                 ];
                 $data['company_id'] = $this->resolveCompanyIdForDocument($document);
+                $data['created_by'] = auth()->id() ?? $document->uploaded_by ?? \App\Models\User::query()->value('id');
                 $this->calendarService->createEvent($data);
             }
         }

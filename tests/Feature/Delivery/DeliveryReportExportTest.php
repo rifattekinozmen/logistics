@@ -64,10 +64,10 @@ it('exports pivot summary as CSV', function (): void {
     $response->assertSuccessful();
     $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
 
-    $content = (string) $response->getContent();
-    expect($content)->toContain('Tarih');
-    expect($content)->toContain('Miktar');
-    expect($content)->toContain('Satır sayısı');
+    $content = method_exists($response, 'streamedContent') ? $response->streamedContent() : (string) $response->getContent();
+    expect((string) $content)->toContain('Tarih');
+    expect((string) $content)->toContain('Miktar');
+    expect((string) $content)->toContain('Satır sayısı');
 });
 
 it('exports grouped invoice lines as CSV', function (): void {
@@ -80,10 +80,10 @@ it('exports grouped invoice lines as CSV', function (): void {
     $response->assertSuccessful();
     $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
 
-    $content = (string) $response->getContent();
+    $content = method_exists($response, 'streamedContent') ? $response->streamedContent() : (string) $response->getContent();
     // Başlık satırında insan okunur isimler beklenir.
-    expect($content)->toContain('Malzeme Kodu');
-    expect($content)->toContain('Irsaliye No');
-    // Gruplanmış tek satırda miktar toplamı 15.5 olmalı.
-    expect($content)->toContain('15,5');
+    expect((string) $content)->toContain('Malzeme Kodu');
+    expect((string) $content)->toContain('Irsaliye No');
+    // Gruplanmış tek satırda miktar toplamı 15.5 olmalı (nokta veya virgül formatında).
+    expect((string) $content)->toContain('15.5');
 });

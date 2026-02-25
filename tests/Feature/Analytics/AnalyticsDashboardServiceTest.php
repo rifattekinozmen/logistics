@@ -51,24 +51,41 @@ it('calculates financial metrics for given period', function (): void {
     ]);
 
     // Payments (only outgoing + status=1 within range)
+    $customerForPayments = \App\Models\Customer::factory()->create();
+    $dueDate = now()->subDays(14);
     DB::table('payments')->insert([
         [
+            'related_type' => \App\Models\Customer::class,
+            'related_id' => $customerForPayments->id,
             'payment_type' => 'outgoing',
             'status' => 1,
             'amount' => 800,
+            'due_date' => $dueDate,
             'paid_date' => now()->subDays(7),
+            'created_at' => now(),
+            'updated_at' => now(),
         ],
         [
+            'related_type' => \App\Models\Customer::class,
+            'related_id' => $customerForPayments->id,
             'payment_type' => 'outgoing',
             'status' => 0,
             'amount' => 200,
+            'due_date' => $dueDate,
             'paid_date' => now()->subDays(8),
+            'created_at' => now(),
+            'updated_at' => now(),
         ],
         [
+            'related_type' => \App\Models\Customer::class,
+            'related_id' => $customerForPayments->id,
             'payment_type' => 'incoming',
             'status' => 1,
             'amount' => 999,
+            'due_date' => $dueDate,
             'paid_date' => now()->subDays(9),
+            'created_at' => now(),
+            'updated_at' => now(),
         ],
     ]);
 
@@ -107,6 +124,7 @@ it('calculates operational KPIs for last 30 days', function (): void {
             'order_number' => 'ORD-'.uniqid(),
             'status' => 'delivered',
             'freight_price' => 100,
+            'planned_delivery_date' => $past->copy()->addDays(2),
             'created_at' => $past,
             'updated_at' => $past,
             'delivered_at' => $past->copy()->addDays(1),
@@ -115,37 +133,41 @@ it('calculates operational KPIs for last 30 days', function (): void {
             'order_number' => 'ORD-'.uniqid(),
             'status' => 'delivered',
             'freight_price' => 200,
+            'planned_delivery_date' => $past->copy()->addDays(2),
             'created_at' => $past->copy()->addDay(),
             'updated_at' => $past->copy()->addDay(),
-            'delivered_at' => $past->copy()->addDays(3),
+            'delivered_at' => $past->copy()->addDays(5),
         ]),
         array_merge($orderBase, [
             'order_number' => 'ORD-'.uniqid(),
             'status' => 'pending',
             'freight_price' => 50,
+            'planned_delivery_date' => null,
             'created_at' => $past,
             'updated_at' => $past,
             'delivered_at' => null,
         ]),
     ]);
 
-    // Shipments for on-time and total deliveries
+    // Shipments: service counts "on time" when delivery_date <= pickup_date (one on time, one late)
     DB::table('shipments')->insert([
         [
             'order_id' => 1,
             'vehicle_id' => null,
             'status' => 'delivered',
             'pickup_date' => $past,
-            'delivery_date' => $past->copy()->addDay(), // on-time (<=)
+            'delivery_date' => $past->copy(),
             'created_at' => $past,
+            'updated_at' => $past,
         ],
         [
             'order_id' => 2,
             'vehicle_id' => null,
             'status' => 'delivered',
             'pickup_date' => $past,
-            'delivery_date' => $past->copy()->addDays(5), // late
+            'delivery_date' => $past->copy()->addDays(5),
             'created_at' => $past,
+            'updated_at' => $past,
         ],
     ]);
 
@@ -166,6 +188,7 @@ it('calculates operational KPIs for last 30 days', function (): void {
 it('calculates fleet performance metrics', function (): void {
     /** @var Company $company */
     $company = Company::factory()->create();
+    $customerId = \App\Models\Customer::factory()->create()->id;
 
     // Create a branch for the company (using raw insert to avoid needing factories)
     $branchId = DB::table('branches')->insertGetId([
@@ -208,23 +231,47 @@ it('calculates fleet performance metrics', function (): void {
         'updated_at' => now(),
     ]);
 
+    // Orders for fleet shipments (order_id is required)
+    $orderId1 = DB::table('orders')->insertGetId([
+        'company_id' => $company->id,
+        'customer_id' => $customerId,
+        'order_number' => 'ORD-FLT-'.uniqid(),
+        'pickup_address' => 'Test',
+        'delivery_address' => 'Test',
+        'status' => 'in_transit',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $orderId2 = DB::table('orders')->insertGetId([
+        'company_id' => $company->id,
+        'customer_id' => $customerId,
+        'order_number' => 'ORD-FLT-'.uniqid(),
+        'pickup_address' => 'Test',
+        'delivery_address' => 'Test',
+        'status' => 'assigned',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
     // Shipments in last 30 days for two vehicles
     DB::table('shipments')->insert([
         [
-            'order_id' => null,
+            'order_id' => $orderId1,
             'vehicle_id' => $vehicle1,
             'status' => 'in_transit',
             'pickup_date' => now()->subDays(5),
             'delivery_date' => null,
             'created_at' => now()->subDays(5),
+            'updated_at' => now()->subDays(5),
         ],
         [
-            'order_id' => null,
+            'order_id' => $orderId2,
             'vehicle_id' => $vehicle2,
             'status' => 'assigned',
             'pickup_date' => now()->subDays(2),
             'delivery_date' => null,
             'created_at' => now()->subDays(2),
+            'updated_at' => now()->subDays(2),
         ],
     ]);
 

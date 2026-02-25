@@ -176,11 +176,11 @@ it('AIDocumentService analyze returns compliance reports for expiring or incompl
         'file_path' => 'documents/ruhsat.pdf',
     ]);
 
-    // Incomplete document (missing file_path)
+    // Incomplete document (empty file_path - column is NOT NULL)
     \App\Models\Document::factory()->create([
         'name' => 'Eksik Belge',
-        'category' => null,
-        'file_path' => null,
+        'category' => 'other',
+        'file_path' => '',
     ]);
 
     $service = app(AIDocumentService::class);
