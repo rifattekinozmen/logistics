@@ -76,4 +76,3 @@ it('validates bulk customer request', function () {
 
     $response->assertSessionHasErrors(['selected']);
 });
-

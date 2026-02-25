@@ -118,6 +118,7 @@ class DashboardController extends Controller
                     'customers' => 'person',
                     'warehouses' => 'warehouse',
                 ];
+
                 return [
                     'id' => $log->id,
                     'title' => ($tableLabels[$log->table_name] ?? ucfirst($log->table_name)).' '.($actionLabels[$log->action] ?? $log->action),

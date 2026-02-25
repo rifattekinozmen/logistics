@@ -10,8 +10,8 @@ use App\Models\Order;
 use App\Order\Requests\StoreOrderRequest;
 use App\Order\Requests\UpdateOrderRequest;
 use App\Order\Services\OrderService;
-use App\Order\Services\OrderWorkflowGuardService;
 use App\Order\Services\OrderStatusTransitionService;
+use App\Order\Services\OrderWorkflowGuardService;
 use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -307,7 +307,7 @@ class OrderController extends Controller
             ->get();
 
         return $addresses->map(fn ($a) => [
-            'id' => 'company_' . $a->id,
+            'id' => 'company_'.$a->id,
             'name' => $a->title ?: $a->address,
             'address' => $a->address,
         ])->all();

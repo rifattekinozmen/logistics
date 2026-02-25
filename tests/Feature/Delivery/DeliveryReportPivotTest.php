@@ -220,4 +220,3 @@ it('handles row_data with missing or empty metric index gracefully', function ()
     expect($pivot[0]['Miktar'])->toBe(0.0);
     expect($pivot[0]['Satır sayısı'])->toBe(1);
 });
-

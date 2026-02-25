@@ -216,4 +216,3 @@ it('calculates fleet performance metrics', function (): void {
     expect($performance['vehicle_utilization'])->toBeArray()->not()->toBeEmpty();
     expect($performance['maintenance_alerts'])->toBeArray();
 });
-

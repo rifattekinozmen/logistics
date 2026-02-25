@@ -67,4 +67,3 @@ it('validates bulk order request', function () {
 
     $response->assertSessionHasErrors(['selected']);
 });
-

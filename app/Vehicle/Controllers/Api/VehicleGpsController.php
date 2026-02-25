@@ -82,7 +82,7 @@ class VehicleGpsController extends Controller
             'vehicle_id' => $validated['vehicle_id'],
             'latitude' => $validated['latitude'],
             'longitude' => $validated['longitude'],
-            'recorded_at' => isset($validated['recorded_at']) ? $validated['recorded_at'] : now(),
+            'recorded_at' => $validated['recorded_at'] ?? now(),
             'source' => $validated['source'] ?? 'manual',
         ]);
 

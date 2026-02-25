@@ -42,4 +42,3 @@ class PaymentIntent extends Model
         return $this->hasMany(Payment::class);
     }
 }
-

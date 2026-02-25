@@ -103,6 +103,7 @@ class Personel extends Model
         if (count($parts) <= 1) {
             return $this->attributes['ad_soyad'] ?? '';
         }
+
         return implode(' ', array_slice($parts, 0, -1));
     }
 
@@ -112,6 +113,7 @@ class Personel extends Model
     public function getSoyadiAttribute(): string
     {
         $parts = preg_split('/\s+/u', trim($this->attributes['ad_soyad'] ?? ''), -1, PREG_SPLIT_NO_EMPTY);
+
         return $parts ? end($parts) : ($this->attributes['ad_soyad'] ?? '');
     }
 

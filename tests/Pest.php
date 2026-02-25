@@ -52,6 +52,13 @@ function createAdminUser(): array
         ['name' => 'admin'],
         ['description' => 'Sistem yöneticisi']
     );
+
+    $shipmentViewPermission = \App\Models\CustomPermission::firstOrCreate(
+        ['code' => 'shipment.view'],
+        ['description' => 'Sevkiyat görüntüleme']
+    );
+    $role->permissions()->syncWithoutDetaching([$shipmentViewPermission->id]);
+
     $company = \App\Models\Company::factory()->create();
     $user = \App\Models\User::factory()->create();
     $user->companies()->attach($company->id, ['role' => 'admin', 'is_default' => true]);

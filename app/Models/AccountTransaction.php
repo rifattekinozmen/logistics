@@ -52,4 +52,3 @@ class AccountTransaction extends Model
         return $this->belongsTo(\App\EInvoice\Models\EInvoice::class);
     }
 }
-

@@ -29,4 +29,3 @@ class PaymentGatewayService
         return PaymentIntent::where('provider_intent_id', $intentId)->first();
     }
 }
-

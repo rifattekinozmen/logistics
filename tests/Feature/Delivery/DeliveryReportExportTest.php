@@ -86,4 +86,3 @@ it('exports grouped invoice lines as CSV', function (): void {
     // Gruplanmış tek satırda miktar toplamı 15.5 olmalı.
     expect($content)->toContain('15,5');
 });
-

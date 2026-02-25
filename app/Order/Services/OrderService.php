@@ -3,8 +3,8 @@
 namespace App\Order\Services;
 
 use App\DocumentFlow\Services\DocumentFlowService;
-use App\Models\Order;
 use App\Models\Customer;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;

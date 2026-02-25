@@ -1,7 +1,6 @@
 <?php
 
 use App\Events\OrderCreated;
-use App\Events\OrderPaid;
 use App\Events\ShipmentDelivered;
 use App\Finance\Services\PaymentService;
 use App\Models\Customer;
@@ -10,8 +9,6 @@ use App\Models\Payment;
 use App\Models\PaymentIntent;
 use App\Models\Shipment;
 use App\Models\ShipmentPlan;
-use App\Models\AccountTransaction;
-use Illuminate\Support\Facades\Event;
 
 it('runs full logistics B2B happy path', function () {
     $user = \App\Models\User::factory()->create();
@@ -63,4 +60,3 @@ it('rejects payment callback with invalid signature', function () {
 
     $response->assertStatus(400);
 });
-

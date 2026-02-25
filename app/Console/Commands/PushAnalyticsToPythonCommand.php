@@ -67,4 +67,3 @@ class PushAnalyticsToPythonCommand extends Command
         return Command::SUCCESS;
     }
 }
-

@@ -1,5 +1,6 @@
 <?php
 
+use App\Admin\Controllers\Web\CalendarController;
 use App\Analytics\Controllers\Web\AnalyticsController;
 use App\BusinessPartner\Controllers\Web\BusinessPartnerController;
 use App\Customer\Controllers\Web\CustomerController;
@@ -10,11 +11,10 @@ use App\Employee\Controllers\Web\AdvanceController;
 use App\Employee\Controllers\Web\EmployeeController;
 use App\Employee\Controllers\Web\LeaveController;
 use App\Employee\Controllers\Web\PayrollController;
-use App\Employee\Controllers\Web\PersonnelAttendanceController;
 use App\Employee\Controllers\Web\PersonelController;
+use App\Employee\Controllers\Web\PersonnelAttendanceController;
 use App\Finance\Controllers\Web\PaymentController;
 use App\FuelPrice\Controllers\Web\FuelPriceController;
-use App\Admin\Controllers\Web\CalendarController;
 use App\Notification\Controllers\Web\NotificationController;
 use App\Order\Controllers\Web\OrderController;
 use App\Pricing\Controllers\Web\PricingConditionController;
@@ -31,10 +31,10 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     // Orders – import routes first (so "import" is not captured by resource {order})
     Route::middleware('permission:order.view')->get('orders/import', [OrderController::class, 'importForm'])->name('orders.import');
     Route::middleware('permission:order.view')->get('orders/customer-addresses', [OrderController::class, 'customerAddresses'])->name('orders.customer-addresses');
-        Route::middleware('permission:order.view')->get('orders/import-template', [OrderController::class, 'importTemplate'])->name('orders.import-template');
-        Route::middleware('permission:order.view')->post('orders/import', [OrderController::class, 'importStore'])->name('orders.import.store');
-        Route::middleware('permission:order.view')->post('orders/bulk', [OrderController::class, 'bulk'])->name('orders.bulk');
-        Route::middleware('permission:order.view')->resource('orders', OrderController::class);
+    Route::middleware('permission:order.view')->get('orders/import-template', [OrderController::class, 'importTemplate'])->name('orders.import-template');
+    Route::middleware('permission:order.view')->post('orders/import', [OrderController::class, 'importStore'])->name('orders.import.store');
+    Route::middleware('permission:order.view')->post('orders/bulk', [OrderController::class, 'bulk'])->name('orders.bulk');
+    Route::middleware('permission:order.view')->resource('orders', OrderController::class);
     // SAP uyumlu durum geçişi
     Route::middleware('permission:order.view')->post('orders/{order}/transition', [OrderController::class, 'transition'])->name('orders.transition');
     // Doküman Akışı
@@ -52,8 +52,8 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         Route::resource('pricing-conditions', PricingConditionController::class)->except(['show']);
     });
 
-        // Customers
-        Route::middleware('permission:customer.view')->group(function () {
+    // Customers
+    Route::middleware('permission:customer.view')->group(function () {
         Route::post('customers/bulk', [CustomerController::class, 'bulk'])->name('customers.bulk');
         Route::resource('customers', CustomerController::class);
         Route::post('customers/{customer}/favorite-addresses', [CustomerController::class, 'storeFavoriteAddress'])->name('customers.favorite-addresses.store');
