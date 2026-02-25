@@ -50,6 +50,9 @@ class OrderController extends Controller
             };
         }
 
+        $filters['sort'] = $request->get('sort');
+        $filters['direction'] = $request->get('direction');
+
         if ($request->has('export')) {
             return $this->export($filters, $request->get('export'));
         }
@@ -383,6 +386,27 @@ class OrderController extends Controller
 
         return redirect()->route('admin.orders.index')
             ->with('success', 'Sipariş başarıyla silindi.');
+    }
+
+    /**
+     * Handle bulk actions on orders.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:orders,id'],
+            'action' => ['required', 'string', 'in:delete'],
+        ]);
+
+        $ids = $validated['selected'];
+
+        if ($validated['action'] === 'delete') {
+            Order::whereIn('id', $ids)->delete();
+        }
+
+        return redirect()->route('admin.orders.index')
+            ->with('success', 'Seçili siparişler silindi.');
     }
 
     /**

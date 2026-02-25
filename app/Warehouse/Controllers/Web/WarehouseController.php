@@ -29,7 +29,7 @@ class WarehouseController extends Controller
                 ->with('error', 'Aktif firma seçmeden depo listesini görüntüleyemezsiniz.');
         }
 
-        $filters = $request->only(['status', 'branch_id', 'search']);
+        $filters = $request->only(['status', 'branch_id', 'search', 'sort', 'direction']);
 
         if ($request->has('export')) {
             return $this->export($companyId, $filters, $request->get('export'));
@@ -41,8 +41,25 @@ class WarehouseController extends Controller
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when($filters['branch_id'] ?? null, fn ($q, $branchId) => $q->where('branch_id', $branchId))
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
-            ->orderBy('name')
-            ->paginate(25);
+            ->tap(function ($query) use ($filters) {
+                $sort = $filters['sort'] ?? null;
+                $direction = ($filters['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+                $sortableColumns = [
+                    'name' => 'name',
+                    'code' => 'code',
+                    'status' => 'status',
+                    'created_at' => 'created_at',
+                ];
+
+                if ($sort && \array_key_exists($sort, $sortableColumns)) {
+                    $query->orderBy($sortableColumns[$sort], $direction);
+                } else {
+                    $query->orderBy('name');
+                }
+            })
+            ->paginate(25)
+            ->withQueryString();
 
         $branches = \App\Models\Branch::where('company_id', $companyId)->where('status', 1)->orderBy('name')->get();
 
@@ -179,5 +196,31 @@ class WarehouseController extends Controller
 
         return redirect()->route('admin.warehouses.index')
             ->with('success', 'Depo başarıyla silindi.');
+    }
+
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:warehouses,id'],
+            'action' => ['required', 'string', 'in:delete,activate,deactivate'],
+        ]);
+
+        $ids = $validated['selected'];
+
+        if ($validated['action'] === 'delete') {
+            \App\Models\Warehouse::whereIn('id', $ids)->delete();
+        }
+
+        if ($validated['action'] === 'activate') {
+            \App\Models\Warehouse::whereIn('id', $ids)->update(['status' => 1]);
+        }
+
+        if ($validated['action'] === 'deactivate') {
+            \App\Models\Warehouse::whereIn('id', $ids)->update(['status' => 0]);
+        }
+
+        return redirect()->route('admin.warehouses.index')
+            ->with('success', 'Seçili depolar için toplu işlem uygulandı.');
     }
 }

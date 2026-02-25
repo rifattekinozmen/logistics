@@ -172,6 +172,19 @@ class PricingService
     {
         $query = PricingCondition::query()->with('company');
 
+        $sort = $filters['sort'] ?? null;
+        $direction = ($filters['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+        $sortableColumns = [
+            'name' => 'name',
+            'condition_type' => 'condition_type',
+            'currency' => 'currency',
+            'valid_from' => 'valid_from',
+            'valid_to' => 'valid_to',
+            'status' => 'status',
+            'created_at' => 'created_at',
+        ];
+
         if (isset($filters['company_id'])) {
             $query->where('company_id', $filters['company_id']);
         }
@@ -184,6 +197,12 @@ class PricingService
             $query->where('status', $filters['status']);
         }
 
-        return $query->latest()->paginate($perPage);
+        if ($sort && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->latest();
+        }
+
+        return $query->paginate($perPage)->withQueryString();
     }
 }

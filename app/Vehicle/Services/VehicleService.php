@@ -33,6 +33,18 @@ class VehicleService
     {
         $query = Vehicle::query()->with(['branch']);
 
+        $sort = $filters['sort'] ?? null;
+        $direction = ($filters['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+        $sortableColumns = [
+            'plate' => 'plate',
+            'brand' => 'brand',
+            'year' => 'year',
+            'capacity_kg' => 'capacity_kg',
+            'status' => 'status',
+            'created_at' => 'created_at',
+        ];
+
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
         }
@@ -45,7 +57,13 @@ class VehicleService
             $query->where('vehicle_type', $filters['vehicle_type']);
         }
 
-        return $query->latest()->paginate($perPage);
+        if ($sort && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->latest();
+        }
+
+        return $query->paginate($perPage)->withQueryString();
     }
 
     /**

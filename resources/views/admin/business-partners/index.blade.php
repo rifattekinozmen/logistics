@@ -44,19 +44,132 @@
             <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>
-</div>
+    </div>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+    <div class="px-4 pt-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <select id="business-partners-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+                <option value="activate">Aktif yap</option>
+                <option value="deactivate">Pasif yap</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="business-partners-bulk-apply">
+                Uygula
+            </button>
+        </div>
+        <div class="small text-secondary">
+            <span id="business-partners-selected-count">0</span> kayıt seçili
+        </div>
+    </div>
     <div class="table-responsive">
+        @php
+            $currentSort = request('sort');
+            $currentDirection = request('direction', 'asc');
+        @endphp
         <table class="table table-hover mb-0">
             <thead class="bg-primary-200">
                 <tr>
-                    <th class="border-0 fw-semibold text-secondary small">BP No</th>
-                    <th class="border-0 fw-semibold text-secondary small">Ad</th>
-                    <th class="border-0 fw-semibold text-secondary small">Tür</th>
-                    <th class="border-0 fw-semibold text-secondary small">Vergi No</th>
-                    <th class="border-0 fw-semibold text-secondary small">Para Birimi</th>
-                    <th class="border-0 fw-semibold text-secondary small">Durum</th>
+                    <th class="border-0 text-center align-middle" style="width: 40px;">
+                        <input type="checkbox" id="select-all-business-partners">
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'partner_number' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.business-partners.index', array_merge(request()->query(), ['sort' => 'partner_number', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>BP No</span>
+                            @if($currentSort === 'partner_number')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'name' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.business-partners.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Ad</span>
+                            @if($currentSort === 'name')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'partner_type' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.business-partners.index', array_merge(request()->query(), ['sort' => 'partner_type', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Tür</span>
+                            @if($currentSort === 'partner_type')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'tax_number' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.business-partners.index', array_merge(request()->query(), ['sort' => 'tax_number', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Vergi No</span>
+                            @if($currentSort === 'tax_number')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'currency' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.business-partners.index', array_merge(request()->query(), ['sort' => 'currency', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Para Birimi</span>
+                            @if($currentSort === 'currency')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.business-partners.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Durum</span>
+                            @if($currentSort === 'status')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small text-end">İşlemler</th>
                 </tr>
             </thead>
@@ -68,6 +181,9 @@
                     $typeColor  = $typeColors[$partner->partner_type] ?? 'secondary';
                 @endphp
                 <tr>
+                    <td class="align-middle text-center">
+                        <input type="checkbox" class="business-partners-row-checkbox" value="{{ $partner->id }}">
+                    </td>
                     <td class="align-middle"><span class="fw-bold font-monospace text-dark">{{ $partner->partner_number }}</span></td>
                     <td class="align-middle fw-semibold text-dark">{{ $partner->name }}</td>
                     <td class="align-middle">
@@ -116,4 +232,82 @@
     <div class="p-4 border-top">{{ $partners->links() }}</div>
     @endif
 </div>
+
+<form id="business-partners-bulk-form" method="POST" action="{{ route('admin.business-partners.bulk') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="action" id="business-partners-bulk-action-input">
+</form>
 @endsection
+
+@push('scripts')
+<script>
+const bpMaster = document.getElementById('select-all-business-partners');
+const bpRows = document.querySelectorAll('.business-partners-row-checkbox');
+const bpCountEl = document.getElementById('business-partners-selected-count');
+const bpApplyBtn = document.getElementById('business-partners-bulk-apply');
+const bpActionSelect = document.getElementById('business-partners-bulk-action');
+const bpForm = document.getElementById('business-partners-bulk-form');
+const bpActionInput = document.getElementById('business-partners-bulk-action-input');
+
+function updateBusinessPartnersSelectedCount() {
+    const selected = Array.from(bpRows).filter(cb => cb.checked);
+    if (bpCountEl) {
+        bpCountEl.textContent = selected.length.toString();
+    }
+    if (bpMaster) {
+        bpMaster.checked = selected.length > 0 && selected.length === bpRows.length;
+        bpMaster.indeterminate = selected.length > 0 && selected.length < bpRows.length;
+    }
+}
+
+if (bpMaster) {
+    bpMaster.addEventListener('change', function () {
+        const checked = bpMaster.checked;
+        bpRows.forEach(function (cb) {
+            cb.checked = checked;
+        });
+        updateBusinessPartnersSelectedCount();
+    });
+}
+
+bpRows.forEach(function (cb) {
+    cb.addEventListener('change', updateBusinessPartnersSelectedCount);
+});
+
+if (bpApplyBtn) {
+    bpApplyBtn.addEventListener('click', function () {
+        const action = bpActionSelect.value;
+        const selected = Array.from(bpRows).filter(cb => cb.checked);
+
+        if (! action) {
+            alert('Lütfen bir toplu işlem seçin.');
+            return;
+        }
+
+        if (selected.length === 0) {
+            alert('Lütfen en az bir kayıt seçin.');
+            return;
+        }
+
+        if (action === 'delete' && ! confirm('Seçili iş ortaklarını silmek istediğinize emin misiniz?')) {
+            return;
+        }
+
+        bpForm.querySelectorAll('input[name="selected[]"]').forEach(function (input) {
+            input.remove();
+        });
+
+        selected.forEach(function (cb) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'selected[]';
+            hidden.value = cb.value;
+            bpForm.appendChild(hidden);
+        });
+
+        bpActionInput.value = action;
+        bpForm.submit();
+    });
+}
+</script>
+@endpush

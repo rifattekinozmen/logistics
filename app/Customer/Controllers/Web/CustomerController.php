@@ -29,16 +29,42 @@ class CustomerController extends Controller
     {
         $filters = $request->only(['status', 'search']);
 
+        $sort = $request->get('sort');
+        $direction = $request->get('direction') === 'asc' ? 'asc' : 'desc';
+
+        $sortableColumns = [
+            'name' => 'name',
+            'email' => 'email',
+            'phone' => 'phone',
+            'tax_number' => 'tax_number',
+            'status' => 'status',
+            'favorite_addresses_count' => 'favorite_addresses_count',
+            'created_at' => 'created_at',
+        ];
+
         if ($request->has('export')) {
             return $this->export($filters, $request->get('export'));
         }
 
-        $customers = \App\Models\Customer::query()
+        $customers = Customer::query()
             ->withCount('favoriteAddresses')
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
-            ->orderBy('name')
-            ->paginate(25);
+            ->when(
+                $sort && \array_key_exists($sort, $sortableColumns),
+                function ($query) use ($sort, $direction, $sortableColumns) {
+                    if ($sort === 'favorite_addresses_count') {
+                        return $query->orderBy('favorite_addresses_count', $direction);
+                    }
+
+                    return $query->orderBy($sortableColumns[$sort], $direction);
+                },
+                function ($query) {
+                    return $query->orderBy('name');
+                }
+            )
+            ->paginate(25)
+            ->withQueryString();
 
         $stats = [
             'total' => Customer::count(),
@@ -158,6 +184,35 @@ class CustomerController extends Controller
 
         return redirect()->route('admin.customers.index')
             ->with('success', 'Müşteri başarıyla silindi.');
+    }
+
+    /**
+     * Handle bulk actions on customers.
+     */
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:customers,id'],
+            'action' => ['required', 'string', 'in:delete,activate,deactivate'],
+        ]);
+
+        $ids = $validated['selected'];
+
+        if ($validated['action'] === 'delete') {
+            Customer::whereIn('id', $ids)->delete();
+        }
+
+        if ($validated['action'] === 'activate') {
+            Customer::whereIn('id', $ids)->update(['status' => 1]);
+        }
+
+        if ($validated['action'] === 'deactivate') {
+            Customer::whereIn('id', $ids)->update(['status' => 0]);
+        }
+
+        return redirect()->route('admin.customers.index')
+            ->with('success', 'Seçili müşteriler için toplu işlem uygulandı.');
     }
 
     /**

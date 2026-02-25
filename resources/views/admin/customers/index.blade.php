@@ -68,22 +68,138 @@
 </div>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden" style="border-color: var(--bs-primary-200);">
+    <div class="px-4 pt-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <select id="customers-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+                <option value="activate">Aktif yap</option>
+                <option value="deactivate">Pasif yap</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="customers-bulk-apply">
+                Uygula
+            </button>
+        </div>
+        <div class="small text-secondary">
+            <span id="customers-selected-count">0</span> kayıt seçili
+        </div>
+    </div>
     <div class="table-responsive">
+        @php
+            $currentSort = request('sort');
+            $currentDirection = request('direction', 'asc');
+        @endphp
         <table class="table table-hover mb-0">
             <thead class="bg-primary-200">
                 <tr>
-                    <th class="border-0 fw-semibold text-secondary small">Müşteri Adı</th>
-                    <th class="border-0 fw-semibold text-secondary small">E-posta</th>
-                    <th class="border-0 fw-semibold text-secondary small">Telefon</th>
-                    <th class="border-0 fw-semibold text-secondary small">Vergi No</th>
-                    <th class="border-0 fw-semibold text-secondary small">Favori / Teslimat Adresleri</th>
-                    <th class="border-0 fw-semibold text-secondary small">Durum</th>
+                    <th class="border-0 text-center align-middle" style="width: 40px;">
+                        <input type="checkbox" id="select-all-customers">
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'name' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.customers.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Müşteri Adı</span>
+                            @if($currentSort === 'name')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'email' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.customers.index', array_merge(request()->query(), ['sort' => 'email', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>E-posta</span>
+                            @if($currentSort === 'email')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'phone' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.customers.index', array_merge(request()->query(), ['sort' => 'phone', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Telefon</span>
+                            @if($currentSort === 'phone')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'tax_number' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.customers.index', array_merge(request()->query(), ['sort' => 'tax_number', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Vergi No</span>
+                            @if($currentSort === 'tax_number')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'favorite_addresses_count' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.customers.index', array_merge(request()->query(), ['sort' => 'favorite_addresses_count', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Favori / Teslimat Adresleri</span>
+                            @if($currentSort === 'favorite_addresses_count')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.customers.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Durum</span>
+                            @if($currentSort === 'status')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small text-end">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($customers as $customer)
                 <tr>
+                    <td class="align-middle text-center">
+                        <input type="checkbox" class="customer-row-checkbox" value="{{ $customer->id }}">
+                    </td>
                     <td class="align-middle">
                         <span class="fw-bold text-dark">{{ $customer->name }}</span>
                     </td>
@@ -155,6 +271,11 @@
     @endif
 </div>
 
+<form id="customers-bulk-form" method="POST" action="{{ route('admin.customers.bulk') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="action" id="customers-bulk-action-input">
+</form>
+
 @push('scripts')
 <script>
 document.querySelectorAll('.delete-form').forEach(function(form) {
@@ -167,6 +288,76 @@ document.querySelectorAll('.delete-form').forEach(function(form) {
         });
     });
 });
+
+const customerMasterCheckbox = document.getElementById('select-all-customers');
+const customerRowCheckboxes = document.querySelectorAll('.customer-row-checkbox');
+const customerSelectedCountEl = document.getElementById('customers-selected-count');
+const customerBulkApplyBtn = document.getElementById('customers-bulk-apply');
+const customerBulkActionSelect = document.getElementById('customers-bulk-action');
+const customerBulkForm = document.getElementById('customers-bulk-form');
+const customerBulkActionInput = document.getElementById('customers-bulk-action-input');
+
+function updateCustomerSelectedCount() {
+    const selected = Array.from(customerRowCheckboxes).filter(cb => cb.checked);
+    if (customerSelectedCountEl) {
+        customerSelectedCountEl.textContent = selected.length.toString();
+    }
+    if (customerMasterCheckbox) {
+        customerMasterCheckbox.checked = selected.length > 0 && selected.length === customerRowCheckboxes.length;
+        customerMasterCheckbox.indeterminate = selected.length > 0 && selected.length < customerRowCheckboxes.length;
+    }
+}
+
+if (customerMasterCheckbox) {
+    customerMasterCheckbox.addEventListener('change', function () {
+        const checked = customerMasterCheckbox.checked;
+        customerRowCheckboxes.forEach(function (cb) {
+            cb.checked = checked;
+        });
+        updateCustomerSelectedCount();
+    });
+}
+
+customerRowCheckboxes.forEach(function (cb) {
+    cb.addEventListener('change', updateCustomerSelectedCount);
+});
+
+if (customerBulkApplyBtn) {
+    customerBulkApplyBtn.addEventListener('click', function () {
+        const action = customerBulkActionSelect.value;
+        const selected = Array.from(customerRowCheckboxes).filter(cb => cb.checked);
+
+        if (! action) {
+            alert('Lütfen bir toplu işlem seçin.');
+            return;
+        }
+
+        if (selected.length === 0) {
+            alert('Lütfen en az bir kayıt seçin.');
+            return;
+        }
+
+        if (action === 'delete' && ! confirm('Seçili müşterileri silmek istediğinize emin misiniz?')) {
+            return;
+        }
+
+        // Eski hidden input'ları temizle
+        customerBulkForm.querySelectorAll('input[name=\"selected[]\"]').forEach(function (input) {
+            input.remove();
+        });
+
+        selected.forEach(function (cb) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'selected[]';
+            hidden.value = cb.value;
+            customerBulkForm.appendChild(hidden);
+        });
+
+        customerBulkActionInput.value = action;
+        customerBulkForm.submit();
+    });
+}
 </script>
 @endpush
 @endsection

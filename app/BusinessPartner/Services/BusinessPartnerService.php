@@ -25,19 +25,39 @@ class BusinessPartnerService
     {
         $query = BusinessPartner::query();
 
+        $sort = $filters['sort'] ?? null;
+        $direction = ($filters['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+        $sortableColumns = [
+            'partner_number' => 'partner_number',
+            'name' => 'name',
+            'partner_type' => 'partner_type',
+            'tax_number' => 'tax_number',
+            'currency' => 'currency',
+            'status' => 'status',
+            'created_at' => 'created_at',
+        ];
+
         if (! empty($filters['partner_type'])) {
             $query->where('partner_type', $filters['partner_type']);
         }
 
         if (! empty($filters['search'])) {
-            $query->where(function ($q) use ($filters) {
-                $q->where('name', 'like', '%'.$filters['search'].'%')
-                    ->orWhere('partner_number', 'like', '%'.$filters['search'].'%')
-                    ->orWhere('tax_number', 'like', '%'.$filters['search'].'%');
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('partner_number', 'like', '%'.$search.'%')
+                    ->orWhere('tax_number', 'like', '%'.$search.'%');
             });
         }
 
-        return $query->latest()->paginate($perPage);
+        if ($sort && \array_key_exists($sort, $sortableColumns)) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->orderBy('name');
+        }
+
+        return $query->paginate($perPage)->withQueryString();
     }
 
     /**

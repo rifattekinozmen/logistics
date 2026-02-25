@@ -80,25 +80,124 @@
             <button type="submit" class="btn btn-filter btn-filter-orders w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>
-</div>
+    </div>
 
     <div class="bg-white rounded-3xl shadow-sm border overflow-hidden" style="border-color: var(--bs-primary-200);">
+    <div class="px-4 pt-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <select id="orders-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="orders-bulk-apply">
+                Uygula
+            </button>
+        </div>
+        <div class="small text-secondary">
+            <span id="orders-selected-count">0</span> kayıt seçili
+        </div>
+    </div>
     <div class="table-responsive">
+        @php
+            $currentSort = request('sort');
+            $currentDirection = request('direction', 'asc');
+        @endphp
         <table class="table table-hover mb-0">
             <thead class="bg-primary-200">
                 <tr>
-                    <th class="border-0 fw-semibold text-secondary small">Sipariş No</th>
-                    <th class="border-0 fw-semibold text-secondary small">Müşteri</th>
-                    <th class="border-0 fw-semibold text-secondary small">Durum</th>
+                    <th class="border-0 text-center align-middle" style="width: 40px;">
+                        <input type="checkbox" id="select-all-orders">
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'order_number' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.orders.index', array_merge(request()->query(), ['sort' => 'order_number', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Sipariş No</span>
+                            @if($currentSort === 'order_number')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'customer_name' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.orders.index', array_merge(request()->query(), ['sort' => 'customer_name', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Müşteri</span>
+                            @if($currentSort === 'customer_name')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.orders.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Durum</span>
+                            @if($currentSort === 'status')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">Alış Adresi</th>
-                    <th class="border-0 fw-semibold text-secondary small">Teslimat Tarihi</th>
-                    <th class="border-0 fw-semibold text-secondary small">Ağırlık</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'planned_delivery_date' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.orders.index', array_merge(request()->query(), ['sort' => 'planned_delivery_date', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Teslimat Tarihi</span>
+                            @if($currentSort === 'planned_delivery_date')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'total_weight' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.orders.index', array_merge(request()->query(), ['sort' => 'total_weight', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Ağırlık</span>
+                            @if($currentSort === 'total_weight')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small text-end">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($orders as $order)
                 <tr>
+                    <td class="align-middle text-center">
+                        <input type="checkbox" class="order-row-checkbox" value="{{ $order->id }}">
+                    </td>
                     <td class="align-middle">
                         <span class="fw-bold text-dark">{{ $order->order_number }}</span>
                     </td>
@@ -180,4 +279,83 @@
     </div>
     @endif
 </div>
+
+<form id="orders-bulk-form" method="POST" action="{{ route('admin.orders.bulk') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="action" id="orders-bulk-action-input">
+</form>
 @endsection
+
+@push('scripts')
+<script>
+const orderMasterCheckbox = document.getElementById('select-all-orders');
+const orderRowCheckboxes = document.querySelectorAll('.order-row-checkbox');
+const orderSelectedCountEl = document.getElementById('orders-selected-count');
+const orderBulkApplyBtn = document.getElementById('orders-bulk-apply');
+const orderBulkActionSelect = document.getElementById('orders-bulk-action');
+const orderBulkForm = document.getElementById('orders-bulk-form');
+const orderBulkActionInput = document.getElementById('orders-bulk-action-input');
+
+function updateOrderSelectedCount() {
+    const selected = Array.from(orderRowCheckboxes).filter(cb => cb.checked);
+    if (orderSelectedCountEl) {
+        orderSelectedCountEl.textContent = selected.length.toString();
+    }
+    if (orderMasterCheckbox) {
+        orderMasterCheckbox.checked = selected.length > 0 && selected.length === orderRowCheckboxes.length;
+        orderMasterCheckbox.indeterminate = selected.length > 0 && selected.length < orderRowCheckboxes.length;
+    }
+}
+
+if (orderMasterCheckbox) {
+    orderMasterCheckbox.addEventListener('change', function () {
+        const checked = orderMasterCheckbox.checked;
+        orderRowCheckboxes.forEach(function (cb) {
+            cb.checked = checked;
+        });
+        updateOrderSelectedCount();
+    });
+}
+
+orderRowCheckboxes.forEach(function (cb) {
+    cb.addEventListener('change', updateOrderSelectedCount);
+});
+
+if (orderBulkApplyBtn) {
+    orderBulkApplyBtn.addEventListener('click', function () {
+        const action = orderBulkActionSelect.value;
+        const selected = Array.from(orderRowCheckboxes).filter(cb => cb.checked);
+
+        if (! action) {
+            alert('Lütfen bir toplu işlem seçin.');
+            return;
+        }
+
+        if (selected.length === 0) {
+            alert('Lütfen en az bir kayıt seçin.');
+            return;
+        }
+
+        if (action === 'delete' && ! confirm('Seçili siparişleri silmek istediğinize emin misiniz?')) {
+            return;
+        }
+
+        // Eski hidden input'ları temizle
+        orderBulkForm.querySelectorAll('input[name=\"selected[]\"]').forEach(function (input) {
+            input.remove();
+        });
+
+        selected.forEach(function (cb) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'selected[]';
+            hidden.value = cb.value;
+            orderBulkForm.appendChild(hidden);
+        });
+
+        orderBulkActionInput.value = action;
+        orderBulkForm.submit();
+    });
+}
+</script>
+@endpush

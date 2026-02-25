@@ -48,20 +48,118 @@
             <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>
-</div>
+    </div>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+    <div class="px-4 pt-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <select id="pricing-conditions-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+                <option value="activate">Aktif yap</option>
+                <option value="deactivate">Pasif yap</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="pricing-conditions-bulk-apply">
+                Uygula
+            </button>
+        </div>
+        <div class="small text-secondary">
+            <span id="pricing-conditions-selected-count">0</span> kayıt seçili
+        </div>
+    </div>
     <div class="table-responsive">
+        @php
+            $currentSort = request('sort');
+            $currentDirection = request('direction', 'asc');
+        @endphp
         <table class="table table-hover mb-0">
             <thead class="bg-primary-200">
                 <tr>
-                    <th class="border-0 fw-semibold text-secondary small">Koşul Adı</th>
-                    <th class="border-0 fw-semibold text-secondary small">Tür</th>
+                    <th class="border-0 text-center align-middle" style="width: 40px;">
+                        <input type="checkbox" id="select-all-pricing-conditions">
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'name' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.pricing-conditions.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Koşul Adı</span>
+                            @if($currentSort === 'name')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'condition_type' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.pricing-conditions.index', array_merge(request()->query(), ['sort' => 'condition_type', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Tür</span>
+                            @if($currentSort === 'condition_type')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">Güzergah</th>
                     <th class="border-0 fw-semibold text-secondary small">Fiyat</th>
-                    <th class="border-0 fw-semibold text-secondary small">Para Birimi</th>
-                    <th class="border-0 fw-semibold text-secondary small">Geçerlilik</th>
-                    <th class="border-0 fw-semibold text-secondary small">Durum</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'currency' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.pricing-conditions.index', array_merge(request()->query(), ['sort' => 'currency', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Para Birimi</span>
+                            @if($currentSort === 'currency')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'valid_from' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.pricing-conditions.index', array_merge(request()->query(), ['sort' => 'valid_from', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Geçerlilik</span>
+                            @if($currentSort === 'valid_from')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.pricing-conditions.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Durum</span>
+                            @if($currentSort === 'status')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small text-end">İşlemler</th>
                 </tr>
             </thead>
@@ -80,6 +178,9 @@
                     };
                 @endphp
                 <tr>
+                    <td class="align-middle text-center">
+                        <input type="checkbox" class="pricing-conditions-row-checkbox" value="{{ $condition->id }}">
+                    </td>
                     <td class="align-middle fw-semibold text-dark">{{ $condition->name }}</td>
                     <td class="align-middle">
                         <span class="badge bg-{{ $typeColor }}-200 text-{{ $typeColor }} px-3 py-2 rounded-pill fw-semibold">
@@ -136,4 +237,82 @@
     <div class="p-4 border-top">{{ $conditions->links() }}</div>
     @endif
 </div>
+
+<form id="pricing-conditions-bulk-form" method="POST" action="{{ route('admin.pricing-conditions.bulk') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="action" id="pricing-conditions-bulk-action-input">
+</form>
 @endsection
+
+@push('scripts')
+<script>
+const pcMaster = document.getElementById('select-all-pricing-conditions');
+const pcRows = document.querySelectorAll('.pricing-conditions-row-checkbox');
+const pcCountEl = document.getElementById('pricing-conditions-selected-count');
+const pcApplyBtn = document.getElementById('pricing-conditions-bulk-apply');
+const pcActionSelect = document.getElementById('pricing-conditions-bulk-action');
+const pcForm = document.getElementById('pricing-conditions-bulk-form');
+const pcActionInput = document.getElementById('pricing-conditions-bulk-action-input');
+
+function updatePricingConditionsSelectedCount() {
+    const selected = Array.from(pcRows).filter(cb => cb.checked);
+    if (pcCountEl) {
+        pcCountEl.textContent = selected.length.toString();
+    }
+    if (pcMaster) {
+        pcMaster.checked = selected.length > 0 && selected.length === pcRows.length;
+        pcMaster.indeterminate = selected.length > 0 && selected.length < pcRows.length;
+    }
+}
+
+if (pcMaster) {
+    pcMaster.addEventListener('change', function () {
+        const checked = pcMaster.checked;
+        pcRows.forEach(function (cb) {
+            cb.checked = checked;
+        });
+        updatePricingConditionsSelectedCount();
+    });
+}
+
+pcRows.forEach(function (cb) {
+    cb.addEventListener('change', updatePricingConditionsSelectedCount);
+});
+
+if (pcApplyBtn) {
+    pcApplyBtn.addEventListener('click', function () {
+        const action = pcActionSelect.value;
+        const selected = Array.from(pcRows).filter(cb => cb.checked);
+
+        if (! action) {
+            alert('Lütfen bir toplu işlem seçin.');
+            return;
+        }
+
+        if (selected.length === 0) {
+            alert('Lütfen en az bir kayıt seçin.');
+            return;
+        }
+
+        if (action === 'delete' && ! confirm('Seçili fiyatlandırma koşullarını silmek istediğinize emin misiniz?')) {
+            return;
+        }
+
+        pcForm.querySelectorAll('input[name="selected[]"]').forEach(function (input) {
+            input.remove();
+        });
+
+        selected.forEach(function (cb) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'selected[]';
+            hidden.value = cb.value;
+            pcForm.appendChild(hidden);
+        });
+
+        pcActionInput.value = action;
+        pcForm.submit();
+    });
+}
+</script>
+@endpush

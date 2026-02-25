@@ -18,7 +18,7 @@ class PricingConditionController extends Controller
 
     public function index(Request $request): View
     {
-        $filters = $request->only(['condition_type', 'status', 'company_id']);
+        $filters = $request->only(['condition_type', 'status', 'company_id', 'sort', 'direction']);
         $conditions = $this->pricingService->getPaginated($filters);
 
         $stats = [
@@ -68,5 +68,31 @@ class PricingConditionController extends Controller
 
         return redirect()->route('admin.pricing-conditions.index')
             ->with('success', 'Fiyatlandırma koşulu başarıyla silindi.');
+    }
+
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:pricing_conditions,id'],
+            'action' => ['required', 'string', 'in:delete,activate,deactivate'],
+        ]);
+
+        $ids = $validated['selected'];
+
+        if ($validated['action'] === 'delete') {
+            PricingCondition::whereIn('id', $ids)->delete();
+        }
+
+        if ($validated['action'] === 'activate') {
+            PricingCondition::whereIn('id', $ids)->update(['status' => 1]);
+        }
+
+        if ($validated['action'] === 'deactivate') {
+            PricingCondition::whereIn('id', $ids)->update(['status' => 0]);
+        }
+
+        return redirect()->route('admin.pricing-conditions.index')
+            ->with('success', 'Seçili fiyatlandırma koşulları için toplu işlem uygulandı.');
     }
 }

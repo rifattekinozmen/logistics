@@ -18,7 +18,7 @@ class BusinessPartnerController extends Controller
 
     public function index(Request $request): View
     {
-        $filters = $request->only(['partner_type', 'search']);
+        $filters = $request->only(['partner_type', 'search', 'sort', 'direction']);
         $partners = $this->partnerService->getPaginated($filters);
 
         $stats = [
@@ -68,5 +68,31 @@ class BusinessPartnerController extends Controller
 
         return redirect()->route('admin.business-partners.index')
             ->with('success', 'İş ortağı başarıyla silindi.');
+    }
+
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:business_partners,id'],
+            'action' => ['required', 'string', 'in:delete,activate,deactivate'],
+        ]);
+
+        $ids = $validated['selected'];
+
+        if ($validated['action'] === 'delete') {
+            BusinessPartner::whereIn('id', $ids)->delete();
+        }
+
+        if ($validated['action'] === 'activate') {
+            BusinessPartner::whereIn('id', $ids)->update(['status' => 1]);
+        }
+
+        if ($validated['action'] === 'deactivate') {
+            BusinessPartner::whereIn('id', $ids)->update(['status' => 0]);
+        }
+
+        return redirect()->route('admin.business-partners.index')
+            ->with('success', 'Seçili iş ortakları için toplu işlem uygulandı.');
     }
 }

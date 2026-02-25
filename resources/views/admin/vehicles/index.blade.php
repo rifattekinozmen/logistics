@@ -86,22 +86,121 @@
 </div>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden" style="border-color: var(--bs-primary-200);">
+    <div class="px-4 pt-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <select id="vehicles-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="vehicles-bulk-apply">
+                Uygula
+            </button>
+        </div>
+        <div class="small text-secondary">
+            <span id="vehicles-selected-count">0</span> kayıt seçili
+        </div>
+    </div>
     <div class="table-responsive">
+        @php
+            $currentSort = request('sort');
+            $currentDirection = request('direction', 'asc');
+        @endphp
         <table class="table table-hover mb-0">
             <thead class="bg-primary-200">
                 <tr>
-                    <th class="border-0 fw-semibold text-secondary small">Plaka</th>
-                    <th class="border-0 fw-semibold text-secondary small">Marka/Model</th>
+                    <th class="border-0 text-center align-middle" style="width: 40px;">
+                        <input type="checkbox" id="select-all-vehicles">
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'plate' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.vehicles.index', array_merge(request()->query(), ['sort' => 'plate', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Plaka</span>
+                            @if($currentSort === 'plate')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'brand' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.vehicles.index', array_merge(request()->query(), ['sort' => 'brand', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Marka/Model</span>
+                            @if($currentSort === 'brand')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">Tip</th>
-                    <th class="border-0 fw-semibold text-secondary small">Yıl</th>
-                    <th class="border-0 fw-semibold text-secondary small">Kapasite</th>
-                    <th class="border-0 fw-semibold text-secondary small">Durum</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'year' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.vehicles.index', array_merge(request()->query(), ['sort' => 'year', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Yıl</span>
+                            @if($currentSort === 'year')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'capacity_kg' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.vehicles.index', array_merge(request()->query(), ['sort' => 'capacity_kg', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Kapasite</span>
+                            @if($currentSort === 'capacity_kg')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.vehicles.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Durum</span>
+                            @if($currentSort === 'status')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small text-end">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($vehicles as $vehicle)
                 <tr>
+                    <td class="align-middle text-center">
+                        <input type="checkbox" class="vehicles-row-checkbox" value="{{ $vehicle->id }}">
+                    </td>
                     <td class="align-middle">
                         <span class="fw-bold text-dark">{{ $vehicle->plate }}</span>
                     </td>
@@ -184,4 +283,82 @@
     </div>
     @endif
 </div>
+
+<form id="vehicles-bulk-form" method="POST" action="{{ route('admin.vehicles.bulk') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="action" id="vehicles-bulk-action-input">
+</form>
 @endsection
+
+@push('scripts')
+<script>
+const vhMaster = document.getElementById('select-all-vehicles');
+const vhRows = document.querySelectorAll('.vehicles-row-checkbox');
+const vhCountEl = document.getElementById('vehicles-selected-count');
+const vhApplyBtn = document.getElementById('vehicles-bulk-apply');
+const vhActionSelect = document.getElementById('vehicles-bulk-action');
+const vhForm = document.getElementById('vehicles-bulk-form');
+const vhActionInput = document.getElementById('vehicles-bulk-action-input');
+
+function updateVehiclesSelectedCount() {
+    const selected = Array.from(vhRows).filter(cb => cb.checked);
+    if (vhCountEl) {
+        vhCountEl.textContent = selected.length.toString();
+    }
+    if (vhMaster) {
+        vhMaster.checked = selected.length > 0 && selected.length === vhRows.length;
+        vhMaster.indeterminate = selected.length > 0 && selected.length < vhRows.length;
+    }
+}
+
+if (vhMaster) {
+    vhMaster.addEventListener('change', function () {
+        const checked = vhMaster.checked;
+        vhRows.forEach(function (cb) {
+            cb.checked = checked;
+        });
+        updateVehiclesSelectedCount();
+    });
+}
+
+vhRows.forEach(function (cb) {
+    cb.addEventListener('change', updateVehiclesSelectedCount);
+});
+
+if (vhApplyBtn) {
+    vhApplyBtn.addEventListener('click', function () {
+        const action = vhActionSelect.value;
+        const selected = Array.from(vhRows).filter(cb => cb.checked);
+
+        if (! action) {
+            alert('Lütfen bir toplu işlem seçin.');
+            return;
+        }
+
+        if (selected.length === 0) {
+            alert('Lütfen en az bir kayıt seçin.');
+            return;
+        }
+
+        if (action === 'delete' && ! confirm('Seçili araçları silmek istediğinize emin misiniz?')) {
+            return;
+        }
+
+        vhForm.querySelectorAll('input[name="selected[]"]').forEach(function (input) {
+            input.remove();
+        });
+
+        selected.forEach(function (cb) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'selected[]';
+            hidden.value = cb.value;
+            vhForm.appendChild(hidden);
+        });
+
+        vhActionInput.value = action;
+        vhForm.submit();
+    });
+}
+</script>
+@endpush

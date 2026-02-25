@@ -31,22 +31,30 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     // Orders – import routes first (so "import" is not captured by resource {order})
     Route::middleware('permission:order.view')->get('orders/import', [OrderController::class, 'importForm'])->name('orders.import');
     Route::middleware('permission:order.view')->get('orders/customer-addresses', [OrderController::class, 'customerAddresses'])->name('orders.customer-addresses');
-    Route::middleware('permission:order.view')->get('orders/import-template', [OrderController::class, 'importTemplate'])->name('orders.import-template');
-    Route::middleware('permission:order.view')->post('orders/import', [OrderController::class, 'importStore'])->name('orders.import.store');
-    Route::middleware('permission:order.view')->resource('orders', OrderController::class);
+        Route::middleware('permission:order.view')->get('orders/import-template', [OrderController::class, 'importTemplate'])->name('orders.import-template');
+        Route::middleware('permission:order.view')->post('orders/import', [OrderController::class, 'importStore'])->name('orders.import.store');
+        Route::middleware('permission:order.view')->post('orders/bulk', [OrderController::class, 'bulk'])->name('orders.bulk');
+        Route::middleware('permission:order.view')->resource('orders', OrderController::class);
     // SAP uyumlu durum geçişi
     Route::middleware('permission:order.view')->post('orders/{order}/transition', [OrderController::class, 'transition'])->name('orders.transition');
     // Doküman Akışı
     Route::middleware('permission:order.view')->get('orders/{order}/document-flow', [DocumentFlowController::class, 'show'])->name('orders.document-flow');
 
     // Business Partners (SAP BP uyumu)
-    Route::middleware('permission:customer.view')->resource('business-partners', BusinessPartnerController::class);
+    Route::middleware('permission:customer.view')->group(function () {
+        Route::post('business-partners/bulk', [BusinessPartnerController::class, 'bulk'])->name('business-partners.bulk');
+        Route::resource('business-partners', BusinessPartnerController::class);
+    });
 
     // Pricing Conditions (SAP navlun fiyatlandırma)
-    Route::middleware('permission:order.view')->resource('pricing-conditions', PricingConditionController::class)->except(['show']);
+    Route::middleware('permission:order.view')->group(function () {
+        Route::post('pricing-conditions/bulk', [PricingConditionController::class, 'bulk'])->name('pricing-conditions.bulk');
+        Route::resource('pricing-conditions', PricingConditionController::class)->except(['show']);
+    });
 
-    // Customers
-    Route::middleware('permission:customer.view')->group(function () {
+        // Customers
+        Route::middleware('permission:customer.view')->group(function () {
+        Route::post('customers/bulk', [CustomerController::class, 'bulk'])->name('customers.bulk');
         Route::resource('customers', CustomerController::class);
         Route::post('customers/{customer}/favorite-addresses', [CustomerController::class, 'storeFavoriteAddress'])->name('customers.favorite-addresses.store');
         Route::put('customers/{customer}/favorite-addresses/{favoriteAddress}', [CustomerController::class, 'updateFavoriteAddress'])->name('customers.favorite-addresses.update');
@@ -74,7 +82,10 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     });
 
     // Vehicles
-    Route::middleware('permission:vehicle.view')->resource('vehicles', VehicleController::class);
+    Route::middleware('permission:vehicle.view')->group(function () {
+        Route::post('vehicles/bulk', [VehicleController::class, 'bulk'])->name('vehicles.bulk');
+        Route::resource('vehicles', VehicleController::class);
+    });
 
     // Employees
     Route::middleware('permission:employee.view')->resource('employees', EmployeeController::class);
@@ -113,7 +124,10 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
     });
 
     // Warehouses
-    Route::middleware('permission:warehouse.view')->resource('warehouses', WarehouseController::class);
+    Route::middleware('permission:warehouse.view')->group(function () {
+        Route::post('warehouses/bulk', [WarehouseController::class, 'bulk'])->name('warehouses.bulk');
+        Route::resource('warehouses', WarehouseController::class);
+    });
 
     // Documents
     Route::middleware('permission:document.view')->resource('documents', DocumentController::class);

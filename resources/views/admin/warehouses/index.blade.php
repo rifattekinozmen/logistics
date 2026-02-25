@@ -69,24 +69,95 @@
             <button type="submit" class="btn btn-filter btn-filter-warehouses w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
         </div>
     </form>
-</div>
+    </div>
 
 <div class="bg-white rounded-3xl shadow-sm border overflow-hidden" style="border-color: var(--bs-primary-200);">
+    <div class="px-4 pt-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <select id="warehouses-bulk-action" class="form-select form-select-sm w-auto">
+                <option value="">Toplu işlem seçin</option>
+                <option value="delete">Seçilenleri sil</option>
+                <option value="activate">Aktif yap</option>
+                <option value="deactivate">Pasif yap</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="warehouses-bulk-apply">
+                Uygula
+            </button>
+        </div>
+        <div class="small text-secondary">
+            <span id="warehouses-selected-count">0</span> kayıt seçili
+        </div>
+    </div>
     <div class="table-responsive">
+        @php
+            $currentSort = request('sort');
+            $currentDirection = request('direction', 'asc');
+        @endphp
         <table class="table table-hover mb-0">
             <thead class="bg-primary-200">
                 <tr>
-                    <th class="border-0 fw-semibold text-secondary small">Depo Adı</th>
-                    <th class="border-0 fw-semibold text-secondary small">Kod</th>
+                    <th class="border-0 text-center align-middle" style="width: 40px;">
+                        <input type="checkbox" id="select-all-warehouses">
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'name' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.warehouses.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Depo Adı</span>
+                            @if($currentSort === 'name')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'code' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.warehouses.index', array_merge(request()->query(), ['sort' => 'code', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Kod</span>
+                            @if($currentSort === 'code')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small">Şube</th>
                     <th class="border-0 fw-semibold text-secondary small">Adres</th>
-                    <th class="border-0 fw-semibold text-secondary small">Durum</th>
+                    <th class="border-0 fw-semibold text-secondary small">
+                        @php
+                            $direction = $currentSort === 'status' && $currentDirection === 'asc' ? 'desc' : 'asc';
+                        @endphp
+                        <a href="{{ route('admin.warehouses.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction])) }}"
+                           class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none">
+                            <span>Durum</span>
+                            @if($currentSort === 'status')
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                    {{ $currentDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                                </span>
+                            @else
+                                <span class="material-symbols-outlined opacity-50" style="font-size: 1rem;">unfold_more</span>
+                            @endif
+                        </a>
+                    </th>
                     <th class="border-0 fw-semibold text-secondary small text-end">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($warehouses as $warehouse)
                 <tr>
+                    <td class="align-middle text-center">
+                        <input type="checkbox" class="warehouses-row-checkbox" value="{{ $warehouse->id }}">
+                    </td>
                     <td class="align-middle">
                         <span class="fw-bold text-dark">{{ $warehouse->name }}</span>
                     </td>
@@ -144,4 +215,82 @@
     </div>
     @endif
 </div>
+
+<form id="warehouses-bulk-form" method="POST" action="{{ route('admin.warehouses.bulk') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="action" id="warehouses-bulk-action-input">
+</form>
 @endsection
+
+@push('scripts')
+<script>
+const whMaster = document.getElementById('select-all-warehouses');
+const whRows = document.querySelectorAll('.warehouses-row-checkbox');
+const whCountEl = document.getElementById('warehouses-selected-count');
+const whApplyBtn = document.getElementById('warehouses-bulk-apply');
+const whActionSelect = document.getElementById('warehouses-bulk-action');
+const whForm = document.getElementById('warehouses-bulk-form');
+const whActionInput = document.getElementById('warehouses-bulk-action-input');
+
+function updateWarehousesSelectedCount() {
+    const selected = Array.from(whRows).filter(cb => cb.checked);
+    if (whCountEl) {
+        whCountEl.textContent = selected.length.toString();
+    }
+    if (whMaster) {
+        whMaster.checked = selected.length > 0 && selected.length === whRows.length;
+        whMaster.indeterminate = selected.length > 0 && selected.length < whRows.length;
+    }
+}
+
+if (whMaster) {
+    whMaster.addEventListener('change', function () {
+        const checked = whMaster.checked;
+        whRows.forEach(function (cb) {
+            cb.checked = checked;
+        });
+        updateWarehousesSelectedCount();
+    });
+}
+
+whRows.forEach(function (cb) {
+    cb.addEventListener('change', updateWarehousesSelectedCount);
+});
+
+if (whApplyBtn) {
+    whApplyBtn.addEventListener('click', function () {
+        const action = whActionSelect.value;
+        const selected = Array.from(whRows).filter(cb => cb.checked);
+
+        if (! action) {
+            alert('Lütfen bir toplu işlem seçin.');
+            return;
+        }
+
+        if (selected.length === 0) {
+            alert('Lütfen en az bir kayıt seçin.');
+            return;
+        }
+
+        if (action === 'delete' && ! confirm('Seçili depoları silmek istediğinize emin misiniz?')) {
+            return;
+        }
+
+        whForm.querySelectorAll('input[name="selected[]"]').forEach(function (input) {
+            input.remove();
+        });
+
+        selected.forEach(function (cb) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'selected[]';
+            hidden.value = cb.value;
+            whForm.appendChild(hidden);
+        });
+
+        whActionInput.value = action;
+        whForm.submit();
+    });
+}
+</script>
+@endpush

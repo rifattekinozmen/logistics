@@ -25,7 +25,7 @@ class VehicleController extends Controller
      */
     public function index(Request $request): View|StreamedResponse|Response
     {
-        $filters = $request->only(['status', 'branch_id', 'vehicle_type']);
+        $filters = $request->only(['status', 'branch_id', 'vehicle_type', 'sort', 'direction']);
 
         if ($request->has('export')) {
             return $this->export($filters, $request->get('export'));
@@ -140,5 +140,23 @@ class VehicleController extends Controller
 
         return redirect()->route('admin.vehicles.index')
             ->with('success', 'Araç başarıyla silindi.');
+    }
+
+    public function bulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'selected' => ['required', 'array'],
+            'selected.*' => ['integer', 'exists:vehicles,id'],
+            'action' => ['required', 'string', 'in:delete'],
+        ]);
+
+        $ids = $validated['selected'];
+
+        if ($validated['action'] === 'delete') {
+            \App\Models\Vehicle::whereIn('id', $ids)->delete();
+        }
+
+        return redirect()->route('admin.vehicles.index')
+            ->with('success', 'Seçili araçlar silindi.');
     }
 }
