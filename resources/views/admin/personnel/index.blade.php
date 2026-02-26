@@ -48,11 +48,20 @@
         </div>
         <div class="col-md-3">
             <label class="form-label small fw-semibold text-dark">Departman</label>
-            <input type="text" name="departman" value="{{ request('departman') }}" class="form-control" placeholder="Departman ara...">
+            <select name="departman" id="filter-departman" class="form-select">
+                <option value="">Tümü</option>
+                @foreach(($departments ?? []) as $key => $label)
+                    <option value="{{ $key }}" {{ request('departman') === $key ? 'selected' : '' }}>
+                        {{ $label }}
+                    </option>
+                @endforeach
+            </select>
         </div>
         <div class="col-md-3">
             <label class="form-label small fw-semibold text-dark">Pozisyon</label>
-            <input type="text" name="pozisyon" value="{{ request('pozisyon') }}" class="form-control" placeholder="Pozisyon ara...">
+            <select name="pozisyon" id="filter-pozisyon" class="form-select">
+                <option value="">Tümü</option>
+            </select>
         </div>
         <div class="col-md-2 d-flex align-items-end">
             <button type="submit" class="btn btn-filter btn-filter-primary w-100 shadow-sm hover:shadow-md transition-all">Filtrele</button>
@@ -294,5 +303,40 @@ if (perApplyBtn) {
         perForm.submit();
     });
 }
+// Departman - Pozisyon filtre bağlama
+document.addEventListener('DOMContentLoaded', function () {
+    const positionMap = @json($position_map ?? []);
+    const deptSelect = document.getElementById('filter-departman');
+    const posSelect = document.getElementById('filter-pozisyon');
+
+    if (!deptSelect || !posSelect) {
+        return;
+    }
+
+    const selectedPos = @json(request('pozisyon'));
+
+    function fillFilterPositions(department) {
+        posSelect.innerHTML = '<option value="">Tümü</option>';
+        if (!department || !positionMap[department]) {
+            return;
+        }
+        positionMap[department].forEach(function (name) {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            if (selectedPos && selectedPos === name) {
+                opt.selected = true;
+            }
+            posSelect.appendChild(opt);
+        });
+    }
+
+    fillFilterPositions(deptSelect.value || null);
+
+    deptSelect.addEventListener('change', function () {
+        fillFilterPositions(this.value || null);
+        posSelect.value = '';
+    });
+});
 </script>
 @endpush

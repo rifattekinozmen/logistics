@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Enums\AskerlikDurumu;
+use App\Enums\AskerlikTuru;
+use App\Enums\CalismaDurumu;
 use App\Enums\Cinsiyet;
 use App\Enums\KanGrubu;
 use App\Enums\MaasOdemeTuru;
@@ -32,8 +34,13 @@ class UpdatePersonelRequest extends FormRequest
 
         return [
             'personel_kodu' => ['nullable', 'string', 'max:50', Rule::unique('personels', 'personel_kodu')->ignore($personnel)],
+            'sirket_vergi_no' => ['nullable', 'string', 'max:50'],
+            'sirket_sgk_no' => ['nullable', 'string', 'max:50'],
+            'sirket_sicil_no' => ['nullable', 'string', 'max:50'],
+            'sirket_unvani' => ['nullable', 'string', 'max:255'],
             'ad_soyad' => ['required', 'string', 'max:255'],
             'tckn' => ['nullable', 'string', 'size:11', 'regex:/^[0-9]+$/'],
+            'pasaport_seri_no' => ['nullable', 'string', 'max:50'],
             'kimlik_seri_no' => ['nullable', 'string', 'max:50'],
             'cilt_no' => ['nullable', 'string', 'max:20'],
             'aile_sira_no' => ['nullable', 'string', 'max:20'],
@@ -54,17 +61,22 @@ class UpdatePersonelRequest extends FormRequest
             'cinsiyet' => ['nullable', Rule::in(array_column(Cinsiyet::cases(), 'value'))],
             'cocuk_sayisi' => ['nullable', 'integer', 'min:0', 'max:20'],
             'adres_satir_1' => ['nullable', 'string', 'max:255'],
+            'adres_satir_2' => ['nullable', 'string', 'max:255'],
             'country_id' => ['nullable', 'exists:countries,id'],
             'city_id' => ['nullable', 'exists:cities,id'],
             'district_id' => ['nullable', 'exists:districts,id'],
+            'mahalle' => ['nullable', 'string', 'max:255'],
             'bulvar' => ['nullable', 'string', 'max:255'],
             'sokak' => ['nullable', 'string', 'max:255'],
+            'cadde' => ['nullable', 'string', 'max:255'],
             'dis_kapi' => ['nullable', 'string', 'max:20'],
             'ic_kapi' => ['nullable', 'string', 'max:20'],
             'posta_kodu' => ['nullable', 'string', 'max:20'],
             'departman' => ['required', 'string', 'max:255'],
             'pozisyon' => ['required', 'string', 'max:255'],
             'ise_baslama_tarihi' => ['required', 'date'],
+            'basvuru_tarihi' => ['nullable', 'date'],
+            'referans_tarihi' => ['nullable', 'date'],
             'sgk_baslangic_tarihi' => ['nullable', 'date'],
             'maas' => ['nullable', 'numeric', 'min:0'],
             'tahsil_durumu' => ['nullable', Rule::in(array_column(TahsilDurumu::cases(), 'value'))],
@@ -73,14 +85,26 @@ class UpdatePersonelRequest extends FormRequest
             'mezuniyet_tarihi' => ['nullable', 'date'],
             'bildigi_dil' => ['nullable', 'string', 'max:100'],
             'askerlik_durumu' => ['nullable', Rule::in(array_column(AskerlikDurumu::cases(), 'value'))],
+            'askerlik_turu' => ['nullable', Rule::in(array_column(AskerlikTuru::cases(), 'value'))],
+            'askerlik_baslangic_tarihi' => ['nullable', 'date'],
+            'askerlik_bitis_tarihi' => ['nullable', 'date'],
             'sgk_yaslilik_ayligi' => ['nullable', 'boolean'],
             'sgk_30_gunden_az' => ['nullable', 'boolean'],
+            'sgk_sigorta_kodu' => ['nullable', 'string', 'max:50'],
+            'sgk_sigorta_adi' => ['nullable', 'string', 'max:255'],
+            'csgb_is_kolu_kodu' => ['nullable', 'string', 'max:50'],
+            'csgb_is_kolu_adi' => ['nullable', 'string', 'max:255'],
+            'kanun_2821_gorev_kodu' => ['nullable', 'string', 'max:50'],
+            'kanun_2821_gorev_adi' => ['nullable', 'string', 'max:255'],
+            'meslek_kodu' => ['nullable', 'string', 'max:50'],
+            'meslek_adi' => ['nullable', 'string', 'max:255'],
             'banka_adi' => ['nullable', 'string', 'max:100'],
             'sube_kodu' => ['nullable', 'string', 'max:20'],
             'hesap_no' => ['nullable', 'string', 'max:50'],
             'maas_odeme_turu' => ['nullable', Rule::in(array_column(MaasOdemeTuru::cases(), 'value'))],
             'iban' => ['nullable', 'string', 'max:34', 'regex:/^[A-Z]{2}[0-9]{2}[A-Z0-9]{4}[0-9]{7}([A-Z0-9]?){0,16}$/i'],
             'aktif' => ['nullable', 'boolean'],
+            'calisma_durumu' => ['nullable', Rule::in(array_column(CalismaDurumu::cases(), 'value'))],
             'notlar' => ['nullable', 'string', 'max:65535'],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ];

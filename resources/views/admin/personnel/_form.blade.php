@@ -5,6 +5,10 @@
     $districts = $districts ?? collect();
     $departments = $departments ?? collect();
     $positions = $positions ?? collect();
+    $sgkInsuranceTypes = $sgk_insurance_types ?? [];
+    $csgbBranches = $csgb_branches ?? [];
+    $law2821Duties = $law2821_duties ?? [];
+    $professions = $professions ?? [];
     $banks = $banks ?? [];
 @endphp
 
@@ -22,10 +26,16 @@
                     <x-form.input name="personel_kodu" label="Personel Kodu" :value="old('personel_kodu', $personnel?->personel_kodu)" placeholder="Opsiyonel" />
                 </div>
                 <div class="col-md-6">
+                    <x-form.input name="sirket_unvani" label="Firma Ünvanı" :value="old('sirket_unvani', $personnel?->sirket_unvani)" placeholder="Opsiyonel" />
+                </div>
+                <div class="col-md-6">
                     <x-form.input name="ad_soyad" label="Ad Soyad" :value="old('ad_soyad', $personnel?->ad_soyad)" required />
                 </div>
                 <div class="col-md-6">
                     <x-form.input name="tckn" label="T.C. Kimlik No" :value="old('tckn', $personnel?->tckn)" maxlength="11" placeholder="11 haneli" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="pasaport_seri_no" label="Pasaport Seri No" :value="old('pasaport_seri_no', $personnel?->pasaport_seri_no)" placeholder="Varsa pasaport no" />
                 </div>
                 <div class="col-md-6">
                     <x-form.input name="dogum_tarihi" type="date" label="Doğum Tarihi" :value="old('dogum_tarihi', $personnel?->dogum_tarihi?->format('Y-m-d'))" />
@@ -53,6 +63,15 @@
                 </div>
                 <div class="col-md-6">
                     <x-form.input name="cocuk_sayisi" type="number" label="Çocuk Sayısı" :value="old('cocuk_sayisi', $personnel?->cocuk_sayisi)" min="0" max="20" placeholder="0" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="sirket_vergi_no" label="Firma Vergi No" :value="old('sirket_vergi_no', $personnel?->sirket_vergi_no)" placeholder="Vergi No" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="sirket_sgk_no" label="Firma SGK No" :value="old('sirket_sgk_no', $personnel?->sirket_sgk_no)" placeholder="SGK Sicil No" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="sirket_sicil_no" label="Firma Sicil No" :value="old('sirket_sicil_no', $personnel?->sirket_sicil_no)" placeholder="Firma Sicil No" />
                 </div>
             </div>
         </div>
@@ -95,6 +114,9 @@
                 <div class="col-12">
                     <x-form.input name="adres_satir_1" label="Adres 1. Satır" :value="old('adres_satir_1', $personnel?->adres_satir_1)" placeholder="Mahalle, sokak vb." />
                 </div>
+                <div class="col-12">
+                    <x-form.input name="adres_satir_2" label="Adres 2. Satır" :value="old('adres_satir_2', $personnel?->adres_satir_2)" placeholder="Apartman, daire vb. ek bilgiler" />
+                </div>
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label for="country_id" class="form-label fw-semibold text-dark">Ülke</label>
@@ -129,10 +151,16 @@
                     </div>
                 </div>
                 <div class="col-md-6">
+                    <x-form.input name="mahalle" label="Mahalle" :value="old('mahalle', $personnel?->mahalle)" />
+                </div>
+                <div class="col-md-6">
                     <x-form.input name="bulvar" label="Bulvar" :value="old('bulvar', $personnel?->bulvar)" />
                 </div>
                 <div class="col-md-6">
                     <x-form.input name="sokak" label="Sokak" :value="old('sokak', $personnel?->sokak)" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="cadde" label="Cadde" :value="old('cadde', $personnel?->cadde)" />
                 </div>
                 <div class="col-md-6">
                     <x-form.input name="dis_kapi" label="Dış Kapı" :value="old('dis_kapi', $personnel?->dis_kapi)" />
@@ -169,7 +197,22 @@
                     <x-form.input name="sgk_baslangic_tarihi" type="date" label="SGK Başlangıç Tarihi" :value="old('sgk_baslangic_tarihi', $personnel?->sgk_baslangic_tarihi?->format('Y-m-d'))" />
                 </div>
                 <div class="col-md-6">
+                    <x-form.input name="basvuru_tarihi" type="date" label="Başvuru Tarihi" :value="old('basvuru_tarihi', $personnel?->basvuru_tarihi?->format('Y-m-d'))" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="referans_tarihi" type="date" label="Referans Tarihi" :value="old('referans_tarihi', $personnel?->referans_tarihi?->format('Y-m-d'))" />
+                </div>
+                <div class="col-md-6">
                     <x-form.input name="maas" type="number" label="Maaş" :value="old('maas', $personnel?->maas)" step="0.01" min="0" placeholder="0.00" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.select
+                        name="calisma_durumu"
+                        label="Çalışma Durumu"
+                        :options="\App\Enums\CalismaDurumu::options()"
+                        :value="old('calisma_durumu', $personnel?->calisma_durumu)"
+                        placeholder="Seçiniz..."
+                    />
                 </div>
             </div>
         </div>
@@ -249,6 +292,21 @@
                 <div class="col-md-6">
                     <x-form.select name="askerlik_durumu" label="Askerlik Durumu" :options="\App\Enums\AskerlikDurumu::options()" :value="old('askerlik_durumu', $personnel?->askerlik_durumu)" placeholder="Seçiniz..." />
                 </div>
+                <div class="col-md-6">
+                    <x-form.select
+                        name="askerlik_turu"
+                        label="Askerlik Türü"
+                        :options="\App\Enums\AskerlikTuru::options()"
+                        :value="old('askerlik_turu', $personnel?->askerlik_turu)"
+                        placeholder="Seçiniz..."
+                    />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="askerlik_baslangic_tarihi" type="date" label="Askerlik Başlangıç Tarihi" :value="old('askerlik_baslangic_tarihi', $personnel?->askerlik_baslangic_tarihi?->format('Y-m-d'))" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="askerlik_bitis_tarihi" type="date" label="Askerlik Bitiş Tarihi" :value="old('askerlik_bitis_tarihi', $personnel?->askerlik_bitis_tarihi?->format('Y-m-d'))" />
+                </div>
             </div>
         </div>
     </div>
@@ -267,6 +325,54 @@
                 </div>
                 <div class="col-md-6">
                     <x-form.select name="sgk_30_gunden_az" label="30 Günden Az (E/H)" :options="[0 => 'Hayır', 1 => 'Evet']" :value="old('sgk_30_gunden_az', $personnel?->sgk_30_gunden_az)" placeholder="Seçiniz..." />
+                </div>
+                <div class="col-md-6">
+                    <x-form.select
+                        name="sgk_sigorta_kodu"
+                        label="SGK Sigorta Kodu"
+                        :options="collect($sgkInsuranceTypes)->mapWithKeys(fn ($name, $code) => [$code => $code.' - '.$name])->toArray()"
+                        :value="old('sgk_sigorta_kodu', $personnel?->sgk_sigorta_kodu)"
+                        placeholder="Seçiniz..."
+                    />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="sgk_sigorta_adi" label="SGK Sigorta Adı" :value="old('sgk_sigorta_adi', $personnel?->sgk_sigorta_adi)" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.select
+                        name="csgb_is_kolu_kodu"
+                        label="ÇSGB İş Kolu Kodu"
+                        :options="collect($csgbBranches)->mapWithKeys(fn ($name, $code) => [$code => $code.' - '.$name])->toArray()"
+                        :value="old('csgb_is_kolu_kodu', $personnel?->csgb_is_kolu_kodu)"
+                        placeholder="Seçiniz..."
+                    />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="csgb_is_kolu_adi" label="ÇSGB İş Kolu Adı" :value="old('csgb_is_kolu_adi', $personnel?->csgb_is_kolu_adi)" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.select
+                        name="kanun_2821_gorev_kodu"
+                        label="2821 Görev Kodu"
+                        :options="collect($law2821Duties)->mapWithKeys(fn ($name, $code) => [$code => $code.' - '.$name])->toArray()"
+                        :value="old('kanun_2821_gorev_kodu', $personnel?->kanun_2821_gorev_kodu)"
+                        placeholder="Seçiniz..."
+                    />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="kanun_2821_gorev_adi" label="2821 Görev Adı" :value="old('kanun_2821_gorev_adi', $personnel?->kanun_2821_gorev_adi)" />
+                </div>
+                <div class="col-md-6">
+                    <x-form.select
+                        name="meslek_kodu"
+                        label="Meslek Kodu"
+                        :options="collect($professions)->mapWithKeys(fn ($name, $code) => [$code => $code.' - '.$name])->toArray()"
+                        :value="old('meslek_kodu', $personnel?->meslek_kodu)"
+                        placeholder="Seçiniz..."
+                    />
+                </div>
+                <div class="col-md-6">
+                    <x-form.input name="meslek_adi" label="Meslek Adı" :value="old('meslek_adi', $personnel?->meslek_adi)" />
                 </div>
             </div>
         </div>
@@ -319,6 +425,46 @@
 
 @push('scripts')
 <script src="https://unpkg.com/alpinejs@3/dist/cdn.min.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const positionMap = @json($position_map ?? []);
+    const deptSelect = document.querySelector('select[name="departman"]');
+    const posSelect = document.querySelector('select[name="pozisyon"]');
+
+    if (!deptSelect || !posSelect || Object.keys(positionMap).length === 0) {
+        return;
+    }
+
+    const placeholderOption = posSelect.querySelector('option[value=""]');
+    const placeholderHtml = placeholderOption ? placeholderOption.outerHTML : '<option value="">Seçiniz...</option>';
+
+    function fillPositions(department, selected) {
+        posSelect.innerHTML = placeholderHtml;
+
+        const list = positionMap[department] || [];
+        list.forEach(function (name) {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            if (selected && selected === name) {
+                opt.selected = true;
+            }
+            posSelect.appendChild(opt);
+        });
+    }
+
+    const currentDept = deptSelect.value;
+    const currentPos = posSelect.value;
+    if (currentDept && positionMap[currentDept]) {
+        fillPositions(currentDept, currentPos);
+    }
+
+    deptSelect.addEventListener('change', function () {
+        const dept = this.value;
+        fillPositions(dept, null);
+    });
+});
+</script>
 <script>
 document.addEventListener('alpine:init', () => {
     const cities = @json($cities);

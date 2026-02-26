@@ -178,6 +178,18 @@
                     <span class="material-symbols-outlined text-secondary mt-1">payments</span>
                     <div><label class="form-label small fw-semibold text-secondary mb-0">Maaş</label><p class="text-dark mb-0">{{ $personnel->maas ? number_format($personnel->maas, 2, ',', '.') . ' ₺' : '-' }}</p></div>
                 </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">event_note</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">Başvuru Tarihi</label><p class="text-dark mb-0">{{ $personnel->basvuru_tarihi?->format('d.m.Y') ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">task_alt</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">Referans Tarihi</label><p class="text-dark mb-0">{{ $personnel->referans_tarihi?->format('d.m.Y') ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">fact_check</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">Çalışma Durumu</label><p class="text-dark mb-0">{{ $personnel->calisma_durumu ?? '-' }}</p></div>
+                </div>
             </div>
         </div>
 
@@ -232,9 +244,23 @@
                 <span class="material-symbols-outlined text-primary">military_tech</span>
                 Askerlik Bilgileri
             </h4>
-            <div class="d-flex gap-2">
-                <span class="material-symbols-outlined text-secondary mt-1">shield</span>
-                <div><label class="form-label small fw-semibold text-secondary mb-0">Askerlik Durumu</label><p class="text-dark mb-0">{{ $personnel->askerlik_durumu ?? '-' }}</p></div>
+            <div class="row g-3">
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">shield</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">Askerlik Durumu</label><p class="text-dark mb-0">{{ $personnel->askerlik_durumu ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">military_tech</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">Askerlik Türü</label><p class="text-dark mb-0">{{ $personnel->askerlik_turu ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">event</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">Askerlik Başlangıç Tarihi</label><p class="text-dark mb-0">{{ $personnel->askerlik_baslangic_tarihi?->format('d.m.Y') ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">event_available</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">Askerlik Bitiş Tarihi</label><p class="text-dark mb-0">{{ $personnel->askerlik_bitis_tarihi?->format('d.m.Y') ?? '-' }}</p></div>
+                </div>
             </div>
         </div>
 
@@ -252,6 +278,38 @@
                 <div class="col-md-6 d-flex gap-2">
                     <span class="material-symbols-outlined text-secondary mt-1">event_busy</span>
                     <div><label class="form-label small fw-semibold text-secondary mb-0">30 Günden Az (E/H)</label><p class="text-dark mb-0">{{ isset($personnel->sgk_30_gunden_az) ? ($personnel->sgk_30_gunden_az ? 'Evet' : 'Hayır') : '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">policy</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">SGK Sigorta Kodu</label><p class="text-dark mb-0">{{ $personnel->sgk_sigorta_kodu ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">description</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">SGK Sigorta Adı</label><p class="text-dark mb-0">{{ $personnel->sgk_sigorta_adi ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">work</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">ÇSGB İş Kolu Kodu</label><p class="text-dark mb-0">{{ $personnel->csgb_is_kolu_kodu ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">work_outline</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">ÇSGB İş Kolu Adı</label><p class="text-dark mb-0">{{ $personnel->csgb_is_kolu_adi ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">badge</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">2821 Görev Kodu</label><p class="text-dark mb-0">{{ $personnel->kanun_2821_gorev_kodu ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">assignment</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">2821 Görev Adı</label><p class="text-dark mb-0">{{ $personnel->kanun_2821_gorev_adi ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">badge</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">Meslek Kodu</label><p class="text-dark mb-0">{{ $personnel->meslek_kodu ?? '-' }}</p></div>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <span class="material-symbols-outlined text-secondary mt-1">person</span>
+                    <div><label class="form-label small fw-semibold text-secondary mb-0">Meslek Adı</label><p class="text-dark mb-0">{{ $personnel->meslek_adi ?? '-' }}</p></div>
                 </div>
             </div>
         </div>

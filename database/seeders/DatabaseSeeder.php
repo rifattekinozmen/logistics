@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
             LocationSeeder::class,
             TaxOfficeSeeder::class,
             CompanySeeder::class,
+            DepartmentSeeder::class,
+            PositionSeeder::class,
         ]);
 
         // Admin kullanıcı oluştur

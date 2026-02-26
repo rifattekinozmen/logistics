@@ -24,12 +24,9 @@ class PersonelController extends Controller
      */
     private function getFormData(): array
     {
-        $key = 'personnel_form_data';
-        if (app()->environment('testing')) {
-            return $this->buildFormData();
-        }
-
-        return Cache::remember($key, 300, fn () => $this->buildFormData());
+        // Departman / pozisyon ve diğer lookup verilerini her istekte taze çek
+        // (cache yerine doğrudan buildFormData kullanıyoruz)
+        return $this->buildFormData();
     }
 
     /**
@@ -43,12 +40,137 @@ class PersonelController extends Controller
         $cities = \App\Models\City::where('is_active', true)->orderBy('name_tr')->get(['id', 'name_tr', 'country_id']);
         $districts = \App\Models\District::where('is_active', true)->orderBy('name_tr')->get(['id', 'name_tr', 'city_id']);
 
+        $departments = [
+            'Lojistik Operasyon' => 'Lojistik Operasyon',
+            'Nakliye & Sevkiyat' => 'Nakliye & Sevkiyat',
+            'Depo & Stok Yönetimi' => 'Depo & Stok Yönetimi',
+            'Filo Yönetimi' => 'Filo Yönetimi',
+            'Planlama & Rota Optimizasyonu' => 'Planlama & Rota Optimizasyonu',
+            'Müşteri İlişkileri & Operasyon Desteği' => 'Müşteri İlişkileri & Operasyon Desteği',
+            'Satış & İş Geliştirme' => 'Satış & İş Geliştirme',
+            'Finans & Muhasebe' => 'Finans & Muhasebe',
+            'İnsan Kaynakları' => 'İnsan Kaynakları',
+            'Bilgi Teknolojileri (BT)' => 'Bilgi Teknolojileri (BT)',
+        ];
+
+        $positionMap = [
+            'Lojistik Operasyon' => [
+                'Lojistik Operasyon Uzmanı',
+                'Lojistik Operasyon Sorumlusu',
+                'Lojistik Operasyon Müdürü',
+            ],
+            'Nakliye & Sevkiyat' => [
+                'Şoför (Tır)',
+                'Şoför (Kamyon)',
+                'Sevkiyat Şefi',
+                'Sevkiyat Planlama Uzmanı',
+            ],
+            'Depo & Stok Yönetimi' => [
+                'Depo Sorumlusu',
+                'Depo Şefi',
+                'Depo Personeli',
+                'Forklift Operatörü',
+                'Stok Kontrol Uzmanı',
+            ],
+            'Filo Yönetimi' => [
+                'Filo Yöneticisi',
+                'Filo Sorumlusu',
+                'Bakım & Onarım Sorumlusu',
+                'Araç Takip Uzmanı',
+            ],
+            'Planlama & Rota Optimizasyonu' => [
+                'Rota Planlama Uzmanı',
+                'Operasyon Planlama Uzmanı',
+                'Planlama ve Optimizasyon Sorumlusu',
+            ],
+            'Müşteri İlişkileri & Operasyon Desteği' => [
+                'Müşteri Temsilcisi',
+                'Operasyon Destek Uzmanı',
+                'Çağrı Merkezi Temsilcisi',
+            ],
+            'Satış & İş Geliştirme' => [
+                'Satış Temsilcisi',
+                'Kurumsal Satış Uzmanı',
+                'İş Geliştirme Uzmanı',
+                'Satış Müdürü',
+            ],
+            'Finans & Muhasebe' => [
+                'Muhasebe Uzmanı',
+                'Finans Uzmanı',
+                'Tahsilat Sorumlusu',
+                'Muhasebe Sorumlusu',
+                'Finans Müdürü',
+            ],
+            'İnsan Kaynakları' => [
+                'İK Uzmanı',
+                'İK Sorumlusu',
+            ],
+            'Bilgi Teknolojileri (BT)' => [
+                'Yazılım Geliştirici',
+                'Sistem Yöneticisi',
+                'Uygulama Destek Uzmanı',
+            ],
+        ];
+
+        // Düz pozisyon listesi (mevcut select component için)
+        $positions = [];
+        foreach ($positionMap as $positionList) {
+            foreach ($positionList as $name) {
+                $positions[$name] = $name;
+            }
+        }
+
+        // SGK sigorta türleri (kod => ad)
+        $sgkInsuranceTypes = [
+            '4A' => 'Hizmet Akdiyle Çalışanlar',
+            '4B' => 'Bağ-Kur (Kendi Adına Çalışanlar)',
+            '4C' => 'Emekli Sandığı',
+            '10' => 'Kısmi Süreli / Part-Time Çalışanlar',
+            '13' => 'Çağrı Üzerine Çalışanlar',
+        ];
+
+        // ÇSGB iş kolları (örnek, lojistik odaklı)
+        $csgbBranches = [
+            '49.41' => 'Kara Taşımacılığı ve Boru Hattı Taşımacılığı',
+            '52.10' => 'Depolama ve Antrepo Faaliyetleri',
+            '52.21' => 'Karayolu Taşımacılığını Destekleyici Faaliyetler',
+            '52.29' => 'Diğer Taşımacılık Destekleyici Faaliyetleri',
+        ];
+
+        // 2821 görevlendirme kodları (örnek)
+        $law2821Duties = [
+            '101' => 'Genel Müdür',
+            '201' => 'Birim / Departman Müdürü',
+            '301' => 'Şoför',
+            '302' => 'Depo Sorumlusu',
+            '303' => 'Operasyon Uzmanı',
+            '304' => 'Muhasebe Uzmanı',
+            '305' => 'Finans Uzmanı',
+        ];
+
+        // Meslek kodu / adı (örnek lojistik meslekleri)
+        $professions = [
+            '833203' => 'Kamyon Şoförü',
+            '833202' => 'Tır Şoförü',
+            '432101' => 'Depo Sorumlusu',
+            '432102' => 'Stok Kontrol Uzmanı',
+            '432103' => 'Lojistik Operasyon Uzmanı',
+            '432104' => 'Sevkiyat Planlama Uzmanı',
+            '241101' => 'Muhasebe Uzmanı',
+            '241301' => 'Finans Analisti',
+        ];
+
         return [
             'countries' => $countries,
             'cities' => $cities,
             'districts' => $districts,
-            'departments' => Department::select('name')->distinct()->orderBy('name')->pluck('name', 'name'),
-            'positions' => Position::select('name')->distinct()->orderBy('name')->pluck('name', 'name'),
+            'departments' => $departments,
+            'positions' => $positions,
+            'position_map' => $positionMap,
+            'sgk_insurance_types' => $sgkInsuranceTypes,
+            'csgb_branches' => $csgbBranches,
+            'law2821_duties' => $law2821Duties,
+            'professions' => $professions,
             'banks' => config('personnel.banks', []),
         ];
     }
@@ -96,7 +218,10 @@ class PersonelController extends Controller
             'active' => Personel::where('aktif', 1)->count(),
         ];
 
-        return view('admin.personnel.index', compact('personels', 'stats'));
+        return view('admin.personnel.index', array_merge(
+            $this->buildFormData(),
+            compact('personels', 'stats'),
+        ));
     }
 
     /**
