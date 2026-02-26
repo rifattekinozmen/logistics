@@ -13,10 +13,15 @@ it('can create a vehicle', function () {
         ->withSession(['active_company_id' => $company->id])
         ->post(route('admin.vehicles.store'), [
             'plate' => '34 ABC 123',
+            'license_number' => 'ABC123456',
             'brand' => 'Mercedes',
+            'series' => 'Actros',
             'model' => 'Actros',
             'year' => 2022,
             'vehicle_type' => 'truck',
+            'fuel_type' => 'diesel',
+            'transmission' => 'automatic',
+            'owner_type' => 'owned',
             'capacity_kg' => 25000,
             'capacity_m3' => 80,
             'status' => 1,
@@ -25,7 +30,10 @@ it('can create a vehicle', function () {
 
     $response->assertRedirect();
     expect(Vehicle::count())->toBe(1);
-    expect(Vehicle::first()->plate)->toBe('34 ABC 123');
+    $vehicle = Vehicle::first();
+    expect($vehicle->plate)->toBe('34 ABC 123');
+    expect($vehicle->license_number)->toBe('ABC123456');
+    expect($vehicle->fuel_type)->toBe('diesel');
 });
 
 it('can list vehicles', function () {

@@ -14,20 +14,34 @@ class Vehicle extends Model
 
     protected $fillable = [
         'plate',
+        'license_number',
         'brand',
+        'series',
         'model',
         'year',
+        'color',
+        'mileage',
         'vehicle_type',
+        'vehicle_subtype',
+        'fuel_type',
+        'transmission',
+        'owner_type',
+        'engine_number',
+        'vin_number',
+        'hgs_number',
+        'hgs_bank',
         'capacity_kg',
         'capacity_m3',
         'status',
         'branch_id',
+        'notes',
     ];
 
     protected function casts(): array
     {
         return [
             'year' => 'integer',
+            'mileage' => 'integer',
             'capacity_kg' => 'decimal:2',
             'capacity_m3' => 'decimal:2',
             'status' => 'integer',

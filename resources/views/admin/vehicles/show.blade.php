@@ -33,6 +33,10 @@
                     <p class="fw-bold text-dark mb-0">{{ $vehicle->plate }}</p>
                 </div>
                 <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Ruhsat No</label>
+                    <p class="text-dark mb-0">{{ $vehicle->license_number ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Durum</label>
                     <div>
                         @php
@@ -55,24 +59,118 @@
                     <p class="fw-bold text-dark mb-0">{{ $vehicle->model }}</p>
                 </div>
                 <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Seri</label>
+                    <p class="text-dark mb-0">{{ $vehicle->series ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
                     <label class="form-label small fw-semibold text-secondary">Yıl</label>
                     <p class="text-dark mb-0">{{ $vehicle->year ?? '-' }}</p>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label small fw-semibold text-secondary">Araç Tipi</label>
+                    <label class="form-label small fw-semibold text-secondary">Renk</label>
+                    <p class="text-dark mb-0">{{ $vehicle->color ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Araç Türü</label>
                     <p class="text-dark mb-0">
                         @php
                             $typeLabels = [
-                                'truck' => 'Kamyon',
-                                'van' => 'Minibüs',
-                                'car' => 'Araba',
-                                'trailer' => 'Römork',
+                                'car' => 'Otomobil',
+                                'truck' => 'Arazi, SUV & Pickup',
+                                'van' => 'Minivan & Panelvan',
+                                'motorcycle' => 'Motosiklet',
+                                'bus' => 'Ticari Araçlar',
+                                'electric' => 'Elektrikli Araçlar',
+                                'rental' => 'Kiralık Araçlar',
+                                'marine' => 'Deniz Araçları',
+                                'damaged' => 'Hasarlı Araçlar',
+                                'caravan' => 'Karavan',
+                                'classic' => 'Klasik Araçlar',
+                                'aircraft' => 'Hava Araçları',
+                                'atv' => 'ATV',
+                                'utv' => 'UTV',
+                                'disabled' => 'Engelli Plakalı Araçlar',
+                                'other' => 'Diğer',
                             ];
                         @endphp
                         <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill">
                             {{ $typeLabels[$vehicle->vehicle_type] ?? $vehicle->vehicle_type }}
                         </span>
                     </p>
+                </div>
+                @if($vehicle->vehicle_subtype)
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Araç Tipi (Alt)</label>
+                    <p class="text-dark mb-0">
+                        @php
+                            $subtypeLabels = [
+                                'minibus' => 'Minibüs & Midibüs',
+                                'bus' => 'Otobüs',
+                                'truck' => 'Kamyon & Kamyonet',
+                                'tractor' => 'Çekici',
+                                'trailer' => 'Dorse',
+                                'caravan' => 'Römork',
+                                'bodywork' => 'Karoser & Üst Yapı',
+                                'recovery' => 'Oto Kurtarıcı & Taşıyıcı',
+                                'commercial' => 'Ticari Hat & Ticari Plaka',
+                            ];
+                        @endphp
+                        {{ $subtypeLabels[$vehicle->vehicle_subtype] ?? $vehicle->vehicle_subtype }}
+                    </p>
+                </div>
+                @endif
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Yakıt Türü</label>
+                    <p class="text-dark mb-0">
+                        @php
+                            $fuelLabels = [
+                                'gasoline' => 'Benzin',
+                                'diesel' => 'Dizel',
+                                'electric' => 'Elektrik',
+                                'hybrid' => 'Hibrit',
+                            ];
+                        @endphp
+                        {{ $vehicle->fuel_type ? ($fuelLabels[$vehicle->fuel_type] ?? $vehicle->fuel_type) : '-' }}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Vites Türü</label>
+                    <p class="text-dark mb-0">
+                        @php
+                            $transmissionLabels = [
+                                'manual' => 'Manuel',
+                                'automatic' => 'Otomatik',
+                                'other' => 'Diğer',
+                            ];
+                        @endphp
+                        {{ $vehicle->transmission ? ($transmissionLabels[$vehicle->transmission] ?? $vehicle->transmission) : '-' }}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Sahiplik Türü</label>
+                    <p class="text-dark mb-0">
+                        @php
+                            $ownerLabels = [
+                                'owned' => 'Şirket Aracı',
+                                'rented' => 'Kiralık Araç',
+                            ];
+                        @endphp
+                        {{ $vehicle->owner_type ? ($ownerLabels[$vehicle->owner_type] ?? $vehicle->owner_type) : '-' }}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Kilometre</label>
+                    <p class="text-dark mb-0">
+                        {{ $vehicle->mileage !== null ? number_format($vehicle->mileage).' km' : '-' }}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Motor No</label>
+                    <p class="text-dark mb-0">{{ $vehicle->engine_number ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Şasi (VIN)</label>
+                    <p class="text-dark mb-0">{{ $vehicle->vin_number ?? '-' }}</p>
                 </div>
             </div>
         </div>
@@ -97,8 +195,31 @@
                     <label class="form-label small fw-semibold text-secondary">Şube</label>
                     <p class="fw-bold text-dark mb-0">{{ $vehicle->branch->name ?? '-' }}</p>
                 </div>
+                <div>
+                    <label class="form-label small fw-semibold text-secondary">HGS</label>
+                    <p class="fw-bold text-dark mb-0">
+                        @if($vehicle->hgs_number)
+                            {{ $vehicle->hgs_number }}
+                            @if($vehicle->hgs_bank)
+                                <span class="text-secondary">({{ $vehicle->hgs_bank }})</span>
+                            @endif
+                        @else
+                            -
+                        @endif
+                    </p>
+                </div>
             </div>
         </div>
+
+        @if($vehicle->notes)
+        <div class="bg-white rounded-3xl shadow-sm border p-4">
+            <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">sticky_note_2</span>
+                Notlar
+            </h3>
+            <p class="text-dark mb-0">{{ $vehicle->notes }}</p>
+        </div>
+        @endif
 
         <div class="bg-white rounded-3xl shadow-sm border p-4">
             <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">

@@ -50,17 +50,41 @@ class VehicleController extends Controller
     {
         $vehicles = $this->vehicleService->getForExport($filters);
 
-        $headers = ['Plaka', 'Marka', 'Model', 'Yıl', 'Tip', 'Kapasite (kg)', 'Kapasite (m³)', 'Şube', 'Durum', 'Oluşturulma'];
+        $headers = ['Plaka', 'Marka', 'Seri', 'Model', 'Yıl', 'Tip', 'Araç Tipi (Alt)', 'Kapasite (kg)', 'Kapasite (m³)', 'Şube', 'Durum', 'Oluşturulma'];
 
-        $typeLabels = ['truck' => 'Kamyon', 'van' => 'Minibüs', 'car' => 'Araba', 'trailer' => 'Römork'];
+        $typeLabels = [
+            'car' => 'Otomobil',
+            'truck' => 'Arazi, SUV & Pickup',
+            'van' => 'Minivan & Panelvan',
+            'motorcycle' => 'Motosiklet',
+            'bus' => 'Ticari Araçlar',
+            'electric' => 'Elektrikli Araçlar',
+            'rental' => 'Kiralık Araçlar',
+            'marine' => 'Deniz Araçları',
+            'damaged' => 'Hasarlı Araçlar',
+            'caravan' => 'Karavan',
+            'classic' => 'Klasik Araçlar',
+            'aircraft' => 'Hava Araçları',
+            'atv' => 'ATV',
+            'utv' => 'UTV',
+            'disabled' => 'Engelli Plakalı Araçlar',
+            'other' => 'Diğer',
+        ];
         $statusLabels = [0 => 'Pasif', 1 => 'Aktif', 2 => 'Bakımda'];
 
+        $subtypeLabels = [
+            'minibus' => 'Minibüs & Midibüs', 'bus' => 'Otobüs', 'truck' => 'Kamyon & Kamyonet',
+            'tractor' => 'Çekici', 'trailer' => 'Dorse', 'caravan' => 'Römork',
+            'bodywork' => 'Karoser & Üst Yapı', 'recovery' => 'Oto Kurtarıcı & Taşıyıcı', 'commercial' => 'Ticari Hat & Ticari Plaka',
+        ];
         $rows = $vehicles->map(fn ($v) => [
             $v->plate,
             $v->brand ?? '-',
+            $v->series ?? '-',
             $v->model ?? '-',
             $v->year !== null ? (string) $v->year : '-',
             $typeLabels[$v->vehicle_type] ?? $v->vehicle_type ?? '-',
+            $v->vehicle_subtype ? ($subtypeLabels[$v->vehicle_subtype] ?? $v->vehicle_subtype) : '-',
             $v->capacity_kg !== null ? (string) $v->capacity_kg : '-',
             $v->capacity_m3 !== null ? (string) $v->capacity_m3 : '-',
             $v->branch?->name ?? '-',
@@ -82,7 +106,69 @@ class VehicleController extends Controller
     {
         $branches = \App\Models\Branch::where('status', 1)->orderBy('name')->get();
 
-        return view('admin.vehicles.create', compact('branches'));
+        $colors = [
+            'Beyaz' => 'Beyaz',
+            'Siyah' => 'Siyah',
+            'Gri' => 'Gri',
+            'Gümüş' => 'Gümüş',
+            'Mavi' => 'Mavi',
+            'Kırmızı' => 'Kırmızı',
+            'Yeşil' => 'Yeşil',
+            'Sarı' => 'Sarı',
+            'Turuncu' => 'Turuncu',
+            'Mor' => 'Mor',
+            'Kahverengi' => 'Kahverengi',
+            'Bej' => 'Bej',
+            'Altın' => 'Altın',
+            'Bronz' => 'Bronz',
+            'Diğer' => 'Diğer',
+        ];
+
+        $hgsBanks = [
+            'Akbank' => 'Akbank',
+            'Albaraka Türk' => 'Albaraka Türk',
+            'Alternatifbank' => 'Alternatifbank',
+            'Anadolubank' => 'Anadolubank',
+            'Bank of America' => 'Bank of America',
+            'Bank of China' => 'Bank of China',
+            'BankPozitif' => 'BankPozitif',
+            'Birleşik Fon Bankası' => 'Birleşik Fon Bankası',
+            'Burgan Bank' => 'Burgan Bank',
+            'Citibank' => 'Citibank',
+            'Denizbank' => 'Denizbank',
+            'Deutsche Bank' => 'Deutsche Bank',
+            'Fibabanka' => 'Fibabanka',
+            'Garanti BBVA' => 'Garanti BBVA',
+            'HSBC' => 'HSBC',
+            'ICBC Turkey Bank' => 'ICBC Turkey Bank',
+            'ING Bank' => 'ING Bank',
+            'İş Bankası' => 'İş Bankası',
+            'JPMorgan Chase Bank' => 'JPMorgan Chase Bank',
+            'Kuveyt Türk' => 'Kuveyt Türk',
+            'Odeabank' => 'Odeabank',
+            'QNB Finansbank' => 'QNB Finansbank',
+            'Şekerbank' => 'Şekerbank',
+            'Türk Ekonomi Bankası (TEB)' => 'Türk Ekonomi Bankası (TEB)',
+            'Türkiye Halk Bankası' => 'Türkiye Halk Bankası',
+            'Türkiye İhracat Kredi Bankası' => 'Türkiye İhracat Kredi Bankası',
+            'Türkiye Kalkınma ve Yatırım Bankası' => 'Türkiye Kalkınma ve Yatırım Bankası',
+            'Türkiye Vakıflar Bankası' => 'Türkiye Vakıflar Bankası',
+            'Türkiye Ziraat Bankası' => 'Türkiye Ziraat Bankası',
+            'Yapı Kredi Bankası' => 'Yapı Kredi Bankası',
+            'Ziraat Katılım' => 'Ziraat Katılım',
+            'Vakıf Katılım' => 'Vakıf Katılım',
+            'Albaraka Katılım' => 'Albaraka Katılım',
+            'Kuveyt Türk Katılım' => 'Kuveyt Türk Katılım',
+            'Türkiye Finans Katılım' => 'Türkiye Finans Katılım',
+            'Ziraat Katılım Bankası' => 'Ziraat Katılım Bankası',
+            'Vakıf Katılım Bankası' => 'Vakıf Katılım Bankası',
+            'Diğer' => 'Diğer',
+        ];
+
+        $brands = \App\Models\Vehicle::select('brand')->distinct()->whereNotNull('brand')->orderBy('brand')->limit(1000)->pluck('brand');
+        $models = \App\Models\Vehicle::select('model')->distinct()->whereNotNull('model')->orderBy('model')->limit(1000)->pluck('model');
+
+        return view('admin.vehicles.create', compact('branches', 'colors', 'hgsBanks', 'brands', 'models'));
     }
 
     /**
@@ -90,7 +176,16 @@ class VehicleController extends Controller
      */
     public function store(StoreVehicleRequest $request): RedirectResponse
     {
-        $vehicle = $this->vehicleService->create($request->validated());
+        $data = $request->validated();
+        if (($data['brand'] ?? '') === 'other' && $request->filled('new_brand')) {
+            $data['brand'] = $request->input('new_brand');
+        }
+        unset($data['new_brand']);
+        if (($data['model'] ?? '') === 'other' && $request->filled('new_model')) {
+            $data['model'] = $request->input('new_model');
+        }
+        unset($data['new_model']);
+        $vehicle = $this->vehicleService->create($data);
 
         return redirect()->route('admin.vehicles.show', $vehicle)
             ->with('success', 'Araç başarıyla oluşturuldu.');
@@ -114,7 +209,69 @@ class VehicleController extends Controller
         $vehicle = \App\Models\Vehicle::findOrFail($id);
         $branches = \App\Models\Branch::where('status', 1)->orderBy('name')->get();
 
-        return view('admin.vehicles.edit', compact('vehicle', 'branches'));
+        $colors = [
+            'Beyaz' => 'Beyaz',
+            'Siyah' => 'Siyah',
+            'Gri' => 'Gri',
+            'Gümüş' => 'Gümüş',
+            'Mavi' => 'Mavi',
+            'Kırmızı' => 'Kırmızı',
+            'Yeşil' => 'Yeşil',
+            'Sarı' => 'Sarı',
+            'Turuncu' => 'Turuncu',
+            'Mor' => 'Mor',
+            'Kahverengi' => 'Kahverengi',
+            'Bej' => 'Bej',
+            'Altın' => 'Altın',
+            'Bronz' => 'Bronz',
+            'Diğer' => 'Diğer',
+        ];
+
+        $hgsBanks = [
+            'Akbank' => 'Akbank',
+            'Albaraka Türk' => 'Albaraka Türk',
+            'Alternatifbank' => 'Alternatifbank',
+            'Anadolubank' => 'Anadolubank',
+            'Bank of America' => 'Bank of America',
+            'Bank of China' => 'Bank of China',
+            'BankPozitif' => 'BankPozitif',
+            'Birleşik Fon Bankası' => 'Birleşik Fon Bankası',
+            'Burgan Bank' => 'Burgan Bank',
+            'Citibank' => 'Citibank',
+            'Denizbank' => 'Denizbank',
+            'Deutsche Bank' => 'Deutsche Bank',
+            'Fibabanka' => 'Fibabanka',
+            'Garanti BBVA' => 'Garanti BBVA',
+            'HSBC' => 'HSBC',
+            'ICBC Turkey Bank' => 'ICBC Turkey Bank',
+            'ING Bank' => 'ING Bank',
+            'İş Bankası' => 'İş Bankası',
+            'JPMorgan Chase Bank' => 'JPMorgan Chase Bank',
+            'Kuveyt Türk' => 'Kuveyt Türk',
+            'Odeabank' => 'Odeabank',
+            'QNB Finansbank' => 'QNB Finansbank',
+            'Şekerbank' => 'Şekerbank',
+            'Türk Ekonomi Bankası (TEB)' => 'Türk Ekonomi Bankası (TEB)',
+            'Türkiye Halk Bankası' => 'Türkiye Halk Bankası',
+            'Türkiye İhracat Kredi Bankası' => 'Türkiye İhracat Kredi Bankası',
+            'Türkiye Kalkınma ve Yatırım Bankası' => 'Türkiye Kalkınma ve Yatırım Bankası',
+            'Türkiye Vakıflar Bankası' => 'Türkiye Vakıflar Bankası',
+            'Türkiye Ziraat Bankası' => 'Türkiye Ziraat Bankası',
+            'Yapı Kredi Bankası' => 'Yapı Kredi Bankası',
+            'Ziraat Katılım' => 'Ziraat Katılım',
+            'Vakıf Katılım' => 'Vakıf Katılım',
+            'Albaraka Katılım' => 'Albaraka Katılım',
+            'Kuveyt Türk Katılım' => 'Kuveyt Türk Katılım',
+            'Türkiye Finans Katılım' => 'Türkiye Finans Katılım',
+            'Ziraat Katılım Bankası' => 'Ziraat Katılım Bankası',
+            'Vakıf Katılım Bankası' => 'Vakıf Katılım Bankası',
+            'Diğer' => 'Diğer',
+        ];
+
+        $brands = \App\Models\Vehicle::select('brand')->distinct()->whereNotNull('brand')->orderBy('brand')->limit(1000)->pluck('brand');
+        $models = \App\Models\Vehicle::select('model')->distinct()->whereNotNull('model')->orderBy('model')->limit(1000)->pluck('model');
+
+        return view('admin.vehicles.edit', compact('vehicle', 'branches', 'colors', 'hgsBanks', 'brands', 'models'));
     }
 
     /**
@@ -123,8 +280,16 @@ class VehicleController extends Controller
     public function update(UpdateVehicleRequest $request, int $id): RedirectResponse
     {
         $vehicle = \App\Models\Vehicle::findOrFail($id);
-
-        $this->vehicleService->update($vehicle, $request->validated());
+        $data = $request->validated();
+        if (($data['brand'] ?? '') === 'other' && $request->filled('new_brand')) {
+            $data['brand'] = $request->input('new_brand');
+        }
+        unset($data['new_brand']);
+        if (($data['model'] ?? '') === 'other' && $request->filled('new_model')) {
+            $data['model'] = $request->input('new_model');
+        }
+        unset($data['new_model']);
+        $this->vehicleService->update($vehicle, $data);
 
         return redirect()->route('admin.vehicles.show', $vehicle)
             ->with('success', 'Araç başarıyla güncellendi.');

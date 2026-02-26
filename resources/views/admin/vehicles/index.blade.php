@@ -59,13 +59,25 @@
             </select>
         </div>
         <div class="col-md-3">
-            <label class="form-label small fw-semibold text-dark">Araç Tipi</label>
+            <label class="form-label small fw-semibold text-dark">Araç Türü</label>
             <select name="vehicle_type" class="form-select">
                 <option value="">Tümü</option>
-                <option value="truck" {{ request('vehicle_type') === 'truck' ? 'selected' : '' }}>Kamyon</option>
-                <option value="van" {{ request('vehicle_type') === 'van' ? 'selected' : '' }}>Minibüs</option>
-                <option value="car" {{ request('vehicle_type') === 'car' ? 'selected' : '' }}>Araba</option>
-                <option value="trailer" {{ request('vehicle_type') === 'trailer' ? 'selected' : '' }}>Römork</option>
+                <option value="car" {{ request('vehicle_type') === 'car' ? 'selected' : '' }}>Otomobil</option>
+                <option value="truck" {{ request('vehicle_type') === 'truck' ? 'selected' : '' }}>Arazi, SUV & Pickup</option>
+                <option value="van" {{ request('vehicle_type') === 'van' ? 'selected' : '' }}>Minivan & Panelvan</option>
+                <option value="motorcycle" {{ request('vehicle_type') === 'motorcycle' ? 'selected' : '' }}>Motosiklet</option>
+                <option value="bus" {{ request('vehicle_type') === 'bus' ? 'selected' : '' }}>Ticari Araçlar</option>
+                <option value="electric" {{ request('vehicle_type') === 'electric' ? 'selected' : '' }}>Elektrikli Araçlar</option>
+                <option value="rental" {{ request('vehicle_type') === 'rental' ? 'selected' : '' }}>Kiralık Araçlar</option>
+                <option value="marine" {{ request('vehicle_type') === 'marine' ? 'selected' : '' }}>Deniz Araçları</option>
+                <option value="damaged" {{ request('vehicle_type') === 'damaged' ? 'selected' : '' }}>Hasarlı Araçlar</option>
+                <option value="caravan" {{ request('vehicle_type') === 'caravan' ? 'selected' : '' }}>Karavan</option>
+                <option value="classic" {{ request('vehicle_type') === 'classic' ? 'selected' : '' }}>Klasik Araçlar</option>
+                <option value="aircraft" {{ request('vehicle_type') === 'aircraft' ? 'selected' : '' }}>Hava Araçları</option>
+                <option value="atv" {{ request('vehicle_type') === 'atv' ? 'selected' : '' }}>ATV</option>
+                <option value="utv" {{ request('vehicle_type') === 'utv' ? 'selected' : '' }}>UTV</option>
+                <option value="disabled" {{ request('vehicle_type') === 'disabled' ? 'selected' : '' }}>Engelli Plakalı Araçlar</option>
+                <option value="other" {{ request('vehicle_type') === 'other' ? 'selected' : '' }}>Diğer</option>
             </select>
         </div>
         <div class="col-md-3">
@@ -220,10 +232,22 @@
                     <td class="align-middle">
                         @php
                             $typeLabels = [
-                                'truck' => 'Kamyon',
-                                'van' => 'Minibüs',
-                                'car' => 'Araba',
-                                'trailer' => 'Römork',
+                                'car' => 'Otomobil',
+                                'truck' => 'Arazi, SUV & Pickup',
+                                'van' => 'Minivan & Panelvan',
+                                'motorcycle' => 'Motosiklet',
+                                'bus' => 'Ticari Araçlar',
+                                'electric' => 'Elektrikli Araçlar',
+                                'rental' => 'Kiralık Araçlar',
+                                'marine' => 'Deniz Araçları',
+                                'damaged' => 'Hasarlı Araçlar',
+                                'caravan' => 'Karavan',
+                                'classic' => 'Klasik Araçlar',
+                                'aircraft' => 'Hava Araçları',
+                                'atv' => 'ATV',
+                                'utv' => 'UTV',
+                                'disabled' => 'Engelli Plakalı Araçlar',
+                                'other' => 'Diğer',
                             ];
                         @endphp
                         <span class="badge bg-secondary-200 text-secondary px-3 py-2 rounded-pill fw-semibold">
