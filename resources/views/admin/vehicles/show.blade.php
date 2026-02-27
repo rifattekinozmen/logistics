@@ -178,6 +178,95 @@
                 </div>
             </div>
         </div>
+
+        <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
+            <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary">description</span>
+                Ruhsat (Ek) Bilgileri
+            </h3>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(B) İlk Tescil Tarihi</label>
+                    <p class="text-dark mb-0">{{ $vehicle->first_registration_date?->format('d.m.Y') ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(Y.2) Tescil Sıra No</label>
+                    <p class="text-dark mb-0">{{ $vehicle->registration_sequence_no ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(I) Tescil Tarihi</label>
+                    <p class="text-dark mb-0">{{ $vehicle->registration_date?->format('d.m.Y') ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(G.1) Net Ağırlığı (kg)</label>
+                    <p class="text-dark mb-0">{{ $vehicle->net_weight_kg !== null ? number_format($vehicle->net_weight_kg, 0, ',', '.').' kg' : '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(G) Katar Ağırlığı (kg)</label>
+                    <p class="text-dark mb-0">{{ $vehicle->train_weight_kg !== null ? number_format($vehicle->train_weight_kg, 0, ',', '.').' kg' : '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(G.2) Römork Azami Yüklü (kg)</label>
+                    <p class="text-dark mb-0">{{ $vehicle->trailer_max_weight_kg !== null ? number_format($vehicle->trailer_max_weight_kg, 0, ',', '.').' kg' : '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(S.1) Koltuk Sayısı</label>
+                    <p class="text-dark mb-0">{{ $vehicle->seat_count !== null ? (string) $vehicle->seat_count : '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(S.2) Ayakta Yolcu Sayısı</label>
+                    <p class="text-dark mb-0">{{ $vehicle->standing_passenger_count !== null ? (string) $vehicle->standing_passenger_count : '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(P.1) Silindir Hacmi (cm³)</label>
+                    <p class="text-dark mb-0">{{ $vehicle->engine_displacement_cm3 !== null ? number_format($vehicle->engine_displacement_cm3).' cm³' : '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(P.2) Motor Gücü (kw)</label>
+                    <p class="text-dark mb-0">{{ $vehicle->engine_power_kw !== null ? number_format($vehicle->engine_power_kw, 2).' kw' : '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(Y.3) Kullanım Amacı</label>
+                    <p class="text-dark mb-0">{{ $vehicle->usage_purpose ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(K) Tip Onay No</label>
+                    <p class="text-dark mb-0">{{ $vehicle->type_approval_no ?? '-' }}</p>
+                </div>
+                <div class="col-12">
+                    <label class="form-label small fw-semibold text-secondary">(Y.4) T.C. Kimlik No / Vergi No</label>
+                    <p class="text-dark mb-0">{{ $vehicle->owner_id_tax_no ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(C.I.1) Soyadı / Ticari Ünvanı</label>
+                    <p class="text-dark mb-0">{{ $vehicle->owner_surname_trade_name ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(C.I.2) Adı</label>
+                    <p class="text-dark mb-0">{{ $vehicle->owner_first_name ?? '-' }}</p>
+                </div>
+                <div class="col-12">
+                    <label class="form-label small fw-semibold text-secondary">(C.I.3) Adresi</label>
+                    <p class="text-dark mb-0">{{ $vehicle->owner_address ?? '-' }}</p>
+                </div>
+                <div class="col-12">
+                    <label class="form-label small fw-semibold text-secondary">(Z.1) Araç Üzerinde Hak ve Menfaati Bulunanlar</label>
+                    <p class="text-dark mb-0">{{ $vehicle->rights_holders ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(Z.3.1) Noter Satış Tarihi</label>
+                    <p class="text-dark mb-0">{{ $vehicle->notary_sale_date?->format('d.m.Y') ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">(Z.3.2) Noter Satış No</label>
+                    <p class="text-dark mb-0">{{ $vehicle->notary_sale_no ?? '-' }}</p>
+                </div>
+                <div class="col-12">
+                    <label class="form-label small fw-semibold text-secondary">(Z.3.3) Noterin Adı</label>
+                    <p class="text-dark mb-0">{{ $vehicle->notary_name ?? '-' }}</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="col-lg-4">

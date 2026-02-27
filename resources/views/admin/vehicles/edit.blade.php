@@ -265,6 +265,90 @@
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+
+            <div class="col-12 mt-4 pt-3 border-top" style="border-color: var(--bs-info-200);">
+                <h4 class="h5 fw-bold text-dark mb-3">Ruhsat (Ek) Bilgileri</h4>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(B) İlk Tescil Tarihi</label>
+                <input type="date" name="first_registration_date" value="{{ old('first_registration_date', $vehicle->first_registration_date?->format('Y-m-d')) }}" class="form-control border-info-200 focus:border-info focus:ring-info">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(Y.2) Tescil Sıra No</label>
+                <input type="text" name="registration_sequence_no" value="{{ old('registration_sequence_no', $vehicle->registration_sequence_no) }}" class="form-control border-info-200 focus:border-info focus:ring-info" maxlength="50">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(I) Tescil Tarihi</label>
+                <input type="date" name="registration_date" value="{{ old('registration_date', $vehicle->registration_date?->format('Y-m-d')) }}" class="form-control border-info-200 focus:border-info focus:ring-info">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(G.1) Net Ağırlığı (kg)</label>
+                <input type="number" step="0.01" name="net_weight_kg" value="{{ old('net_weight_kg', $vehicle->net_weight_kg) }}" min="0" class="form-control border-info-200 focus:border-info focus:ring-info">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(G) Katar Ağırlığı (kg)</label>
+                <input type="number" step="0.01" name="train_weight_kg" value="{{ old('train_weight_kg', $vehicle->train_weight_kg) }}" min="0" class="form-control border-info-200 focus:border-info focus:ring-info">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(G.2) Römork Azami Yüklü (kg)</label>
+                <input type="number" step="0.01" name="trailer_max_weight_kg" value="{{ old('trailer_max_weight_kg', $vehicle->trailer_max_weight_kg) }}" min="0" class="form-control border-info-200 focus:border-info focus:ring-info">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(S.1) Koltuk Sayısı (Sür.Dahil)</label>
+                <input type="number" name="seat_count" value="{{ old('seat_count', $vehicle->seat_count) }}" min="0" class="form-control border-info-200 focus:border-info focus:ring-info">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(S.2) Ayakta Yolcu Sayısı</label>
+                <input type="number" name="standing_passenger_count" value="{{ old('standing_passenger_count', $vehicle->standing_passenger_count) }}" min="0" class="form-control border-info-200 focus:border-info focus:ring-info">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(P.1) Silindir Hacmi (cm³)</label>
+                <input type="number" name="engine_displacement_cm3" value="{{ old('engine_displacement_cm3', $vehicle->engine_displacement_cm3) }}" min="0" class="form-control border-info-200 focus:border-info focus:ring-info">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(P.2) Motor Gücü (kw)</label>
+                <input type="number" step="0.01" name="engine_power_kw" value="{{ old('engine_power_kw', $vehicle->engine_power_kw) }}" min="0" class="form-control border-info-200 focus:border-info focus:ring-info">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(Y.3) Kullanım Amacı</label>
+                <input type="text" name="usage_purpose" value="{{ old('usage_purpose', $vehicle->usage_purpose) }}" class="form-control border-info-200 focus:border-info focus:ring-info" maxlength="100">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(K) Tip Onay No</label>
+                <input type="text" name="type_approval_no" value="{{ old('type_approval_no', $vehicle->type_approval_no) }}" class="form-control border-info-200 focus:border-info focus:ring-info" maxlength="100">
+            </div>
+            <div class="col-12 mt-3">
+                <label class="form-label fw-semibold text-dark">(Y.4) T.C. Kimlik No / Vergi No</label>
+                <input type="text" name="owner_id_tax_no" value="{{ old('owner_id_tax_no', $vehicle->owner_id_tax_no) }}" class="form-control border-info-200 focus:border-info focus:ring-info" maxlength="50">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(C.I.1) Soyadı / Ticari Ünvanı</label>
+                <input type="text" name="owner_surname_trade_name" value="{{ old('owner_surname_trade_name', $vehicle->owner_surname_trade_name) }}" class="form-control border-info-200 focus:border-info focus:ring-info" maxlength="255">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(C.I.2) Adı</label>
+                <input type="text" name="owner_first_name" value="{{ old('owner_first_name', $vehicle->owner_first_name) }}" class="form-control border-info-200 focus:border-info focus:ring-info" maxlength="100">
+            </div>
+            <div class="col-12">
+                <label class="form-label fw-semibold text-dark">(C.I.3) Adresi</label>
+                <textarea name="owner_address" rows="2" class="form-control border-info-200 focus:border-info focus:ring-info">{{ old('owner_address', $vehicle->owner_address) }}</textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label fw-semibold text-dark">(Z.1) Araç Üzerinde Hak ve Menfaati Bulunanlar</label>
+                <textarea name="rights_holders" rows="2" class="form-control border-info-200 focus:border-info focus:ring-info">{{ old('rights_holders', $vehicle->rights_holders) }}</textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(Z.3.1) Noter Satış Tarihi</label>
+                <input type="date" name="notary_sale_date" value="{{ old('notary_sale_date', $vehicle->notary_sale_date?->format('Y-m-d')) }}" class="form-control border-info-200 focus:border-info focus:ring-info">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">(Z.3.2) Noter Satış No</label>
+                <input type="text" name="notary_sale_no" value="{{ old('notary_sale_no', $vehicle->notary_sale_no) }}" class="form-control border-info-200 focus:border-info focus:ring-info" maxlength="50">
+            </div>
+            <div class="col-12">
+                <label class="form-label fw-semibold text-dark">(Z.3.3) Noterin Adı</label>
+                <input type="text" name="notary_name" value="{{ old('notary_name', $vehicle->notary_name) }}" class="form-control border-info-200 focus:border-info focus:ring-info" maxlength="255">
+            </div>
                 </div>
             </div>
 
@@ -513,11 +597,37 @@
                 const notes = form.querySelector('[name="notes"]')?.value;
                 const licenseNumber = form.querySelector('[name="license_number"]')?.value;
                 const branchSelect = form.querySelector('[name="branch_id"]');
+                const firstReg = form.querySelector('[name="first_registration_date"]')?.value;
+                const regSeq = form.querySelector('[name="registration_sequence_no"]')?.value;
+                const regDate = form.querySelector('[name="registration_date"]')?.value;
+                const netWeight = form.querySelector('[name="net_weight_kg"]')?.value;
+                const trainWeight = form.querySelector('[name="train_weight_kg"]')?.value;
+                const trailerMax = form.querySelector('[name="trailer_max_weight_kg"]')?.value;
+                const seatCount = form.querySelector('[name="seat_count"]')?.value;
+                const standingCount = form.querySelector('[name="standing_passenger_count"]')?.value;
+                const disp = form.querySelector('[name="engine_displacement_cm3"]')?.value;
+                const powerKw = form.querySelector('[name="engine_power_kw"]')?.value;
+                const usagePurpose = form.querySelector('[name="usage_purpose"]')?.value;
+                const typeApproval = form.querySelector('[name="type_approval_no"]')?.value;
+                const ownerIdTax = form.querySelector('[name="owner_id_tax_no"]')?.value;
+                const ownerSurname = form.querySelector('[name="owner_surname_trade_name"]')?.value;
+                const ownerFirst = form.querySelector('[name="owner_first_name"]')?.value;
+                const ownerAddr = form.querySelector('[name="owner_address"]')?.value;
+                const rightsHolders = form.querySelector('[name="rights_holders"]')?.value;
+                const notaryDate = form.querySelector('[name="notary_sale_date"]')?.value;
+                const notaryNo = form.querySelector('[name="notary_sale_no"]')?.value;
+                const notaryName = form.querySelector('[name="notary_name"]')?.value;
 
                 const colorText = colorSelect?.selectedOptions?.[0]?.textContent?.trim();
                 const typeText = typeSelectForPreview?.selectedOptions?.[0]?.textContent?.trim();
                 const fuelText = fuelSelect?.selectedOptions?.[0]?.textContent?.trim();
                 const branchText = branchSelect?.selectedOptions?.[0]?.textContent?.trim();
+
+                function formatDateYmdToDmy(ymd) {
+                    if (!ymd) return '';
+                    const [y, m, d] = ymd.split('-');
+                    return d && m && y ? d + '.' + m + '.' + y : ymd;
+                }
 
                 setPreviewValue('plate', plate);
                 setPreviewValue('brand', brand);
@@ -534,6 +644,26 @@
                 setPreviewValue('notes', notes);
                 setPreviewValue('license_number', licenseNumber ? 'Seri ' + licenseNumber : '');
                 setPreviewValue('branch', branchText && branchText !== 'Şube Seçin' ? branchText : '');
+                setPreviewValue('first_registration_date', formatDateYmdToDmy(firstReg));
+                setPreviewValue('registration_sequence_no', regSeq);
+                setPreviewValue('registration_date', formatDateYmdToDmy(regDate));
+                setPreviewValue('net_weight_kg', netWeight ? Number(netWeight).toLocaleString('tr-TR') : '');
+                setPreviewValue('train_weight_kg', trainWeight ? Number(trainWeight).toLocaleString('tr-TR') : '');
+                setPreviewValue('trailer_max_weight_kg', trailerMax ? Number(trailerMax).toLocaleString('tr-TR') : '');
+                setPreviewValue('seat_count', seatCount);
+                setPreviewValue('standing_passenger_count', standingCount);
+                setPreviewValue('engine_displacement_cm3', disp ? Number(disp).toLocaleString('tr-TR') : '');
+                setPreviewValue('engine_power_kw', powerKw ? Number(powerKw).toLocaleString('tr-TR', { minimumFractionDigits: 2 }) : '');
+                setPreviewValue('usage_purpose', usagePurpose);
+                setPreviewValue('type_approval_no', typeApproval);
+                setPreviewValue('owner_id_tax_no', ownerIdTax);
+                setPreviewValue('owner_surname_trade_name', ownerSurname);
+                setPreviewValue('owner_first_name', ownerFirst);
+                setPreviewValue('owner_address', ownerAddr);
+                setPreviewValue('rights_holders', rightsHolders);
+                setPreviewValue('notary_sale_date', formatDateYmdToDmy(notaryDate));
+                setPreviewValue('notary_sale_no', notaryNo);
+                setPreviewValue('notary_name', notaryName);
             }
 
             if (typeSelect) typeSelect.addEventListener('change', updateSubtypeOptions);

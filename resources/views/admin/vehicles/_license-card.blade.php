@@ -44,7 +44,7 @@
                                     </div>
                                     <div class="cell">
                                         <span class="lbl">(B) İlk Tescil Tarihi</span>
-                                        <span class="val sm" style="margin-top:3px;">-</span>
+                                        <span class="val sm" style="margin-top:3px;" data-preview="first_registration_date">{{ $vehicle->first_registration_date?->format('d.m.Y') ?? '-' }}</span>
                                     </div>
                                 </div>
 
@@ -52,11 +52,11 @@
                                 <div class="row">
                                     <div class="cell">
                                         <span class="lbl">(Y.2) Tescil Sıra No</span>
-                                        <span class="val mono">-</span>
+                                        <span class="val mono" data-preview="registration_sequence_no">{{ $vehicle->registration_sequence_no ?? '-' }}</span>
                                     </div>
                                     <div class="cell">
                                         <span class="lbl">(I) Tescil Tarihi</span>
-                                        <span class="val red" style="font-size:12px;">-</span>
+                                        <span class="val red" style="font-size:12px;" data-preview="registration_date">{{ $vehicle->registration_date?->format('d.m.Y') ?? '-' }}</span>
                     </div>
                     </div>
 
@@ -117,7 +117,7 @@
                                     <div class="cell">
                                         <span class="lbl">(G.1) Net Ağırlığı</span>
                                         <div class="d-flex justify-content-between align-items-end">
-                                            <span class="val">-</span>
+                                            <span class="val" data-preview="net_weight_kg">{{ $vehicle->net_weight_kg !== null ? number_format($vehicle->net_weight_kg, 0, ',', '.') : '-' }}</span>
                                             <span class="val xs" style="font-size:9px;font-weight:400;">kg.</span>
                                         </div>
                                     </div>
@@ -137,14 +137,14 @@
                                     <div class="cell">
                                         <span class="lbl">(G) Katar Ağırlığı</span>
                                         <div class="d-flex justify-content-between align-items-end">
-                                            <span class="val">-</span>
+                                            <span class="val" data-preview="train_weight_kg">{{ $vehicle->train_weight_kg !== null ? number_format($vehicle->train_weight_kg, 0, ',', '.') : '-' }}</span>
                                             <span class="val xs" style="font-size:9px;font-weight:400;">kg.</span>
                                         </div>
                                     </div>
                                     <div class="cell cell-pad-left">
                                         <span class="lbl">(G.2) Römork Azami Yüklü</span>
                                         <div class="d-flex justify-content-between align-items-end">
-                                            <span class="val">-</span>
+                                            <span class="val" data-preview="trailer_max_weight_kg">{{ $vehicle->trailer_max_weight_kg !== null ? number_format($vehicle->trailer_max_weight_kg, 0, ',', '.') : '-' }}</span>
                                             <span class="val xs" style="font-size:9px;font-weight:400;">kg.</span>
                                         </div>
                     </div>
@@ -154,11 +154,11 @@
                                 <div class="row">
                                     <div class="cell">
                                         <span class="lbl">(S.1) Koltuk Sayısı (Sür.Dahil)</span>
-                                        <span class="val">-</span>
+                                        <span class="val" data-preview="seat_count">{{ $vehicle->seat_count !== null ? (string) $vehicle->seat_count : '-' }}</span>
                                     </div>
                                     <div class="cell">
                                         <span class="lbl">(S.2) Ayakta Yolcu Sayısı</span>
-                                        <span class="val">-</span>
+                                        <span class="val" data-preview="standing_passenger_count">{{ $vehicle->standing_passenger_count !== null ? (string) $vehicle->standing_passenger_count : '-' }}</span>
                     </div>
                     </div>
 
@@ -167,14 +167,14 @@
                                     <div class="cell">
                                         <span class="lbl">(P.1) Silindir Hacmi</span>
                                         <div class="d-flex justify-content-between align-items-end">
-                                            <span class="val">-</span>
+                                            <span class="val" data-preview="engine_displacement_cm3">{{ $vehicle->engine_displacement_cm3 !== null ? number_format($vehicle->engine_displacement_cm3) : '-' }}</span>
                                             <span class="val xs" style="font-size:9px;font-weight:400;">cm³</span>
                                         </div>
                     </div>
                                     <div class="cell cell-pad-left">
                                         <span class="lbl">(P.2) Motor Gücü</span>
                                         <div class="d-flex justify-content-between align-items-end">
-                                            <span class="val">-</span>
+                                            <span class="val" data-preview="engine_power_kw">{{ $vehicle->engine_power_kw !== null ? number_format($vehicle->engine_power_kw, 2) : '-' }}</span>
                                             <span class="val xs" style="font-size:9px;font-weight:400;">kw</span>
                     </div>
                 </div>
@@ -188,7 +188,7 @@
                                     </div>
                                     <div class="cell cell-val-right">
                                         <span class="lbl">(Q) Güç Ağırlık Oranı (Motosiklet)</span>
-                                        <span class="val xs soft">kw/kg</span>
+                                        <span class="val xs soft">-</span>
                                     </div>
                                 </div>
 
@@ -196,11 +196,11 @@
                                 <div class="row grow">
                                     <div class="cell grow">
                                         <span class="lbl">(Y.3) Kullanım Amacı</span>
-                                        <span class="val xs">-</span>
+                                        <span class="val xs" data-preview="usage_purpose">{{ $vehicle->usage_purpose ?? '-' }}</span>
                                     </div>
                                     <div class="cell grow">
                                         <span class="lbl">(K) Tip Onay No</span>
-                                        <span class="val mono xs">-</span>
+                                        <span class="val mono xs" data-preview="type_approval_no">{{ $vehicle->type_approval_no ?? '-' }}</span>
                                     </div>
                                 </div>
 
@@ -221,34 +221,36 @@
                                 {{-- ROW 0: (Y.4) T.C. Kimlik / Vergi No --}}
                                 <div class="cell">
                                     <span class="lbl">(Y.4) T.C. Kimlik No / Vergi No</span>
-                                    <span class="val navy" style="font-size:17px; letter-spacing:0.07em; margin-top:0;">-</span>
+                                    <span class="val navy" style="font-size:17px; letter-spacing:0.07em; margin-top:0;" data-preview="owner_id_tax_no">{{ $vehicle->owner_id_tax_no ?? '-' }}</span>
                     </div>
 
                                 {{-- ROW 1: (C.I.1) Ünvan --}}
                                 <div class="cell" style="min-height:26px;">
                                     <span class="lbl">(C.I.1) Soyadı / Ticari Ünvanı</span>
-                                    <span class="val xs soft">-</span>
+                                    <span class="val xs soft" data-preview="owner_surname_trade_name">{{ $vehicle->owner_surname_trade_name ?? '-' }}</span>
                     </div>
 
                                 {{-- ROW 2: (C.I.2) Adı --}}
                                 <div class="cell">
                                     <span class="lbl">(C.I.2) Adı</span>
-                                    <span class="val navy" style="font-size:12px;">-</span>
+                                    <span class="val navy" style="font-size:12px;" data-preview="owner_first_name">{{ $vehicle->owner_first_name ?? '-' }}</span>
                     </div>
 
                                 {{-- ROW 3: (C.I.3) Adresi --}}
                                 <div class="cell">
                                     <span class="lbl">(C.I.3) Adresi</span>
-                                    <span class="val xs soft" style="margin-top:3px; line-height:1.65;">-</span>
+                                    <span class="val xs soft" style="margin-top:3px; line-height:1.65;" data-preview="owner_address">{{ $vehicle->owner_address ?? '-' }}</span>
                     </div>
 
                                 {{-- ROW 4: (Z.1) Hak-Menfaat | (Z.3.1) Noter Satış Tarihi --}}
                                 <div class="row" style="min-height:38px;">
                                     <div class="cell" style="flex:1.2;">
                                         <span class="lbl">(Z.1) Araç Üzerinde Hak ve Menfaati Bulunanlar</span>
+                                        <span class="val xs soft" data-preview="rights_holders">{{ $vehicle->rights_holders ?? '-' }}</span>
                     </div>
                                     <div class="cell" style="flex:0.8;">
                                         <span class="lbl">(Z.3.1) Noter Satış Tarihi</span>
+                                        <span class="val xs" data-preview="notary_sale_date">{{ $vehicle->notary_sale_date?->format('d.m.Y') ?? '-' }}</span>
                     </div>
                     </div>
 
