@@ -2,6 +2,10 @@
 
 @section('title', 'Araç Düzenle - Logistics')
 
+@section('styles')
+@include('admin.vehicles._vehicle_styles')
+@endsection
+
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
@@ -20,6 +24,8 @@
         @method('PUT')
 
         <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="row g-4">
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Plaka <span class="text-danger">*</span></label>
                 <input type="text" name="plate" value="{{ old('plate', $vehicle->plate) }}" class="form-control @error('plate') is-invalid @enderror" required>
@@ -254,6 +260,42 @@
                 @error('notes')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
+            </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                @php
+                    $typeLabels = [
+                        'car' => 'Otomobil',
+                        'truck' => 'Arazi, SUV & Pickup',
+                        'van' => 'Minivan & Panelvan',
+                        'motorcycle' => 'Motosiklet',
+                        'bus' => 'Ticari Araçlar',
+                        'electric' => 'Elektrikli Araçlar',
+                        'rental' => 'Kiralık Araçlar',
+                        'marine' => 'Deniz Araçları',
+                        'damaged' => 'Hasarlı Araçlar',
+                        'caravan' => 'Karavan',
+                        'classic' => 'Klasik Araçlar',
+                        'aircraft' => 'Hava Araçları',
+                        'atv' => 'ATV',
+                        'utv' => 'UTV',
+                        'disabled' => 'Engelli Plakalı Araçlar',
+                        'other' => 'Diğer',
+                    ];
+                    $fuelLabels = [
+                        'gasoline' => 'Benzin',
+                        'diesel' => 'Dizel',
+                        'electric' => 'Elektrik',
+                        'hybrid' => 'Hibrit',
+                    ];
+                @endphp
+                @include('admin.vehicles._license-card', [
+                    'vehicle' => $vehicle,
+                    'typeLabels' => $typeLabels,
+                    'fuelLabels' => $fuelLabels,
+                ])
             </div>
         </div>
 

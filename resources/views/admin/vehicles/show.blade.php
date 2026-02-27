@@ -2,6 +2,10 @@
 
 @section('title', 'Araç Detayı - Logistics')
 
+@section('styles')
+@include('admin.vehicles._vehicle_styles')
+@endsection
+
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
@@ -177,6 +181,34 @@
     </div>
 
     <div class="col-lg-4">
+        @include('admin.vehicles._license-card', [
+            'vehicle' => $vehicle,
+            'typeLabels' => $typeLabels ?? [
+                'car' => 'Otomobil',
+                'truck' => 'Arazi, SUV & Pickup',
+                'van' => 'Minivan & Panelvan',
+                'motorcycle' => 'Motosiklet',
+                'bus' => 'Ticari Araçlar',
+                'electric' => 'Elektrikli Araçlar',
+                'rental' => 'Kiralık Araçlar',
+                'marine' => 'Deniz Araçları',
+                'damaged' => 'Hasarlı Araçlar',
+                'caravan' => 'Karavan',
+                'classic' => 'Klasik Araçlar',
+                'aircraft' => 'Hava Araçları',
+                'atv' => 'ATV',
+                'utv' => 'UTV',
+                'disabled' => 'Engelli Plakalı Araçlar',
+                'other' => 'Diğer',
+            ],
+            'fuelLabels' => $fuelLabels ?? [
+                'gasoline' => 'Benzin',
+                'diesel' => 'Dizel',
+                'electric' => 'Elektrik',
+                'hybrid' => 'Hibrit',
+            ],
+        ])
+
         <div class="bg-white rounded-3xl shadow-sm border p-4 mb-4">
             <h3 class="h4 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
                 <span class="material-symbols-outlined text-primary">straighten</span>
