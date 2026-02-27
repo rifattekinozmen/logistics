@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Laravel",
+      "runtimeExecutable": "php",
+      "runtimeArgs": ["artisan", "serve"],
+      "port": 8000,
+      "autoPort": true
+    },
+    {
+      "name": "Vite",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["node_modules/vite/bin/vite.js"],
+      "port": 5173,
+      "autoPort": true
+    }
+  ]
+}

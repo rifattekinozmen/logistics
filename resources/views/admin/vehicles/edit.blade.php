@@ -25,26 +25,30 @@
 
         <div class="row g-4">
             <div class="col-lg-8">
+                <h3 class="h4 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">info</span>
+                    Genel Bilgiler
+                </h3>
                 <div class="row g-4">
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Plaka <span class="text-danger">*</span></label>
-                <input type="text" name="plate" value="{{ old('plate', $vehicle->plate) }}" class="form-control @error('plate') is-invalid @enderror" required>
+                <label class="form-label fw-semibold text-dark">Plaka <span class="text-danger">*</span></label>
+                <input type="text" name="plate" value="{{ old('plate', $vehicle->plate) }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('plate') is-invalid border-danger @enderror" required>
                 @error('plate')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Ruhsat No</label>
-                <input type="text" name="license_number" value="{{ old('license_number', $vehicle->license_number) }}" class="form-control @error('license_number') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">Ruhsat No</label>
+                <input type="text" name="license_number" value="{{ old('license_number', $vehicle->license_number) }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('license_number') is-invalid border-danger @enderror">
                 @error('license_number')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Durum <span class="text-danger">*</span></label>
-                <select name="status" class="form-select @error('status') is-invalid @enderror" required>
+                <label class="form-label fw-semibold text-dark">Durum <span class="text-danger">*</span></label>
+                <select name="status" class="form-select border-info-200 focus:border-info focus:ring-info @error('status') is-invalid border-danger @enderror" required>
                     <option value="1" {{ old('status', $vehicle->status) == 1 ? 'selected' : '' }}>Aktif</option>
                     <option value="0" {{ old('status', $vehicle->status) == 0 ? 'selected' : '' }}>Pasif</option>
                     <option value="2" {{ old('status', $vehicle->status) == 2 ? 'selected' : '' }}>Bakımda</option>
@@ -55,12 +59,12 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Marka <span class="text-danger">*</span></label>
-                <select name="brand" id="brand" class="form-select @error('brand') is-invalid @enderror" required>
+                <label class="form-label fw-semibold text-dark">Marka <span class="text-danger">*</span></label>
+                <select name="brand" id="brand" class="form-select border-info-200 focus:border-info focus:ring-info @error('brand') is-invalid border-danger @enderror" required>
                     <option value="">Marka seçiniz</option>
                 </select>
                 <div id="newBrandInput" class="mt-2" style="display: none;">
-                    <input type="text" name="new_brand" class="form-control" placeholder="Yeni marka adı" maxlength="100" value="{{ old('new_brand') }}">
+                    <input type="text" name="new_brand" class="form-control border-info-200 focus:border-info focus:ring-info" placeholder="Yeni marka adı" maxlength="100" value="{{ old('new_brand') }}">
                 </div>
                 @error('brand')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -68,8 +72,8 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Seri</label>
-                <select name="series" id="series" class="form-select @error('series') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">Seri</label>
+                <select name="series" id="series" class="form-select border-info-200 focus:border-info focus:ring-info @error('series') is-invalid border-danger @enderror">
                     <option value="">Seri seçiniz</option>
                 </select>
                 @error('series')
@@ -78,12 +82,12 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Model <span class="text-danger">*</span></label>
-                <select name="model" id="model" class="form-select @error('model') is-invalid @enderror" required>
+                <label class="form-label fw-semibold text-dark">Model <span class="text-danger">*</span></label>
+                <select name="model" id="model" class="form-select border-info-200 focus:border-info focus:ring-info @error('model') is-invalid border-danger @enderror" required>
                     <option value="">Model seçiniz</option>
                 </select>
                 <div id="newModelInput" class="mt-2" style="display: none;">
-                    <input type="text" name="new_model" class="form-control" placeholder="Yeni model adı" maxlength="100" value="{{ old('new_model') }}">
+                    <input type="text" name="new_model" class="form-control border-info-200 focus:border-info focus:ring-info" placeholder="Yeni model adı" maxlength="100" value="{{ old('new_model') }}">
                 </div>
                 @error('model')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -91,13 +95,13 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Yıl</label>
-                <input type="number" name="year" value="{{ old('year', $vehicle->year) }}" min="1900" max="{{ date('Y') }}" class="form-control">
+                <label class="form-label fw-semibold text-dark">Yıl</label>
+                <input type="number" name="year" value="{{ old('year', $vehicle->year) }}" min="1900" max="{{ date('Y') }}" class="form-control border-info-200 focus:border-info focus:ring-info">
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Renk</label>
-                <select name="color" class="form-select @error('color') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">Renk</label>
+                <select name="color" class="form-select border-info-200 focus:border-info focus:ring-info @error('color') is-invalid border-danger @enderror">
                     <option value="">Seçiniz</option>
                     @foreach(($colors ?? []) as $key => $value)
                         <option value="{{ $key }}" {{ old('color', $vehicle->color) == $key ? 'selected' : '' }}>
@@ -111,8 +115,8 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Araç Türü <span class="text-danger">*</span></label>
-                <select name="vehicle_type" id="vehicle_type" class="form-select @error('vehicle_type') is-invalid @enderror" required>
+                <label class="form-label fw-semibold text-dark">Araç Türü <span class="text-danger">*</span></label>
+                <select name="vehicle_type" id="vehicle_type" class="form-select border-info-200 focus:border-info focus:ring-info @error('vehicle_type') is-invalid border-danger @enderror" required>
                     <option value="">Seçiniz</option>
                     <option value="car" {{ old('vehicle_type', $vehicle->vehicle_type) === 'car' ? 'selected' : '' }}>Otomobil</option>
                     <option value="truck" {{ old('vehicle_type', $vehicle->vehicle_type) === 'truck' ? 'selected' : '' }}>Arazi, SUV & Pickup</option>
@@ -137,8 +141,8 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Araç Tipi</label>
-                <select name="vehicle_subtype" id="vehicle_subtype" class="form-select @error('vehicle_subtype') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">Araç Tipi</label>
+                <select name="vehicle_subtype" id="vehicle_subtype" class="form-select border-info-200 focus:border-info focus:ring-info @error('vehicle_subtype') is-invalid border-danger @enderror">
                     <option value="">Seçiniz</option>
                 </select>
                 @error('vehicle_subtype')
@@ -147,8 +151,8 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Yakıt Türü</label>
-                <select name="fuel_type" class="form-select @error('fuel_type') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">Yakıt Türü</label>
+                <select name="fuel_type" class="form-select border-info-200 focus:border-info focus:ring-info @error('fuel_type') is-invalid border-danger @enderror">
                     <option value="">Seçiniz</option>
                     <option value="gasoline" {{ old('fuel_type', $vehicle->fuel_type) === 'gasoline' ? 'selected' : '' }}>Benzin</option>
                     <option value="diesel" {{ old('fuel_type', $vehicle->fuel_type) === 'diesel' ? 'selected' : '' }}>Dizel</option>
@@ -161,8 +165,8 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Vites Türü</label>
-                <select name="transmission" class="form-select @error('transmission') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">Vites Türü</label>
+                <select name="transmission" class="form-select border-info-200 focus:border-info focus:ring-info @error('transmission') is-invalid border-danger @enderror">
                     <option value="">Seçiniz</option>
                     <option value="manual" {{ old('transmission', $vehicle->transmission) === 'manual' ? 'selected' : '' }}>Manuel</option>
                     <option value="automatic" {{ old('transmission', $vehicle->transmission) === 'automatic' ? 'selected' : '' }}>Otomatik</option>
@@ -174,8 +178,8 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Sahiplik Türü</label>
-                <select name="owner_type" class="form-select @error('owner_type') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">Sahiplik Türü</label>
+                <select name="owner_type" class="form-select border-info-200 focus:border-info focus:ring-info @error('owner_type') is-invalid border-danger @enderror">
                     <option value="">Seçiniz</option>
                     <option value="owned" {{ old('owner_type', $vehicle->owner_type) === 'owned' ? 'selected' : '' }}>Şirket Aracı</option>
                     <option value="rented" {{ old('owner_type', $vehicle->owner_type) === 'rented' ? 'selected' : '' }}>Kiralık Araç</option>
@@ -186,26 +190,26 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Kapasite (kg)</label>
-                <input type="number" step="0.01" name="capacity_kg" value="{{ old('capacity_kg', $vehicle->capacity_kg) }}" class="form-control">
+                <label class="form-label fw-semibold text-dark">Kapasite (kg)</label>
+                <input type="number" step="0.01" name="capacity_kg" value="{{ old('capacity_kg', $vehicle->capacity_kg) }}" class="form-control border-info-200 focus:border-info focus:ring-info">
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Kapasite (m³)</label>
-                <input type="number" step="0.01" name="capacity_m3" value="{{ old('capacity_m3', $vehicle->capacity_m3) }}" class="form-control">
+                <label class="form-label fw-semibold text-dark">Kapasite (m³)</label>
+                <input type="number" step="0.01" name="capacity_m3" value="{{ old('capacity_m3', $vehicle->capacity_m3) }}" class="form-control border-info-200 focus:border-info focus:ring-info">
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Kilometre</label>
-                <input type="number" name="mileage" value="{{ old('mileage', $vehicle->mileage) }}" min="0" class="form-control @error('mileage') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">Kilometre</label>
+                <input type="number" name="mileage" value="{{ old('mileage', $vehicle->mileage) }}" min="0" class="form-control border-info-200 focus:border-info focus:ring-info @error('mileage') is-invalid border-danger @enderror">
                 @error('mileage')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Şube</label>
-                <select name="branch_id" class="form-select">
+                <label class="form-label fw-semibold text-dark">Şube</label>
+                <select name="branch_id" class="form-select border-info-200 focus:border-info focus:ring-info">
                     <option value="">Şube Seçin</option>
                     @foreach($branches ?? [] as $branch)
                     <option value="{{ $branch->id }}" {{ old('branch_id', $vehicle->branch_id) == $branch->id ? 'selected' : '' }}>
@@ -216,32 +220,32 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Motor No</label>
-                <input type="text" name="engine_number" value="{{ old('engine_number', $vehicle->engine_number) }}" class="form-control @error('engine_number') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">Motor No</label>
+                <input type="text" name="engine_number" value="{{ old('engine_number', $vehicle->engine_number) }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('engine_number') is-invalid border-danger @enderror">
                 @error('engine_number')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Şasi (VIN)</label>
-                <input type="text" name="vin_number" value="{{ old('vin_number', $vehicle->vin_number) }}" class="form-control @error('vin_number') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">Şasi (VIN)</label>
+                <input type="text" name="vin_number" value="{{ old('vin_number', $vehicle->vin_number) }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('vin_number') is-invalid border-danger @enderror">
                 @error('vin_number')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">HGS No</label>
-                <input type="text" name="hgs_number" value="{{ old('hgs_number', $vehicle->hgs_number) }}" class="form-control @error('hgs_number') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">HGS No</label>
+                <input type="text" name="hgs_number" value="{{ old('hgs_number', $vehicle->hgs_number) }}" class="form-control border-info-200 focus:border-info focus:ring-info @error('hgs_number') is-invalid border-danger @enderror">
                 @error('hgs_number')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-semibold">HGS Bankası</label>
-                <select name="hgs_bank" class="form-select @error('hgs_bank') is-invalid @enderror">
+                <label class="form-label fw-semibold text-dark">HGS Bankası</label>
+                <select name="hgs_bank" class="form-select border-info-200 focus:border-info focus:ring-info @error('hgs_bank') is-invalid border-danger @enderror">
                     <option value="">Seçiniz</option>
                     @foreach(($hgsBanks ?? []) as $key => $value)
                         <option value="{{ $key }}" {{ old('hgs_bank', $vehicle->hgs_bank) == $key ? 'selected' : '' }}>
@@ -255,8 +259,8 @@
             </div>
 
             <div class="col-12">
-                <label class="form-label fw-semibold">Notlar</label>
-                <textarea name="notes" rows="3" class="form-control @error('notes') is-invalid @enderror">{{ old('notes', $vehicle->notes) }}</textarea>
+                <label class="form-label fw-semibold text-dark">Notlar</label>
+                <textarea name="notes" rows="3" class="form-control border-info-200 focus:border-info focus:ring-info @error('notes') is-invalid border-danger @enderror">{{ old('notes', $vehicle->notes) }}</textarea>
                 @error('notes')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -299,9 +303,9 @@
             </div>
         </div>
 
-        <div class="d-flex align-items-center justify-content-end gap-3 mt-4 pt-4 border-top">
-            <a href="{{ route('admin.vehicles.show', $vehicle->id) }}" class="btn btn-light">İptal</a>
-            <button type="submit" class="btn btn-primary">Güncelle</button>
+        <div class="d-flex align-items-center justify-content-end gap-3 mt-4 pt-4 border-top" style="border-color: var(--bs-info-200);">
+            <a href="{{ route('admin.vehicles.show', $vehicle->id) }}" class="btn bg-secondary-200 text-secondary border-0 hover:bg-secondary hover:text-white transition-all">İptal</a>
+            <button type="submit" class="btn btn-primary shadow-sm hover:shadow-md transition-all">Güncelle</button>
         </div>
     </form>
 </div>
@@ -478,12 +482,72 @@
             const brandSelect = document.getElementById('brand');
             const seriesSelect = document.getElementById('series');
             const modelSelect = document.getElementById('model');
+            const previewRoot = document.querySelector('.vehicle-license-root');
+
+            function setPreviewValue(key, value) {
+                if (!previewRoot) {
+                    return;
+                }
+                previewRoot.querySelectorAll('[data-preview="' + key + '"]').forEach(function (el) {
+                    el.textContent = value && String(value).trim() !== '' ? String(value) : '-';
+                });
+            }
+
+            function refreshPreviewFromForm() {
+                const form = document.querySelector('form[action*="vehicles"]');
+                if (!form) {
+                    return;
+                }
+
+                const plate = form.querySelector('[name="plate"]')?.value;
+                const brand = form.querySelector('[name="brand"]')?.value;
+                const series = form.querySelector('[name="series"]')?.value;
+                const model = form.querySelector('[name="model"]')?.value;
+                const year = form.querySelector('[name="year"]')?.value;
+                const colorSelect = form.querySelector('[name="color"]');
+                const typeSelectForPreview = form.querySelector('[name="vehicle_type"]');
+                const fuelSelect = form.querySelector('[name="fuel_type"]');
+                const engineNumber = form.querySelector('[name="engine_number"]')?.value;
+                const vinNumber = form.querySelector('[name="vin_number"]')?.value;
+                const capacityKg = form.querySelector('[name="capacity_kg"]')?.value;
+                const notes = form.querySelector('[name="notes"]')?.value;
+                const licenseNumber = form.querySelector('[name="license_number"]')?.value;
+                const branchSelect = form.querySelector('[name="branch_id"]');
+
+                const colorText = colorSelect?.selectedOptions?.[0]?.textContent?.trim();
+                const typeText = typeSelectForPreview?.selectedOptions?.[0]?.textContent?.trim();
+                const fuelText = fuelSelect?.selectedOptions?.[0]?.textContent?.trim();
+                const branchText = branchSelect?.selectedOptions?.[0]?.textContent?.trim();
+
+                setPreviewValue('plate', plate);
+                setPreviewValue('brand', brand);
+                setPreviewValue('series', series);
+                setPreviewValue('model', model);
+                setPreviewValue('year', year);
+                setPreviewValue('color', colorText && colorText !== 'Seçiniz' ? colorText : '');
+                setPreviewValue('vehicle_type', typeText && typeText !== 'Seçiniz' ? typeText : '');
+                setPreviewValue('cinsi', typeText && typeText !== 'Seçiniz' ? typeText : '');
+                setPreviewValue('fuel_type', fuelText && fuelText !== 'Seçiniz' ? fuelText : '');
+                setPreviewValue('engine_number', engineNumber);
+                setPreviewValue('vin_number', vinNumber);
+                setPreviewValue('capacity_kg', capacityKg);
+                setPreviewValue('notes', notes);
+                setPreviewValue('license_number', licenseNumber ? 'Seri ' + licenseNumber : '');
+                setPreviewValue('branch', branchText && branchText !== 'Şube Seçin' ? branchText : '');
+            }
+
             if (typeSelect) typeSelect.addEventListener('change', updateSubtypeOptions);
             if (subtypeSelect) subtypeSelect.addEventListener('change', updateBrandDropdown);
             if (brandSelect) brandSelect.addEventListener('change', function () { updateSeriesDropdown(); toggleNewBrand(); });
             if (seriesSelect) seriesSelect.addEventListener('change', function () { updateModelDropdown(); });
             if (modelSelect) modelSelect.addEventListener('change', toggleNewModel);
+            document.querySelectorAll('form[action*="vehicles"] input, form[action*="vehicles"] select, form[action*="vehicles"] textarea')
+                .forEach(function (field) {
+                    field.addEventListener('input', refreshPreviewFromForm);
+                    field.addEventListener('change', refreshPreviewFromForm);
+                });
             updateSubtypeOptions();
+            refreshPreviewFromForm();
         });
     })();
 </script>
