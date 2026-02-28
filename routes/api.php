@@ -1,6 +1,11 @@
 <?php
 
 use App\Customer\Controllers\Api\V2\CustomerMobileController;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use App\Driver\Controllers\Api\DriverController;
 use App\Driver\Controllers\Api\V2\DriverV2Controller;
 use App\Employee\Controllers\Api\EmployeeController;
@@ -35,6 +40,17 @@ Route::get('/districts', function (\Illuminate\Http\Request $request) {
 
 Route::post('payment/callback', [PaymentCallbackController::class, 'handle'])
     ->name('api.payment.callback');
+
+Route::post('login', function (Request $request) {
+    $request->validate(['email' => 'required|email', 'password' => 'required']);
+    $user = User::where('email', $request->email)->first();
+    if (! $user || ! Hash::check($request->password, $user->password)) {
+        throw ValidationException::withMessages(['email' => ['E-posta veya şifre hatalı.']]);
+    }
+    $token = $user->createToken('mobile')->plainTextToken;
+
+    return response()->json(['token' => $token, 'user' => ['id' => $user->id, 'email' => $user->email, 'name' => $user->name]]);
+})->name('api.login');
 
 Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     // Orders

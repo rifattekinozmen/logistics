@@ -8,27 +8,27 @@
 
 ## Faz 1 – İskelet ve Auth
 - [x] Plan dokümanı
-- [ ] Expo projesi `mobile/` (create-expo-app)
-- [ ] API client (base URL, Sanctum Bearer token)
-- [ ] Login ekranı (email + password → POST /login → token)
-- [ ] Token saklama (SecureStore) + auth context
-- [ ] Tab/drawer: Giriş yoksa Login, varsa Ana sayfa
+- [x] Expo projesi `mobile/` (create-expo-app)
+- [x] API client (base URL, Sanctum Bearer token)
+- [x] Login ekranı (email + password → POST /login → token)
+- [x] Token saklama (SecureStore) + auth context
+- [x] Tab/drawer: Giriş yoksa Login, varsa Ana sayfa
 
 ## Faz 2 – Sevkiyatlar
-- [ ] GET /api/v1/driver/shipments → liste ekranı
-- [ ] Filtre (status query)
-- [ ] Sevkiyat detay ekranı (order_number, adresler, status)
-- [ ] Durum güncelleme: PUT .../status (assigned → loaded → in_transit → delivered)
+- [x] GET /api/v1/driver/shipments → liste ekranı
+- [x] Filtre (status query)
+- [x] Sevkiyat detay ekranı (order_number, adresler, status)
+- [x] Durum güncelleme: PUT .../status (assigned → loaded → in_transit → delivered)
 
 ## Faz 3 – POD ve Konum
-- [ ] POD yükleme: seçilen sevkiyat için POST .../pod (multipart, pod_file)
+- [x] POD yükleme: seçilen sevkiyat için POST .../pod (multipart, pod_file)
 - [ ] Konum: POST /api/v1/driver/location (latitude, longitude, shipment_id?)
 - [ ] v2: GET /api/v2/driver/dashboard, POST /api/v2/driver/checkin (opsiyonel)
 
 ## Faz 4 – İyileştirmeler
-- [ ] Çekme-yenile (pull-to-refresh)
+- [x] Çekme-yenile (pull-to-refresh)
 - [ ] Hata/offline mesajları
-- [ ] .env (EXPO_PUBLIC_API_URL) ile API base
+- [x] .env (EXPO_PUBLIC_API_URL) ile API base
 
 ---
 
