@@ -19,10 +19,13 @@ class GenerateWeeklyReportJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 2;
+
     public function __construct(
         protected ?Carbon $startDate = null,
         protected ?Carbon $endDate = null
     ) {
+        $this->onQueue('low');
         $this->startDate = $startDate ?? now()->subWeek()->startOfWeek();
         $this->endDate = $endDate ?? now()->subWeek()->endOfWeek();
     }

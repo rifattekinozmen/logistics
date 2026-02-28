@@ -98,26 +98,25 @@ Order   → Shipment → Delivery → Invoice → Finance → Analytics
 
 ## ═══ 4. SESSION BELLEĞİ ═══
 
-> **Son Güncelleme:** 2026-02-22
+> **Son Güncelleme:** 2026-02-28
 
-**Aktif Entity:** `AnalyticsDashboardService` + Analytics Dashboard
+**Aktif Entity:** Faz 2/3 tamamlandı (Analytics, Reporting, Bildirim, AI skorları, PythonBridge, GPS harita).
 
-**Son Değişiklikler (git status):**
-- `app/Analytics/Services/AnalyticsDashboardService.php` — finansal metrik metodları refactor
-- `resources/js/charts.js` — mevcut chart yapısı yeniden düzenlendi
-- `resources/js/analytics-charts.js` *(yeni)* — modüler chart başlatma
-- `resources/views/admin/analytics/finance.blade.php` — Chart.js entegrasyonu
-- `resources/views/admin/analytics/fleet.blade.php` — Chart.js entegrasyonu
-- `resources/views/admin/analytics/operations.blade.php` — Chart.js entegrasyonu
-- `resources/views/layouts/app.blade.php` — Vite asset güncelleme
-- `vite.config.js` — analytics-charts.js entry point eklendi
-- `tests/Feature/AnalyticsTest.php` *(yeni)* — test coverage başlatıldı
+**Tamamlanan Faz 2/3 (son oturumlar):**
+- Queue: Job’larda `onQueue()` + tries/backoff; `07-queue-jobs.md`
+- Order/Shipment: 404 ve filtre feature testleri
+- AIFleetService: bakım anomali, fleet_avg_score, deviation, trend, scoreToSeverity
+- AIFinanceService: risk_score, overdue_ratio, volatility, severity kuralları
+- AIDocumentService: document_risk_score, scoreToSeverity
+- PythonBridgeService: buildFinanceRiskPayload, buildFleetMaintenancePayload; config/python_bridge.php, enabled/retry/backoff
+- Filo harita: admin fleet-map sayfası, fleetMapPositions (company-scoped JSON)
+- Bildirim: NotificationChannel arayüzü, SmsChannel, WhatsappChannel, config/channels; CheckDocumentExpiry/CheckPaymentDue’da sendForScenario
+- Reporting API: finance-summary, fleet-utilization, operations-kpi; 5 dk cache; throttle:reporting (10/dk)
 
 **Sonraki Beklenen Adımlar:**
-1. `AnalyticsTest.php` test case'lerini tamamla
-2. `AnalyticsDashboardService` — fleet metrics metodunu doğrula
-3. `analytics-charts.js` — hata yönetimi ekle (empty data fallback)
-4. Finance analytics — aylık karşılaştırma grafiği ekle
+1. İsteğe bağlı: SMS/WhatsApp gerçek sağlayıcı entegrasyonu (Twilio vb.)
+2. İsteğe bağlı: notification_logs / aynı bildirim günde 1 kez (rate limit)
+3. Mobil uygulama (Faz 2 — Flutter/RN) veya diğer backlog öğeleri
 
 ---
 

@@ -12,10 +12,13 @@ use App\Listeners\CreateInvoiceDraft;
 use App\Listeners\CreatePaymentIntentForOrder;
 use App\Listeners\CreateShipmentPlanForPaidOrder;
 use App\Listeners\MoveOrderToPreparing;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 
@@ -37,7 +40,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            \App\Notification\Contracts\SmsProviderInterface::class,
+            \App\Notification\Providers\LogOnlySmsProvider::class
+        );
+        $this->app->bind(
+            \App\Notification\Contracts\WhatsappProviderInterface::class,
+            \App\Notification\Providers\LogOnlyWhatsappProvider::class
+        );
     }
 
     /**
@@ -46,6 +56,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Route::bind('personnel', fn (string $value) => \App\Models\Personel::findOrFail($value));
+
+        RateLimiter::for('reporting', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
+        });
 
         Paginator::useBootstrapFive();
 

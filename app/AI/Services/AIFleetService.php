@@ -139,23 +139,46 @@ class AIFleetService
             ->where('status', 1)
             ->get();
 
+        $allScores = [];
         $maintenanceAnomalies = [];
+        $hasCriticalInspection = false;
         foreach ($vehicles as $vehicle) {
             $prediction = $this->predictMaintenanceNeeds($vehicle);
+            $allScores[] = $prediction['maintenance_score'];
             if ($prediction['status'] === 'needs_attention' || $prediction['maintenance_score'] < 40) {
+                $inspectionCritical = $prediction['last_inspection_days'] >= self::INSPECTION_CRITICAL_DAYS;
+                if ($inspectionCritical) {
+                    $hasCriticalInspection = true;
+                }
                 $maintenanceAnomalies[] = [
                     'vehicle_id' => $vehicle->id,
                     'plate' => $vehicle->plate,
                     'maintenance_score' => $prediction['maintenance_score'],
+                    'inspection_critical' => $inspectionCritical,
+                    'last_inspection_days' => $prediction['last_inspection_days'],
                 ];
             }
         }
 
+        $fleetAvgScore = count($allScores) > 0 ? round((float) array_sum($allScores) / count($allScores), 1) : 0.0;
+
+        foreach ($maintenanceAnomalies as $i => $anomaly) {
+            $maintenanceAnomalies[$i]['maintenance_risk'] = round(100 - $anomaly['maintenance_score'], 1);
+            $maintenanceAnomalies[$i]['days_since_inspection'] = $anomaly['last_inspection_days'];
+            $maintenanceAnomalies[$i]['fleet_avg_score'] = $fleetAvgScore;
+            $maintenanceAnomalies[$i]['deviation'] = round($anomaly['maintenance_score'] - $fleetAvgScore, 1);
+            $maintenanceAnomalies[$i]['trend'] = 'stable';
+        }
+
         if (count($maintenanceAnomalies) > 0) {
+            $minScore = min(array_column($maintenanceAnomalies, 'maintenance_score'));
+            $severity = $hasCriticalInspection || count($maintenanceAnomalies) >= 3
+                ? 'high'
+                : $this->scoreToSeverity($minScore);
             $reports[] = $this->createReport(
                 'fleet',
                 count($maintenanceAnomalies).' araç acil bakım veya muayene gerektiriyor.',
-                count($maintenanceAnomalies) >= 3 ? 'high' : 'medium',
+                $severity,
                 ['vehicles' => $maintenanceAnomalies]
             );
         }
@@ -369,6 +392,21 @@ class AIFleetService
         }
 
         return $recommendations;
+    }
+
+    /**
+     * Ortak skor → severity (0–100, 100 en iyi). ADVANCED_SCORING.md.
+     */
+    protected function scoreToSeverity(float $score): string
+    {
+        if ($score >= 80) {
+            return 'low';
+        }
+        if ($score >= 50) {
+            return 'medium';
+        }
+
+        return 'high';
     }
 
     /**

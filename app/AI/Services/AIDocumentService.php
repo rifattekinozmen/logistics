@@ -19,6 +19,10 @@ class AIDocumentService
     {
         $reports = [];
 
+        $incompleteCount = Document::query()
+            ->where(fn ($q) => $q->whereNull('file_path')->orWhereNull('category'))
+            ->count();
+
         // 1) Son 30 günde süresi dolacak belgeler
         $expiringSoon = Document::query()
             ->whereNotNull('valid_until')
@@ -31,11 +35,10 @@ class AIDocumentService
             $criticalCount = $expiringSoon->where('valid_until', '<=', now()->addDays(7))->count();
             $totalCount = $expiringSoon->count();
 
-            $severity = match (true) {
-                $criticalCount >= 5 || $totalCount >= 20 => 'high',
-                $criticalCount >= 1 || $totalCount >= 10 => 'medium',
-                default => 'low',
-            };
+            $expiryRisk = min(100, $criticalCount * 10 + $totalCount * 2);
+            $dataQualityRisk = min(100, $incompleteCount * 5);
+            $documentRiskScore = min(100, $expiryRisk * 0.7 + $dataQualityRisk * 0.3);
+            $severity = $this->scoreToSeverity(100 - $documentRiskScore);
 
             $reports[] = $this->createReport(
                 'document_compliance',
@@ -44,6 +47,8 @@ class AIDocumentService
                 [
                     'total_expiring_30d' => $totalCount,
                     'critical_expiring_7d' => $criticalCount,
+                    'incomplete_count' => $incompleteCount,
+                    'document_risk_score' => round($documentRiskScore, 1),
                     'documents' => $expiringSoon->take(10)->map(fn (Document $doc) => [
                         'id' => $doc->id,
                         'name' => $doc->name,
@@ -56,15 +61,15 @@ class AIDocumentService
 
         // 2) Eksik dosya yolu veya kategori bilgisi olan belgeler
         $incompleteDocs = Document::query()
-            ->whereNull('file_path')
-            ->orWhereNull('category')
+            ->where(fn ($q) => $q->whereNull('file_path')->orWhereNull('category'))
             ->get();
 
         if ($incompleteDocs->isNotEmpty()) {
+            $docSeverity = $this->scoreToSeverity(max(0, 100 - min(100, $incompleteDocs->count() * 5)));
             $reports[] = $this->createReport(
                 'document_compliance',
                 $incompleteDocs->count().' belgenin dosya yolu veya kategorisi eksik.',
-                $incompleteDocs->count() > 10 ? 'medium' : 'low',
+                $docSeverity,
                 [
                     'incomplete_count' => $incompleteDocs->count(),
                     'documents' => $incompleteDocs->take(10)->map(fn (Document $doc) => [
@@ -253,6 +258,21 @@ class AIDocumentService
         }
 
         return $recommendations;
+    }
+
+    /**
+     * Ortak skor → severity (0–100, 100 en iyi). ADVANCED_SCORING.md.
+     */
+    protected function scoreToSeverity(float $score): string
+    {
+        if ($score >= 80) {
+            return 'low';
+        }
+        if ($score >= 50) {
+            return 'medium';
+        }
+
+        return 'high';
     }
 
     /**

@@ -35,4 +35,20 @@ abstract class AIService
             'generated_at' => now(),
         ];
     }
+
+    /**
+     * Ortak risk skoru → severity eşlemesi (0–100; 100 en iyi).
+     * ADVANCED_SCORING.md: 80+ low, 50–79 medium, 0–49 high.
+     */
+    protected function scoreToSeverity(float $score): string
+    {
+        if ($score >= 80) {
+            return 'low';
+        }
+        if ($score >= 50) {
+            return 'medium';
+        }
+
+        return 'high';
+    }
 }

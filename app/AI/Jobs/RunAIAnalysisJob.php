@@ -34,7 +34,9 @@ class RunAIAnalysisJob implements ShouldQueue
      */
     public function __construct(
         protected ?Company $company = null
-    ) {}
+    ) {
+        $this->onQueue('default');
+    }
 
     /**
      * Execute the job.

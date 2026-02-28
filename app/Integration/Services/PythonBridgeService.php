@@ -2,26 +2,38 @@
 
 namespace App\Integration\Services;
 
+use App\AI\Services\AIFleetService;
 use App\Integration\Jobs\SendToPythonJob;
+use App\Models\Customer;
 use App\Models\FuelPrice;
+use App\Models\Payment;
 use App\Models\Shipment;
+use App\Models\Vehicle;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class PythonBridgeService
 {
     /**
      * Python ara katmana veri gönder.
-     *
-     * Python SDK kısıtları için ara katman kullanılıyorsa bu servis kullanılır.
+     * config('python_bridge.enabled') false ise HTTP atılmaz (fail-safe).
      */
     public function sendToPython(array $data, string $action = 'process'): array
     {
-        try {
-            $pythonEndpoint = config('services.python.endpoint', 'http://localhost:8001/api/process');
+        if (! config('python_bridge.enabled', false)) {
+            Log::debug('Python bridge disabled, skipping send.', ['action' => $action]);
 
-            $response = Http::timeout(30)->post($pythonEndpoint, [
+            return ['success' => true, 'response' => ['skipped' => true]];
+        }
+
+        try {
+            $endpoint = config('python_bridge.endpoint', config('services.python.endpoint', 'http://localhost:8001/api/process'));
+            $timeout = config('python_bridge.timeout', 30);
+
+            $response = Http::timeout($timeout)->post($endpoint, [
                 'action' => $action,
                 'data' => $data,
                 'timestamp' => now()->toIso8601String(),
@@ -134,5 +146,122 @@ class PythonBridgeService
             'source' => $payload['source'],
             'payload' => $payload,
         ], 'fuel_shipments');
+    }
+
+    /**
+     * Finans risk özeti payload'ı oluşturur (geciken ödemeler, toplam bakiye).
+     *
+     * @return array{source: string, company_id: int, period: array{start: string, end: string}, overdue_payments: array<int, array{id: int, customer_id: int, days_overdue: int, amount: float}>, total_outstanding: float, collection_rate: float}
+     */
+    public function buildFinanceRiskPayload(int $companyId, int $days = 30): array
+    {
+        $start = now()->subDays($days);
+        $end = now();
+
+        $customerIds = Customer::where('company_id', $companyId)->pluck('id')->all();
+
+        $overdueQuery = Payment::query()
+            ->where('related_type', Customer::class)
+            ->whereIn('related_id', $customerIds)
+            ->where('status', Payment::STATUS_PENDING)
+            ->where('due_date', '<', now());
+
+        $overduePayments = $overdueQuery->get();
+
+        $overdueList = $overduePayments->map(fn (Payment $p) => [
+            'id' => $p->id,
+            'customer_id' => $p->related_id,
+            'days_overdue' => (int) now()->diffInDays($p->due_date, false),
+            'amount' => round((float) $p->amount, 2),
+        ])->values()->all();
+
+        $totalOutstanding = round((float) $overduePayments->sum('amount'), 2);
+
+        $paidInPeriod = (float) Payment::query()
+            ->where('related_type', Customer::class)
+            ->whereIn('related_id', $customerIds)
+            ->where('status', Payment::STATUS_PAID)
+            ->whereBetween('paid_date', [$start, $end])
+            ->sum('amount');
+
+        $invoicedInPeriod = 0.0;
+        if (Schema::hasTable('orders')) {
+            $invoicedInPeriod = (float) DB::table('orders')
+                ->where('company_id', $companyId)
+                ->where('status', 'invoiced')
+                ->whereBetween('created_at', [$start, $end])
+                ->sum('freight_price');
+        }
+
+        $collectionRate = $invoicedInPeriod > 0 ? round(($paidInPeriod / $invoicedInPeriod) * 100, 2) : 0.0;
+
+        return [
+            'source' => 'finance_risk',
+            'company_id' => $companyId,
+            'period' => [
+                'start' => $start->toDateString(),
+                'end' => $end->toDateString(),
+            ],
+            'overdue_payments' => $overdueList,
+            'total_outstanding' => $totalOutstanding,
+            'collection_rate' => $collectionRate,
+        ];
+    }
+
+    /**
+     * Filo bakım özeti payload'ı oluşturur (AIFleetService ile).
+     *
+     * @return array{source: string, company_id: int, vehicles: array<int, array{id: int, plate: string, maintenance_score: float, last_inspection_days: int, status: string}>}
+     */
+    public function buildFleetMaintenancePayload(int $companyId): array
+    {
+        $fleetService = app(AIFleetService::class);
+
+        $vehicles = Vehicle::query()
+            ->whereHas('branch', fn ($q) => $q->where('company_id', $companyId))
+            ->where('status', 1)
+            ->get();
+
+        $vehiclesData = [];
+        foreach ($vehicles as $vehicle) {
+            $prediction = $fleetService->predictMaintenanceNeeds($vehicle);
+            $vehiclesData[] = [
+                'id' => $vehicle->id,
+                'plate' => $vehicle->plate,
+                'maintenance_score' => $prediction['maintenance_score'],
+                'last_inspection_days' => $prediction['last_inspection_days'],
+                'status' => $prediction['status'],
+            ];
+        }
+
+        return [
+            'source' => 'fleet_maintenance',
+            'company_id' => $companyId,
+            'vehicles' => $vehiclesData,
+        ];
+    }
+
+    /**
+     * Finans risk özetini Python'a kuyruk üzerinden gönderir.
+     */
+    public function pushFinanceRiskToPython(int $companyId, int $days = 30): void
+    {
+        $payload = $this->buildFinanceRiskPayload($companyId, $days);
+        $this->sendToPythonAsync([
+            'source' => $payload['source'],
+            'payload' => $payload,
+        ], 'finance_risk');
+    }
+
+    /**
+     * Filo bakım özetini Python'a kuyruk üzerinden gönderir.
+     */
+    public function pushFleetMaintenanceToPython(int $companyId): void
+    {
+        $payload = $this->buildFleetMaintenancePayload($companyId);
+        $this->sendToPythonAsync([
+            'source' => $payload['source'],
+            'payload' => $payload,
+        ], 'fleet_maintenance');
     }
 }

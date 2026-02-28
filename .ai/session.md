@@ -1,43 +1,38 @@
 # Session State
 
-**Last updated:** 2026-02-25
+**Last updated:** 2026-02-28
 **Branch:** main
-**Status:** Active development
+**Status:** Faz 2/3 tamamlandı
 
 ## Current Focus
 
-Faz 2/3 backlog: queue yapılandırması, Order/Shipment testleri, AIFleetService gelişmiş kurallar.
+Faz 2/3 tamamlandı. Opsiyonel: SMS/WhatsApp sağlayıcı entegrasyonu, notification rate limit, mobil uygulama.
 
-Recent completed work (2026-02-25):
-- AI anomaly: `AIFinanceService::detectOverdueAnomaly`, `AIFleetService::analyze()` (bakım + filo kullanım anomali), `ai_reports` yazımı
-- Dashboard: yüksek öncelikli AI uyarı sayısı ve banner (kritik/high)
-- Faz 3 GPS: `vehicle_gps_positions` tablosu, `VehicleGpsPosition` modeli, API placeholder, VehicleGpsApiTest
-- `AIDocumentService::analyze()`: süresi dolacak belgeler + eksik file_path/category, `RunAIAnalysisJob` entegrasyonu
-- Python POC genişletme: `buildFuelAndShipmentsPayload`, `pushFuelAndShipmentsToPython`, `python:push-fuel-shipments` komutu, haftalık schedule, PythonBridgeTest güncellemesi
-- DeliveryReportPivotService edge-case testleri: boş satır (buildPivot/buildInvoiceLines []), grupsuz fatura (groupBy=false 2 satır), eksik/boş miktar (0.0)
+## Recent Completed Work (2026-02-28)
 
-Earlier:
-- Queue tries + dokümantasyon, Order/Shipment 404 ve filtre testleri, AIFleetService eşik sabitleri
-- DeliveryReportPivotService eager loading, pivot/invoice CSV export, DeliveryReportPivotTest, DeliveryReportExportTest
-- PythonBridgeService POC: analytics:push-python, SendToPythonJob, PythonBridgeTest
+- **Reporting API:** finance-summary, fleet-utilization, operations-kpi; 5 dk cache; `throttle:reporting` (10/dk)
+- **Bildirim:** NotificationChannelDispatcher; CheckDocumentExpiry/CheckPaymentDue’da SMS/WhatsApp sendForScenario; config admin_phone
+- **Advanced AI skorları:** Fleet (maintenance_risk, fleet_avg_score, deviation, trend); Finance (risk_score, volatility); Document (document_risk_score); scoreToSeverity ortak
+- **PythonBridge production:** config/python_bridge.php, enabled/retry/backoff; SendToPythonJob tries/backoff; disabled iken skip
+- **Filo harita:** admin fleet-map sayfası, fleetMapPositions (company-scoped)
+- **Analytics KPI:** edge-case testleri (sıfır teslimat, sıfır araç)
+- **Queue, Order/Shipment testleri, AIFleetService, GPS, driver-mobile doc, kpi-overview, python-bridge doc** (önceki oturumlar)
 
 ## Active Areas
 
 | Module | File(s) | Status |
 |---|---|---|
-| Delivery | `DeliveryReportPivotService`, `DeliveryImportController` | Active |
-| AI | `AIFleetService`, `AIFinanceService`, `AIDocumentService`, `RunAIAnalysisJob` | Active |
-| Vehicle | `VehicleGpsPosition`, `VehicleGpsController` (API) | Placeholder |
-| Finance | `FinanceDashboardService`, `PaymentController` | Stable |
-| Employee | `PersonnelAttendanceController`, `Personel` model | Stable |
+| Analytics | `AnalyticsDashboardService`, `ReportingController` | Stable + cache + throttle |
+| AI | `AIFleetService`, `AIFinanceService`, `AIDocumentService` | Advanced scoring |
+| Notification | `NotificationChannelDispatcher`, Sms/WhatsappChannel, Commands | SMS/WhatsApp stub + scenario |
+| Integration | `PythonBridgeService`, `SendToPythonJob`, config | Production config |
+| Vehicle | `VehicleGpsPosition`, fleet-map view | Placeholder + admin map |
 
-## Pending Work (Known TODOs)
+## Pending Work (Optional)
 
-- Queue: job'lara queue adı ve tries atanması, kritik/non-kritik ayrımı dokümante
-- Order/Shipment: edge-case feature testleri (filtre, 404, status geçişleri)
-- AIFleetService: bakım eşikleri ve kuralların zenginleştirilmesi
-- Python bridge: POC genişletme (ek veri setleri)
-- Flutter/React Native mobile app (Faz 2 — not started)
+- SMS/WhatsApp gerçek sağlayıcı (Twilio vb.)
+- Bildirim: aynı tip/gün rate limit (notification_logs)
+- Mobil uygulama (Faz 2)
 
 ## Module Status Snapshot
 

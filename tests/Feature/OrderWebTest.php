@@ -174,3 +174,32 @@ it('filters orders by workflow shortcut', function () {
             return $ids->contains($deliveredOrder->id) && ! $ids->contains($pendingOrder->id);
         });
 });
+
+it('returns 404 when showing non-existent order on web', function () {
+    [$user, $company] = createAdminUser();
+    $nonExistentId = Order::query()->max('id') + 99999;
+
+    $response = $this->actingAs($user)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('admin.orders.show', ['order' => $nonExistentId]));
+
+    $response->assertNotFound();
+});
+
+it('filters orders by status query when provided', function () {
+    [$user, $company] = createAdminUser();
+    Order::factory()->create(['status' => 'pending']);
+    Order::factory()->create(['status' => 'delivered']);
+    Order::factory()->create(['status' => 'pending']);
+
+    $response = $this->actingAs($user)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('admin.orders.index', ['status' => 'pending']));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('orders', function ($orders) {
+        $collection = $orders->getCollection();
+
+        return $collection->every(fn ($order) => $order->status === 'pending');
+    });
+});

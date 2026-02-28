@@ -7,6 +7,7 @@ use App\Employee\Controllers\Api\EmployeeController;
 use App\Finance\Controllers\Api\PaymentCallbackController;
 use App\Order\Controllers\Api\OrderController;
 use App\Vehicle\Controllers\Api\VehicleController;
+use App\Analytics\Controllers\Api\ReportingController;
 use App\Vehicle\Controllers\Api\VehicleGpsController;
 use App\Warehouse\Controllers\Api\BarcodeController;
 use Illuminate\Support\Facades\Route;
@@ -67,6 +68,13 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         Route::post('/barcode/stock-out', [BarcodeController::class, 'stockOut'])->name('barcode.stock-out');
         Route::post('/stock/transfer', [BarcodeController::class, 'transfer'])->name('stock.transfer');
         Route::get('/stock/alerts', [BarcodeController::class, 'criticalStockAlerts'])->name('stock.alerts');
+    });
+
+    // Reporting API (Faz 3 – BI / Power BI vb.; dakikada 10 istek)
+    Route::prefix('reporting')->name('reporting.')->middleware('throttle:reporting')->group(function () {
+        Route::get('/finance-summary', [ReportingController::class, 'financeSummary'])->name('finance-summary');
+        Route::get('/fleet-utilization', [ReportingController::class, 'fleetUtilization'])->name('fleet-utilization');
+        Route::get('/operations-kpi', [ReportingController::class, 'operationsKpi'])->name('operations-kpi');
     });
 });
 

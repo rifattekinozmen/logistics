@@ -147,4 +147,21 @@ it('analytics route\'larına giriş yapmadan erişilemez', function () {
     $this->get(route('admin.analytics.finance'))->assertRedirect('/login');
     $this->get(route('admin.analytics.operations'))->assertRedirect('/login');
     $this->get(route('admin.analytics.fleet'))->assertRedirect('/login');
+    $this->get(route('admin.analytics.fleet-map'))->assertRedirect('/login');
+});
+
+it('yetkili kullanıcı filo harita sayfasına erişebilir ve konum endpoint\'i JSON döner', function () {
+    [$user, $company] = createAdminUser();
+    session(['active_company_id' => $company->id]);
+
+    $this->actingAs($user);
+
+    $response = $this->get(route('admin.analytics.fleet-map'));
+    $response->assertSuccessful();
+    $response->assertViewHas('company');
+
+    $jsonResponse = $this->getJson(route('admin.analytics.fleet-map.positions'));
+    $jsonResponse->assertSuccessful();
+    $jsonResponse->assertJsonStructure(['data']);
+    expect($jsonResponse->json('data'))->toBeArray();
 });

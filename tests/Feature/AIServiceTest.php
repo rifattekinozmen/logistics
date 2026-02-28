@@ -116,8 +116,9 @@ it('AIFinanceService detectOverdueAnomaly returns report when overdue exceeds 1.
     expect($result)->toBeArray();
     expect($result)->toHaveKeys(['type', 'summary_text', 'severity', 'data_snapshot', 'generated_at']);
     expect($result['type'])->toBe('finance');
-    expect($result['data_snapshot'])->toHaveKey('ratio');
-    expect($result['data_snapshot']['ratio'])->toBeGreaterThanOrEqual(1.5);
+    expect($result['data_snapshot'])->toHaveKey('overdue_ratio');
+    expect($result['data_snapshot']['overdue_ratio'])->toBeGreaterThanOrEqual(1.5);
+    expect($result['data_snapshot'])->toHaveKeys(['risk_score', 'volatility']);
 });
 
 it('AIFleetService analyze returns array of reports with correct shape', function () {

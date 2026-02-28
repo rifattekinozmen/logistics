@@ -24,6 +24,8 @@ class ProcessExcelJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 2;
+
     /**
      * Create a new job instance.
      */
@@ -32,7 +34,9 @@ class ProcessExcelJob implements ShouldQueue
         protected string $disk = 'private',
         protected ?Company $company = null,
         protected string $sourceType = 'operations' // operations, materials, logistics
-    ) {}
+    ) {
+        $this->onQueue('low');
+    }
 
     /**
      * Execute the job.

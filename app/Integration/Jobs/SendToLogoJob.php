@@ -29,7 +29,9 @@ class SendToLogoJob implements ShouldQueue
     public function __construct(
         protected array $invoiceData,
         protected Company $company
-    ) {}
+    ) {
+        $this->onQueue('critical');
+    }
 
     /**
      * Execute the job.

@@ -5,6 +5,7 @@ namespace App\Notification\Console\Commands;
 use App\Mail\DocumentExpiryReminderMail;
 use App\Models\Document;
 use App\Models\Notification;
+use App\Notification\Services\NotificationChannelDispatcher;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -41,11 +42,18 @@ class CheckDocumentExpiryCommand extends Command
 
         $notificationsSent = 0;
 
+        $dispatcher = app(NotificationChannelDispatcher::class);
+
         if ($today->isNotEmpty()) {
             foreach ($today as $document) {
                 $this->createNotification($document, 0);
             }
             $this->sendEmailNotification($today, 0);
+            $dispatcher->sendForScenario('document_expiry', 'document_expiry', [
+                'days_until' => 0,
+                'count' => $today->count(),
+                'summary' => $today->count().' belge bugün süresi doluyor.',
+            ]);
             $notificationsSent += $today->count();
         }
 
@@ -54,6 +62,11 @@ class CheckDocumentExpiryCommand extends Command
                 $this->createNotification($document, 7);
             }
             $this->sendEmailNotification($in7Days, 7);
+            $dispatcher->sendForScenario('document_expiry', 'document_expiry', [
+                'days_until' => 7,
+                'count' => $in7Days->count(),
+                'summary' => $in7Days->count().' belge 7 gün içinde süresi dolacak.',
+            ]);
             $notificationsSent += $in7Days->count();
         }
 
@@ -62,6 +75,11 @@ class CheckDocumentExpiryCommand extends Command
                 $this->createNotification($document, 15);
             }
             $this->sendEmailNotification($in15Days, 15);
+            $dispatcher->sendForScenario('document_expiry', 'document_expiry', [
+                'days_until' => 15,
+                'count' => $in15Days->count(),
+                'summary' => $in15Days->count().' belge 15 gün içinde süresi dolacak.',
+            ]);
             $notificationsSent += $in15Days->count();
         }
 
@@ -70,6 +88,11 @@ class CheckDocumentExpiryCommand extends Command
                 $this->createNotification($document, 30);
             }
             $this->sendEmailNotification($in30Days, 30);
+            $dispatcher->sendForScenario('document_expiry', 'document_expiry', [
+                'days_until' => 30,
+                'count' => $in30Days->count(),
+                'summary' => $in30Days->count().' belge 30 gün içinde süresi dolacak.',
+            ]);
             $notificationsSent += $in30Days->count();
         }
 

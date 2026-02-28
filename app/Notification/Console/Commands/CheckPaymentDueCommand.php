@@ -5,6 +5,7 @@ namespace App\Notification\Console\Commands;
 use App\Mail\PaymentDueReminderMail;
 use App\Models\Notification;
 use App\Models\Payment;
+use App\Notification\Services\NotificationChannelDispatcher;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -44,12 +45,19 @@ class CheckPaymentDueCommand extends Command
             ->get();
 
         $notificationsSent = 0;
+        $dispatcher = app(NotificationChannelDispatcher::class);
 
         if ($today->isNotEmpty()) {
             foreach ($today as $payment) {
                 $this->createNotification($payment, 0);
             }
             $this->sendEmailNotification($today, 0, false);
+            $dispatcher->sendForScenario('payment_due', 'payment_due', [
+                'days_until' => 0,
+                'count' => $today->count(),
+                'total_amount' => $today->sum('amount'),
+                'summary' => $today->count().' ödeme bugün vadesinde.',
+            ]);
             $notificationsSent += $today->count();
         }
 
@@ -58,6 +66,12 @@ class CheckPaymentDueCommand extends Command
                 $this->createNotification($payment, 3);
             }
             $this->sendEmailNotification($in3Days, 3, false);
+            $dispatcher->sendForScenario('payment_due', 'payment_due', [
+                'days_until' => 3,
+                'count' => $in3Days->count(),
+                'total_amount' => $in3Days->sum('amount'),
+                'summary' => $in3Days->count().' ödeme 3 gün içinde vadesinde.',
+            ]);
             $notificationsSent += $in3Days->count();
         }
 
@@ -66,6 +80,12 @@ class CheckPaymentDueCommand extends Command
                 $this->createNotification($payment, 7);
             }
             $this->sendEmailNotification($in7Days, 7, false);
+            $dispatcher->sendForScenario('payment_due', 'payment_due', [
+                'days_until' => 7,
+                'count' => $in7Days->count(),
+                'total_amount' => $in7Days->sum('amount'),
+                'summary' => $in7Days->count().' ödeme 7 gün içinde vadesinde.',
+            ]);
             $notificationsSent += $in7Days->count();
         }
 
@@ -75,6 +95,12 @@ class CheckPaymentDueCommand extends Command
                 $this->createOverdueNotification($payment, abs($daysOverdue));
             }
             $this->sendEmailNotification($overduePayments, 0, true);
+            $dispatcher->sendForScenario('payment_due', 'payment_overdue', [
+                'days_overdue' => true,
+                'count' => $overduePayments->count(),
+                'total_amount' => $overduePayments->sum('amount'),
+                'summary' => $overduePayments->count().' ödeme gecikmiş.',
+            ]);
             $notificationsSent += $overduePayments->count();
         }
 

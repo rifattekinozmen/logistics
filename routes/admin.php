@@ -223,6 +223,8 @@ Route::middleware(['auth', 'active.company'])->prefix('admin')->name('admin.')->
         Route::get('/finance', [AnalyticsController::class, 'finance'])->name('finance');
         Route::get('/operations', [AnalyticsController::class, 'operations'])->name('operations');
         Route::get('/fleet', [AnalyticsController::class, 'fleet'])->name('fleet');
+        Route::get('/fleet-map', [AnalyticsController::class, 'fleetMap'])->name('fleet-map');
+        Route::get('/fleet-map/positions', [AnalyticsController::class, 'fleetMapPositions'])->name('fleet-map.positions');
     });
 
     // Calendar

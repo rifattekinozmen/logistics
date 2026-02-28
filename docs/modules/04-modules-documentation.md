@@ -166,14 +166,16 @@ app/Shift/
 - Offline çalışma
 - Push notifications
 
-### API Endpoints
+### API Endpoints (v1 – Sanctum auth)
 ```
-GET  /api/v1/driver/shipments
-PUT  /api/v1/driver/shipments/{id}/status
-POST /api/v1/driver/shipments/{id}/pod
-POST /api/v1/driver/location
+GET  /api/v1/driver/shipments              # Şoföre atanmış sevkiyatlar (query: status)
+PUT  /api/v1/driver/shipments/{shipment}/status
+POST /api/v1/driver/shipments/{shipment}/pod   # multipart: pod_file, notes
+POST /api/v1/driver/location                # JSON: latitude, longitude, shipment_id?
 POST /api/v1/warehouse/barcode/scan
 ```
+v2: `GET /api/v2/driver/dashboard`, `POST /api/v2/driver/checkin` (konum + opsiyonel shipment).
+Tam sözleşme ve response örnekleri: **`docs/api/driver-mobile.md`**.
 
 ### Offline Çalışma
 - Local database (SQLite)

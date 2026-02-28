@@ -40,13 +40,43 @@ class AIFinanceService extends AIService
             );
         }
 
-        // Anomali: geciken ödemeler ortalamanın çok üzerinde mi?
+        // Anomali: geciken ödemeler ortalamanın çok üzerinde mi? (risk_score, volatility ile)
         $overdueAnomaly = $this->detectOverdueAnomaly();
         if ($overdueAnomaly !== null) {
             $reports[] = $overdueAnomaly;
         }
 
         return $reports;
+    }
+
+    /**
+     * Son 6 aylık aylık ödeme toplamlarına göre volatilite: low / medium / high.
+     */
+    protected function computeVolatility(): string
+    {
+        $months = [];
+        for ($i = 0; $i < 6; $i++) {
+            $start = now()->subMonths($i + 1)->startOfMonth();
+            $end = now()->subMonths($i + 1)->endOfMonth();
+            $months[] = (float) Payment::where('status', Payment::STATUS_PAID)
+                ->whereBetween('paid_date', [$start, $end])
+                ->sum('amount');
+        }
+        $mean = array_sum($months) / 6;
+        if ($mean <= 0) {
+            return 'low';
+        }
+        $variance = array_sum(array_map(fn ($x) => ($x - $mean) ** 2, $months)) / 6;
+        $std = sqrt($variance);
+        $coefficientOfVariation = $std / $mean;
+        if ($coefficientOfVariation < 0.5) {
+            return 'low';
+        }
+        if ($coefficientOfVariation <= 1.0) {
+            return 'medium';
+        }
+
+        return 'high';
     }
 
     /**
@@ -86,12 +116,13 @@ class AIFinanceService extends AIService
 
     /**
      * Geciken ödemelerde anomali tespit et (ortalamaya göre aşırı yüksek gecikme).
-     * Son 3 aydaki aylık ortalama ödenen tutarla karşılaştırır.
+     * risk_score, overdue_ratio, volatility ile severity (ADVANCED_SCORING.md).
      */
     public function detectOverdueAnomaly(): ?array
     {
         $overdue = $this->analyzeOverduePayments();
-        if ($overdue['total_amount'] <= 0) {
+        $overdueTotal = (float) $overdue['total_amount'];
+        if ($overdueTotal <= 0) {
             return null;
         }
 
@@ -101,30 +132,34 @@ class AIFinanceService extends AIService
             ->value('total');
         $avgMonthlyPaid = $avgMonthlyPaid / 3;
 
-        if ($avgMonthlyPaid <= 0) {
+        $avgMonthlyPaid = max($avgMonthlyPaid, 1);
+        $overdueRatio = $overdueTotal / $avgMonthlyPaid;
+        $riskScore = (float) min(100, $overdueRatio * 25);
+        $volatility = $this->computeVolatility();
+
+        $severity = $riskScore >= 80 || $volatility === 'high'
+            ? 'high'
+            : ($riskScore >= 50 || $volatility === 'medium' ? 'medium' : 'low');
+
+        if ($overdueRatio < 1.5) {
             return null;
         }
-
-        $ratio = $overdue['total_amount'] / $avgMonthlyPaid;
-        if ($ratio < 1.5) {
-            return null;
-        }
-
-        $severity = $ratio >= 3 ? 'high' : ($ratio >= 2 ? 'medium' : 'low');
 
         return $this->createReport(
             'finance',
             sprintf(
                 'Anomali: Geciken ödemeler (%.2f TL) son 3 ay ortalamasının %.1f katı.',
-                $overdue['total_amount'],
-                round($ratio, 1)
+                $overdueTotal,
+                round($overdueRatio, 1)
             ),
             $severity,
             [
-                'overdue_total' => $overdue['total_amount'],
+                'overdue_total' => round($overdueTotal, 2),
                 'overdue_count' => $overdue['count'],
                 'avg_monthly_paid_3m' => round($avgMonthlyPaid, 2),
-                'ratio' => round($ratio, 2),
+                'overdue_ratio' => round($overdueRatio, 2),
+                'risk_score' => round($riskScore, 1),
+                'volatility' => $volatility,
             ]
         );
     }

@@ -65,6 +65,7 @@ return [
                     ['route' => 'admin.analytics.finance', 'label' => 'Finans Analitik', 'icon' => 'analytics', 'pattern' => 'admin.analytics.finance'],
                     ['route' => 'admin.analytics.operations', 'label' => 'Operasyon Analitik', 'icon' => 'donut_small', 'pattern' => 'admin.analytics.operations'],
                     ['route' => 'admin.analytics.fleet', 'label' => 'Filo Analitik', 'icon' => 'speed', 'pattern' => 'admin.analytics.fleet'],
+                    ['route' => 'admin.analytics.fleet-map', 'label' => 'Filo Harita', 'icon' => 'map', 'pattern' => 'admin.analytics.fleet-map'],
                 ],
             ],
             [

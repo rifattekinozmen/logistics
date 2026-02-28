@@ -12,14 +12,11 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Python ara katmana veri gönderme job'u.
- * Kritik değil: analitik POC, başarısız olursa sonraki tetiklemede tekrar dener.
+ * Python ara katmana veri gönderme job'u (Faz 3 production: config, retry, backoff).
  */
 class SendToPythonJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    public int $tries = 2;
 
     /**
      * Create a new job instance.
@@ -27,7 +24,11 @@ class SendToPythonJob implements ShouldQueue
     public function __construct(
         protected array $data,
         protected string $action = 'process'
-    ) {}
+    ) {
+        $this->onQueue('default');
+        $this->tries = config('python_bridge.max_retries', 3);
+        $this->backoff = config('python_bridge.backoff', 60);
+    }
 
     /**
      * Execute the job.

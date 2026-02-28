@@ -173,3 +173,19 @@ it('returns 404 when showing non-existent shipment', function () {
 
     $response->assertNotFound();
 });
+
+it('filters shipments by status when provided', function () {
+    [$user, $company] = createAdminUser();
+    Shipment::factory()->create(['status' => 'pending']);
+    Shipment::factory()->create(['status' => 'in_transit']);
+    Shipment::factory()->create(['status' => 'pending']);
+
+    $response = $this->actingAs($user)
+        ->withSession(['active_company_id' => $company->id])
+        ->get(route('admin.shipments.index', ['status' => 'pending']));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('shipments', function ($shipments) {
+        return $shipments->getCollection()->every(fn ($s) => $s->status === 'pending');
+    });
+});

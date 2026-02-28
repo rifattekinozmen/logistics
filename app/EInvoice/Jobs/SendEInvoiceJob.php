@@ -24,7 +24,9 @@ class SendEInvoiceJob implements ShouldQueue
 
     public function __construct(
         public EInvoice $eInvoice
-    ) {}
+    ) {
+        $this->onQueue('critical');
+    }
 
     public function handle(): void
     {

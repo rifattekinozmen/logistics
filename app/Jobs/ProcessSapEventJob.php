@@ -22,7 +22,9 @@ class ProcessSapEventJob implements ShouldQueue
         public string $eventType,
         public string $eventId,
         public array $payload
-    ) {}
+    ) {
+        $this->onQueue('critical');
+    }
 
     public function handle(): void
     {

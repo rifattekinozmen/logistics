@@ -286,3 +286,44 @@ it('calculates fleet performance metrics', function (): void {
     expect($performance['vehicle_utilization'])->toBeArray()->not()->toBeEmpty();
     expect($performance['maintenance_alerts'])->toBeArray();
 });
+
+it('returns safe operational KPIs when there are no deliveries', function (): void {
+    $company = Company::factory()->create();
+    $customerId = \App\Models\Customer::factory()->create()->id;
+
+    DB::table('orders')->insert([
+        'company_id' => $company->id,
+        'customer_id' => $customerId,
+        'order_number' => 'ORD-'.uniqid(),
+        'pickup_address' => 'Test',
+        'delivery_address' => 'Test',
+        'status' => 'pending',
+        'freight_price' => 100,
+        'created_at' => now()->subDays(5),
+        'updated_at' => now()->subDays(5),
+    ]);
+
+    $service = app(AnalyticsDashboardService::class);
+    $kpis = $service->getOperationalKpis($company);
+
+    expect($kpis['total_orders'])->toBe(1);
+    expect($kpis['total_deliveries'])->toBe(0);
+    expect($kpis['on_time_deliveries'])->toBe(0);
+    expect($kpis['on_time_delivery_rate'])->toBe(0.0);
+    expect($kpis['avg_processing_time'])->toBeFloat();
+    expect($kpis['status_breakdown'])->toBeArray();
+});
+
+it('returns safe fleet performance when company has no vehicles', function (): void {
+    $company = Company::factory()->create();
+
+    $service = app(AnalyticsDashboardService::class);
+    $performance = $service->getFleetPerformance($company);
+
+    expect($performance['total_vehicles'])->toBe(0);
+    expect($performance['active_vehicles'])->toBe(0);
+    expect($performance['idle_vehicles'])->toBe(0);
+    expect($performance['utilization_rate'])->toBe(0.0);
+    expect($performance['vehicle_utilization'])->toBeArray()->toBeEmpty();
+    expect($performance['maintenance_alerts'])->toBeArray();
+});

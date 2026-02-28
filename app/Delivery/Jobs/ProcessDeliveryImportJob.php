@@ -26,7 +26,9 @@ class ProcessDeliveryImportJob implements ShouldQueue
     public function __construct(
         protected DeliveryImportBatch $batch,
         protected Company $company
-    ) {}
+    ) {
+        $this->onQueue('default');
+    }
 
     public function handle(DeliveryReportImportService $reportImportService): void
     {
